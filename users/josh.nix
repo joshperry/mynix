@@ -6,6 +6,7 @@
     fzf
     git
     unstable.gitmux
+    unstable.godot_4
     imagemagick
     libcanberra-gtk3
     networkmanagerapplet
