@@ -10,19 +10,24 @@
     };
   };
 
-  outputs = inputs@{ nixpkgs, nixos-unstable, home-manager, ... }:
-  let
-    # Overlays-module makes "pkgs.unstable" available in modules
-    unstableOverlay = final: prev: { unstable = import nixos-unstable { inherit (prev) system; }; };
-    overlayModule = ({ config, pkgs, ... }: { nixpkgs.overlays = [ unstableOverlay ]; });
-  in
-  {
+  outputs = inputs@{ nixpkgs, nixos-unstable, home-manager, ... }: {
     nixosConfigurations = {
 
       bones = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          overlayModule
+          #nixpkgs overlay(s)
+          ({ config, pkgs, ... }: {
+            nixpkgs.overlays = [
+              (final: prev: {
+                #pkgs.unstable
+                unstable = import nixos-unstable {
+                  inherit (prev) system; 
+                };
+
+              })
+            ]; 
+          })
           ./machines/bones/configuration.nix
           ./machines/bones/hardware-configuration.nix
           home-manager.nixosModules.home-manager
