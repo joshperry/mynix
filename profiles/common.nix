@@ -11,6 +11,8 @@
     pciutils
     wget
     vlc
+    unzip
+    zip
 
     # Build Vim with X11 support
     (vim_configurable.overrideAttrs (old: {
