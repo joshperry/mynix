@@ -132,7 +132,7 @@
 
     windowManager.i3 = {
       enable = true;
-      package = pkgs.unstable.i3;
+      package = pkgs.i3;
       extraPackages = with pkgs; [
         dmenu
         dunst
