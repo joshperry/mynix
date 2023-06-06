@@ -2,6 +2,7 @@
   home.stateVersion = "23.05";
 
   home.packages = with pkgs; [
+    audacity
     unstable.blender
     discord
     fzf
