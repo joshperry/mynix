@@ -3,7 +3,7 @@
     ../../profiles/common.nix
   ];
 
-  system.stateVersion = "22.11";
+  system.stateVersion = "23.05";
 
   environment.systemPackages = with pkgs; [
     pcsclite
