@@ -8,7 +8,9 @@
     gnupg
     htop
     lshw
+    nvd
     pciutils
+    pv
     wget
     vlc
     unzip
