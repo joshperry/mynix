@@ -140,12 +140,6 @@
         i3lock
         i3lock-color
         i3blocks
-        rofi
-        rofi-top
-        rofi-systemd
-        rofi-pulse-select
-        rofi-file-browser
-        rofi-power-menu
       ];
     };
   };

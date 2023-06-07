@@ -29,6 +29,25 @@
     xfce.thunar
   ];
 
+  programs.rofi = {
+    enable = true;
+    font = "Source Code Pro 12";
+    terminal = "${pkgs.terminator}/bin/terminator";
+    theme = "gruvbox-dark-hard";
+    plugins = with pkgs; [
+      rofi-file-browser
+      rofi-power-menu
+      rofi-pulse-select
+      rofi-systemd
+      rofi-top
+    ];
+    extraConfig = {
+      modi = "window,run,ssh,combi,drun";
+      combi-modi = "window,drun";
+      ssh-command = "{terminal} -e '{ssh-client} {host} [-p {port}]'";
+    };
+  };
+
   programs.bash = {
     enable = true;
 
