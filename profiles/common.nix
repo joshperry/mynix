@@ -12,7 +12,6 @@
     pciutils
     pv
     wget
-    vlc
     unzip
     zip
 

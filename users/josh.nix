@@ -25,6 +25,7 @@
     tmuxinator
     terminator
     ungoogled-chromium
+    vlc
     xfce.thunar
   ];
 
