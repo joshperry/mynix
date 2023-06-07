@@ -7,7 +7,7 @@
     discord
     fzf
     git
-    unstable.gitmux
+    gitmux
     unstable.godot_4
     imagemagick
     libcanberra-gtk3
