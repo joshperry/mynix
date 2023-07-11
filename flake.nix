@@ -1,5 +1,5 @@
 {
-  description = "Bones NixOS configuration";
+  description = "NixOS configurations";
 
   inputs = {
     nixpkgs = { url = "github:nixos/nixpkgs/nixos-23.05"; };
