@@ -8,6 +8,7 @@
     gnupg
     htop
     lshw
+    libnotify
     nvd
     pciutils
     pv

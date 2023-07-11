@@ -39,6 +39,33 @@
           }
         ];
       };
+
+      xeeps = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          #nixpkgs overlay(s)
+          ({ config, pkgs, ... }: {
+            nixpkgs.overlays = [
+              (final: prev: {
+                #pkgs.unstable
+                unstable = import nixos-unstable {
+                  inherit (prev) system; 
+                };
+
+              })
+            ]; 
+          })
+          ./machines/xeeps/configuration.nix
+          ./machines/xeeps/hardware-configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.josh = import ./users/josh.nix;
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
+      };
       
     };
   };
