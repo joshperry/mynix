@@ -52,34 +52,15 @@
   # Which unfree packages to allow
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
     "discord"
+    "google-chrome"
     "nvidia-x11"
     "nvidia-settings"
-    "steam"
-    "steam-original"
-    "steam-run"
     "slack"
-    "google-chrome"
-  ];
-
-  nixpkgs.overlays = [
-    (final: prev: {
-      steam = prev.steam.override {
-        extraPkgs = pkgs': with pkgs'; [
-          qt5.qtbase
-          audit
-          libsForQt5.qt5.qtmultimedia
-        ];
-      };
-    })
   ];
 
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
-  };
-
-  programs.steam = {
-    enable = true;
   };
 
   programs.thunar.plugins = with pkgs.xfce; [
