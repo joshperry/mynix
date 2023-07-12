@@ -41,6 +41,7 @@
       "plugdev"   # Access to usb devices
       "video"     # Access to video devices
       "wireshark" # Access to packet capture
+      "docker"    # Containerize all the things
     ];
   };
 
@@ -57,6 +58,8 @@
     "nvidia-settings"
     "slack"
   ];
+
+  virtualisation.docker.enable = true;
 
   programs.gnupg.agent = {
     enable = true;
