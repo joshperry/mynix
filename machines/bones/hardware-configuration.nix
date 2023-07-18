@@ -66,6 +66,12 @@
       options = [ "credentials=/etc/nixos/kago-secrets" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" ];
     };
 
+  fileSystems."/mnt/kagosync" =
+    { device = "//kago.local/media";
+      fsType = "cifs";
+      options = [ "credentials=/etc/nixos/kago-secrets" "uid=279" "gid=990" "file_mode=0664" "dir_mode=0775" ];
+    };
+
   fileSystems."/mnt/sub" =
     { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
       fsType = "btrfs";
@@ -84,7 +90,7 @@
     };
 
   fileSystems."/mnt/deuce" =
-    { device = "/dev/disk/by-uuid/EE48CF1648CEDC89";
+    { device = "/dev/disk/by-uuid/44FDD4B725A6CD68";
       fsType = "ntfs3";
       options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" ];
     };

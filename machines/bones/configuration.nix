@@ -38,6 +38,14 @@
    gid = 1000;
   };
 
+  # User for camera FTP uploads
+  users.users.janus = {
+    group = "josh";
+    home = "/mnt/kago/pic/camftp";
+    initialHashedPassword = "$6$rounds=1000$M3h5rHnoZ8NVtllY$Sa4PhtobRQA6.wn7tvJoYdPo06kGc9vgdcCT0Wtbpt20RB3A6Ck7C.5g8d1F1X1.kYw.3RXaPXkHXeP6X0Afz.";
+    isSystemUser = true;
+  };
+
   ###
   # Which unfree packages to allow
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
@@ -47,6 +55,7 @@
     "steam"
     "steam-original"
     "steam-run"
+    "resilio-sync"
   ];
 
   nixpkgs.overlays = [
@@ -93,6 +102,11 @@
   # networking.firewall.allowedUDPPorts = [ ... ];
   networking.firewall.enable = true;
 
+  networking.firewall.allowedTCPPorts = [ 21 ];
+  networking.firewall.allowedTCPPortRanges = [
+    # vsftpd pasv ports
+    { from = 51000; to = 51009; }
+  ];
   # Set your time zone.
   time.timeZone = "MST7MDT";
 
@@ -199,6 +213,17 @@
   services.gvfs.enable = true;
   services.tumbler.enable = true; 
 
+  # Resilio Sync
+  services.resilio = {
+    enable = true;
+    directoryRoot = "/mnt/guiltyspark/sync";
+    enableWebUI = true;
+    listeningPort = 55555;
+    httpListenAddr = "127.0.0.1";
+    httpLogin = "admin";
+    httpPass = "admin1234";
+  };
+
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
@@ -213,6 +238,27 @@
       addresses = true;
       workstation = true;
     };
+  };
+
+  services.vsftpd = {
+    enable = true;
+    localUsers = true;
+    chrootlocalUser = true;
+    writeEnable = true;
+    allowWriteableChroot = true;
+    userlistEnable = true;
+    userlist = [
+      "janus"
+    ];
+    extraConfig = ''
+      cmds_denied=DELE,RMD,MKD,RNTO,RNFR
+      delete_failed_uploads=YES
+      download_enable=NO
+      hide_ids=YES
+      log_ftp_protocol=YES
+      pasv_min_port=51000
+      pasv_max_port=51009
+    '';
   };
 
   ###
