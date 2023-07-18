@@ -102,7 +102,15 @@
   ###
   # Hardware
   hardware.pulseaudio.enable = true;
-  hardware.opengl.enable = true;
+  hardware.opengl = {
+    enable = true;
+    extraPackages = [
+      pkgs.nvidia-vaapi-driver
+      pkgs.vaapiVdpau
+      pkgs.libvdpau-va-gl
+    ];
+  };
+  hardware.nvidia.modesetting.enable = true;
 
   ###
   # X11 windowing system.
