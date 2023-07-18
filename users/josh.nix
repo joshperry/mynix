@@ -4,8 +4,10 @@
   home.packages = with pkgs; [
     audacity
     unstable.blender
+    darktable
     discord
     fzf
+    gimp-with-plugins
     git
     gitmux
     unstable.godot_4
