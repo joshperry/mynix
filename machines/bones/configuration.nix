@@ -115,7 +115,16 @@
 
   ###
   # Hardware
-  hardware.pulseaudio.enable = true;
+  sound.enable = true;
+  hardware.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    pulse.enable = true;
+  };
+
+  # OpenGL
   hardware.opengl = {
     enable = true;
     extraPackages = [
@@ -124,6 +133,7 @@
       pkgs.libvdpau-va-gl
     ];
   };
+  # Modeset driver plz
   hardware.nvidia.modesetting.enable = true;
 
   ###
@@ -173,6 +183,9 @@
       emojione
       inconsolata
       font-awesome
+      (nerdfonts.override { fonts = [
+        "SourceCodePro"
+      ];})
     ];
     fontconfig = {
       antialias = true;
@@ -180,7 +193,7 @@
       hinting.enable = true;
       hinting.autohint = true;
       defaultFonts = {
-        monospace = [ "Source Code Pro" ];
+        monospace = [ "SauceCodePro Nerd Font Mono Regular" ];
       };
     };
   };

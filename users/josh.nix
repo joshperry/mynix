@@ -33,7 +33,7 @@
 
   programs.rofi = {
     enable = true;
-    font = "Source Code Pro 12";
+    font = "SauceCodePro Nerd Font Mono Regular";
     terminal = "${pkgs.terminator}/bin/terminator";
     theme = "gruvbox-dark-hard";
     plugins = with pkgs; [
@@ -66,7 +66,7 @@
       bind -x '"\C-z":"fg"'
 
       function _update_ps1() {
-        PS1="$(powerline-go -modules 'venv,user,ssh,cwd,perms,git,jobs,exit,root,nix-shell' -error $?)"
+        PS1="$(powerline-go -modules 'venv,ssh,cwd,perms,git,jobs,exit,root,nix-shell' -error $?)"
       }
       PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
 
