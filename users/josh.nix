@@ -5,6 +5,7 @@
     audacity
     unstable.blender
     darktable
+    direnv
     discord
     fzf
     gimp-with-plugins

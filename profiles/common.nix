@@ -14,6 +14,7 @@
     jq
     lshw
     libnotify
+    lzop
     nvd
     pciutils
     pv

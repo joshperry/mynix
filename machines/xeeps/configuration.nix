@@ -10,6 +10,7 @@
   };
 
   environment.systemPackages = with pkgs; [
+    docker-compose
     pcsclite
     xclip
     yubikey-personalization
@@ -81,6 +82,13 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   security.polkit.enable = true;
+
+  security.pam.loginLimits = [{
+    domain = "*";
+    type = "soft";
+    item = "nofile";
+    value = "65536";
+  }];
 
   networking.hostName = "xeeps"; # Define your hostname.
   networking.networkmanager.enable = true;
