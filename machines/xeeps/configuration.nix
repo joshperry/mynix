@@ -19,6 +19,9 @@
     (google-cloud-sdk.withExtraComponents [google-cloud-sdk.components.gke-gcloud-auth-plugin])
     kubectl
     k9s
+    irssi
+    proxmark3-rrg
+    (callPackage ../../mypkgs/drata.nix {})
 
     # Install xss-lock branch that comms with logind
     # https://chat.openai.com/c/6f543d75-9dbb-4b0c-8188-08152032821a
@@ -54,6 +57,7 @@
   # Which unfree packages to allow
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
     "discord"
+    "drata"
     "google-chrome"
     "nvidia-x11"
     "nvidia-settings"
