@@ -10,24 +10,30 @@
     };
   };
 
-  outputs = inputs@{ nixpkgs, nixos-unstable, home-manager, ... }: {
+  outputs = inputs@{ nixpkgs, nixos-unstable, home-manager, ... }:
+  let
+    packages = { config, pkgs, ... }: {
+      nixpkgs.overlays = [
+        #pkgs.unstable
+        (final: prev: {
+          unstable = nixos-unstable.legacyPackages."${prev.system}";
+        })
+        
+        # Private package overlay set
+        (final: prev:
+          import ./packages { pkgs = final; }
+        )
+      ]; 
+    };
+  in
+  {
     nixosConfigurations = {
 
       bones = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          #nixpkgs overlay(s)
-          ({ config, pkgs, ... }: {
-            nixpkgs.overlays = [
-              (final: prev: {
-                #pkgs.unstable
-                unstable = import nixos-unstable {
-                  inherit (prev) system; 
-                };
-
-              })
-            ]; 
-          })
+          packages
+          ./modules
           ./machines/bones/configuration.nix
           ./machines/bones/hardware-configuration.nix
           home-manager.nixosModules.home-manager
@@ -43,18 +49,8 @@
       xeeps = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          #nixpkgs overlay(s)
-          ({ config, pkgs, ... }: {
-            nixpkgs.overlays = [
-              (final: prev: {
-                #pkgs.unstable
-                unstable = import nixos-unstable {
-                  inherit (prev) system; 
-                };
-
-              })
-            ]; 
-          })
+          packages
+          ./modules
           ./machines/xeeps/configuration.nix
           ./machines/xeeps/hardware-configuration.nix
           home-manager.nixosModules.home-manager

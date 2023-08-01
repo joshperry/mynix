@@ -9,7 +9,7 @@ function verify_me() {
   esac
 }
 
-nixos-rebuild build --flake .
+nixos-rebuild build --flake . --show-trace
 nvd diff /run/current-system result
 
 if [[ "yes" == $(verify_me "Switch?") ]]; then

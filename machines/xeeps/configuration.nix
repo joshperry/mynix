@@ -1,4 +1,5 @@
-({ pkgs, ... }: {
+({ pkgs, ... }:
+{
   imports = [
     ../../profiles/common.nix
   ];
@@ -21,7 +22,6 @@
     k9s
     irssi
     proxmark3-rrg
-    (callPackage ../../mypkgs/drata.nix {})
 
     # Install xss-lock branch that comms with logind
     # https://chat.openai.com/c/6f543d75-9dbb-4b0c-8188-08152032821a
@@ -65,6 +65,8 @@
   ];
 
   virtualisation.docker.enable = true;
+
+  programs.drata.enable = true;
 
   programs.gnupg.agent = {
     enable = true;
