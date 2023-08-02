@@ -56,6 +56,8 @@
 
     shellAliases = {
       ll = "ls --color=auto";
+      pbcopy = "xclip";
+      pbpaste = "xclip -o";
     };
 
     sessionVariables = {

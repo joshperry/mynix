@@ -58,6 +58,7 @@
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
     "discord"
     "drata"
+    "falcon-sensor"
     "google-chrome"
     "nvidia-x11"
     "nvidia-settings"
@@ -67,6 +68,7 @@
   virtualisation.docker.enable = true;
 
   programs.drata.enable = true;
+  programs.falcon.enable = true;
 
   programs.gnupg.agent = {
     enable = true;

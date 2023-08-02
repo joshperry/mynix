@@ -12,7 +12,7 @@
 
   outputs = inputs@{ nixpkgs, nixos-unstable, home-manager, ... }:
   let
-    packages = { config, pkgs, ... }: {
+    packages = { ... }: {
       nixpkgs.overlays = [
         #pkgs.unstable
         (final: prev: {
