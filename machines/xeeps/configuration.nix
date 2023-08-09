@@ -22,6 +22,9 @@
     k9s
     irssi
     proxmark3-rrg
+    inkscape
+    _1password-gui
+    _1password
 
     # Install xss-lock branch that comms with logind
     # https://chat.openai.com/c/6f543d75-9dbb-4b0c-8188-08152032821a
@@ -43,6 +46,7 @@
     extraGroups = [
       "wheel"     # Enable ‘sudo’ for the user.
       "plugdev"   # Access to usb devices
+      "dialout"   # Access to serial devices
       "video"     # Access to video devices
       "wireshark" # Access to packet capture
       "docker"    # Containerize all the things
@@ -63,6 +67,8 @@
     "nvidia-x11"
     "nvidia-settings"
     "slack"
+    "1password"
+    "1password-cli"
   ];
 
   virtualisation.docker.enable = true;
