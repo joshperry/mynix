@@ -50,6 +50,7 @@
         system = "x86_64-linux";
         modules = [
           packages
+          (_: { nix.registry.nixpkgs.flake = inputs.nixpkgs; })
           ./modules
           ./machines/xeeps/configuration.nix
           ./machines/xeeps/hardware-configuration.nix
