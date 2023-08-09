@@ -56,7 +56,7 @@
 
     shellAliases = {
       ll = "ls --color=auto";
-      pbcopy = "xclip";
+      pbcopy = "xclip -sel clip";
       pbpaste = "xclip -o";
     };
 
