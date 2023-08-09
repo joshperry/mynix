@@ -20,6 +20,7 @@
     pv
     wget
     unzip
+    yq
     zip
 
     # Build Vim with X11 support
