@@ -1,4 +1,4 @@
-({ pkgs, ... }:
+({ pkgs, config, ... }:
 {
   imports = [
     ../../profiles/common.nix
@@ -8,6 +8,15 @@
 
   boot.initrd.secrets = {
     "/crypto_keyfile.bin" = null;
+  };
+
+  system.autoUpgrade = {
+    enable = true;
+    dates = "04:00";
+    flake = "${config.users.users.josh.home}/dev/mynix";
+    flags = [
+      "--update-input" "nixpkgs"
+    ];
   };
 
   environment.systemPackages = with pkgs; [
@@ -25,6 +34,8 @@
     inkscape
     _1password-gui
     _1password
+    firefox
+    asciinema
 
     # Install xss-lock branch that comms with logind
     # https://chat.openai.com/c/6f543d75-9dbb-4b0c-8188-08152032821a
