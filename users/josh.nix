@@ -58,6 +58,7 @@
       ll = "ls --color=auto";
       pbcopy = "xclip -sel clip";
       pbpaste = "xclip -o";
+      cdf = "cd $(find . -type d -print | fzf)";
     };
 
     sessionVariables = {
