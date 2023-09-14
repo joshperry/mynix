@@ -51,6 +51,11 @@
     };
   };
 
+  home.file.".local/bin/dev" = {
+    source = ./scripts/dev.sh;
+    executable = true;
+  };
+
   programs.bash = {
     enable = true;
 
@@ -58,7 +63,8 @@
       ll = "ls --color=auto";
       pbcopy = "xclip -sel clip";
       pbpaste = "xclip -o";
-      cdf = "cd $(find . -type d -print | fzf)";
+      cdf = "cd $(find . -maxdepth 2 -type d -print | fzf)";
+      tdie = "tmux killw";
     };
 
     sessionVariables = {
@@ -66,6 +72,7 @@
     };
 
     initExtra = ''
+      PATH=/home/josh/.local/bin:$PATH
       stty susp undef
       bind -x '"\C-z":"fg"'
 
