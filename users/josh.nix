@@ -5,7 +5,6 @@
     audacity
     unstable.blender
     darktable
-    direnv
     discord
     fzf
     gimp-with-plugins
@@ -56,15 +55,22 @@
     executable = true;
   };
 
+  programs.direnv = { # <-- me succumbing to direnv
+      enable = true;
+      enableBashIntegration = true;
+      nix-direnv.enable = true;
+  };
+
   programs.bash = {
     enable = true;
 
     shellAliases = {
       ll = "ls --color=auto";
-      pbcopy = "xclip -sel clip";
+      pbcopy = "xclip -sel clip"; # I used macs for a decade
       pbpaste = "xclip -o";
-      cdf = "cd $(find . -maxdepth 2 -type d -print | fzf)";
+      cdf = "cd $(find . -maxdepth 2 -type d -print | fzf)"; # Don't use this much with `dev` alias
       tdie = "tmux killw";
+      ndi = "nix develop --impure"; # <-- me avoiding direnv
     };
 
     sessionVariables = {
