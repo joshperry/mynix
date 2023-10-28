@@ -274,6 +274,11 @@
     '';
   };
 
+  services.udev.packages = [ 
+    # QMK keyboards
+    pkgs.qmk-udev-rules
+  ];
+
   ###
   # Users
   users.mutableUsers = false;
