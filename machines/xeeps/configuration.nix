@@ -37,7 +37,7 @@
     firefox
     asciinema
 
-    # Install xss-lock branch that comms with logind
+    # Install xss-lock branch that comms with logind for lock-on-sleep
     # https://chat.openai.com/c/6f543d75-9dbb-4b0c-8188-08152032821a
     (xss-lock.overrideAttrs (_: {
       src = fetchFromGitHub {
