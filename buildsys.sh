@@ -10,7 +10,8 @@ function verify_me() {
 }
 
 nixos-rebuild build --flake . --show-trace
-nvd diff /run/current-system result
+command -v nvd >/dev/null 2>&1 \
+  && nvd diff /run/current-system result
 
 if [[ "yes" == $(verify_me "Switch?") ]]; then
   sudo nix-env -p /nix/var/nix/profiles/system --set ./result
