@@ -63,13 +63,13 @@
   fileSystems."/mnt/kago" =
     { device = "//kago.local/media";
       fsType = "cifs";
-      options = [ "credentials=/etc/nixos/kago-secrets" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" ];
+      options = [ "credentials=/etc/nixos/kago-secrets" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
     };
 
   fileSystems."/mnt/kagosync" =
     { device = "//kago.local/media";
       fsType = "cifs";
-      options = [ "credentials=/etc/nixos/kago-secrets" "uid=279" "gid=990" "file_mode=0664" "dir_mode=0775" ];
+      options = [ "credentials=/etc/nixos/kago-secrets" "uid=279" "gid=990" "file_mode=0664" "dir_mode=0775" "nofail" ];
     };
 
   fileSystems."/mnt/sub" =
