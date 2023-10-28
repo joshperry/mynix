@@ -18,6 +18,12 @@
         (final: prev: {
           unstable = nixos-unstable.legacyPackages."${prev.system}";
         })
+
+        # Want python310
+        (final: prev: {
+          python3 = final.python310;
+          python3Packages = final.python310.pkgs;
+        })
         
         # Private package overlay set
         (final: prev:
