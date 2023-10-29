@@ -44,7 +44,7 @@
           ./machines/bones/hardware-configuration.nix
           home-manager.nixosModules.home-manager
           {
-            home-manager.users.josh = import ./users/josh.nix;
+            home-manager.users.josh = import ./users/josh;
 
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -62,7 +62,7 @@
           ./machines/xeeps/hardware-configuration.nix
           home-manager.nixosModules.home-manager
           {
-            home-manager.users.josh = import ./users/josh.nix;
+            home-manager.users.josh = import ./users/josh;
 
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;

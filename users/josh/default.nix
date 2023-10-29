@@ -8,7 +8,6 @@
     discord
     fzf
     gimp-with-plugins
-    git
     gitmux
     unstable.godot_4
     imagemagick
@@ -52,6 +51,22 @@
   home.file.".local/bin/dev" = {
     source = ./scripts/dev.sh;
     executable = true;
+  };
+
+  programs.git = {
+    enable = true;
+    userName = "Joshua Perry";
+    userEmail = lib.mkDefault "josh@6bit.com";
+    #signing = {
+    #  key = null;
+    #  signByDefault = true;
+    #};
+    extraConfig = {
+      commit.gpgSign = true;
+      tag.gpgSign = true;
+      init.defaultBranch = "master";
+      pull.rebase = true;
+    };
   };
 
   programs.tmux = {
