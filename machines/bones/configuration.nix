@@ -280,6 +280,10 @@
     pkgs.qmk-udev-rules
   ];
 
+  services.kubo = {
+    enable = true;
+  };
+
   ###
   # Users
   users.mutableUsers = false;
