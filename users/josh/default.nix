@@ -69,6 +69,12 @@
 
   programs.tmux = {
     enable = true;
+    shortcut = "a";
+    terminal = "tmux-256color";
+    historyLimit = 20000;
+    mouse = true;
+    keyMode = "vi";
+    escapeTime = 0; # no esc delay, for vim
     extraConfig = lib.fileContents config/tmux/tmux.conf;
     plugins = [
       pkgs.tmuxPlugins.tmux-fzf
