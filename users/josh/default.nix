@@ -57,13 +57,11 @@
     enable = true;
     userName = "Joshua Perry";
     userEmail = lib.mkDefault "josh@6bit.com";
-    #signing = {
-    #  key = null;
-    #  signByDefault = true;
-    #};
+    signing = {
+      key = null;
+      signByDefault = true;
+    };
     extraConfig = {
-      commit.gpgSign = true;
-      tag.gpgSign = true;
       init.defaultBranch = "master";
       pull.rebase = true;
     };
