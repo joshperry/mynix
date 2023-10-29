@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, lib, ... }: {
   home.stateVersion = "23.05";
 
   home.packages = with pkgs; [
@@ -23,7 +23,6 @@
     scrot
     silver-searcher
     thunderbird
-    tmux
     tmuxinator
     terminator
     ungoogled-chromium
@@ -55,6 +54,21 @@
     executable = true;
   };
 
+  programs.tmux = {
+    enable = true;
+    extraConfig = lib.fileContents config/tmux/tmux.conf;
+    plugins = [
+      pkgs.tmuxPlugins.tmux-fzf
+    ];
+  };
+
+  programs.neovim = {
+    enable = true;
+    extraConfig = ''
+      set number relativenumber
+    '';
+  };
+
   programs.direnv = { # <-- me succumbing to direnv
       enable = true;
       enableBashIntegration = true;
@@ -74,7 +88,7 @@
     };
 
     sessionVariables = {
-      EDITOR = "vim";
+      EDITOR = "nvim";
     };
 
     initExtra = ''
