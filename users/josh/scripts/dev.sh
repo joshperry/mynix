@@ -31,6 +31,6 @@ fi
 name=`basename $path`
 
 tmux new-window -c "$path" -n $name
-tmux send-keys 'vim +NERDTree' C-m
+tmux send-keys 'nvim .' C-m
 tmux split-window -v -l 25% -c "$path"
 tmux last-pane
