@@ -22,12 +22,25 @@
     scrot
     silver-searcher
     thunderbird
-    tmuxinator
     terminator
     ungoogled-chromium
     vlc
     xfce.thunar
   ];
+
+  programs.kitty = {
+    enable = true;
+    theme = "Gruvbox Dark";
+    font = {
+      name = "Source Code Pro for Powerline Regular";
+      size = 11;
+    };
+    settings = {
+      enable_audio_bell = false;
+      update_check_interval = 0;
+      adjust_line_height = "120%";
+    };
+  };
 
   programs.rofi = {
     enable = true;
@@ -76,6 +89,7 @@
     keyMode = "vi";
     escapeTime = 0; # no esc delay, for vim
     extraConfig = lib.fileContents config/tmux/tmux.conf;
+    tmuxinator.enable = true;
     plugins = [
       pkgs.tmuxPlugins.tmux-fzf
     ];
@@ -83,9 +97,23 @@
 
   programs.neovim = {
     enable = true;
-    extraConfig = ''
-      set number relativenumber
-    '';
+    coc.enable = true;
+    plugins = with pkgs.vimPlugins; [
+      nvim-web-devicons
+      gruvbox
+      coc-eslint
+      coc-tsserver
+      vim-tmux-navigator
+      vim-polyglot
+      mini-nvim
+      vim-fugitive
+      {
+        plugin = oil-nvim;
+        type = "lua";
+        config = "require('oil').setup()";
+      }
+    ];
+    extraConfig = lib.fileContents config/vim/vimrc;
   };
 
   programs.direnv = { # <-- me succumbing to direnv

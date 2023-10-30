@@ -1,0 +1,104 @@
+let g:gruvbox_italic=1
+colorscheme gruvbox
+
+set termguicolors
+set background=dark   " Prefer dark mode
+
+set nobackup
+set nowritebackup
+set nocompatible
+
+filetype plugin indent on
+
+set tabstop=4 shiftwidth=2 expandtab
+set incsearch	"incremental and highlight search
+
+syntax on
+set hlsearch
+
+set mouse=a
+
+" ---------------
+" UI
+" ---------------
+set ruler			" Ruler on
+set relativenumber	" relative line numters
+set nu				" Enable "hybrid" line numbers
+set nowrap			" Line wrapping off
+set laststatus=2	" Always show the statusline
+set cmdheight=2
+set showcmd			" display incomplete commands
+set cursorline
+
+set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+
+" ViM, remember things on exit please
+" '100 remember marks for 100 files
+" <50 remember 50 register lines
+" h don't hlsearch in viminfo file
+set viminfo='100,<50,h
+
+" ---------------
+" Behaviors
+" ---------------
+set wildmenu           "show all file autocompletion options
+set wildmode=list:longest
+set autoread           " Automatically reload changes if detected
+set history=768        " Number of things to remember in history.
+set cf                 " Enable error files & error jumping.
+set clipboard=unnamed  " Yanks go on clipboard instead.
+set autowrite          " Writes on make/shell commands
+set timeoutlen=500     " Time to wait for a command (after leader for example)
+set formatoptions=crql
+nnoremap <C-e> 3<C-e>
+nnoremap <C-y> 3<C-y>
+set updatetime=250     " Update every 250ms
+
+" Restore file's previous cursor position
+function! ResCur()
+  if line("'\"") <= line("$")
+    normal! g`"
+    return 1
+  endif
+endfunction
+
+augroup resCur
+  autocmd!
+  autocmd BufWinEnter * call ResCur()
+augroup END
+
+" ---------------
+" Sounds
+" ---------------
+set noerrorbells
+set novisualbell
+set t_vb=
+
+" Set leader to ,
+let mapleader=","
+
+" ---------------
+" My Shortcuts
+" ---------------
+" clear search highlights
+nnoremap <leader>s :let @/ = ""<CR>
+
+" Navigate splits with ctrl-hjkl
+nnoremap <c-h> <c-w>h
+nnoremap <c-j> <c-w>j
+nnoremap <c-k> <c-w>k
+nnoremap <c-l> <c-w>l
+
+if exists('$TMUX')
+  " Proper cursor switching for VIM modes in tmux
+  let &t_SI = "\<Esc>Ptmux;\<Esc>\e[5 q\<Esc>\\"
+  let &t_EI = "\<Esc>Ptmux;\<Esc>\e[0 q\<Esc>\\"
+  
+  " Terminfo override for truecolor in tmux
+  set t_8b=[48;2;%lu;%lu;%lum
+  set t_8f=[38;2;%lu;%lu;%lum
+else
+  " Cursor switching for VIM modes
+  let &t_SI = "\<Esc>[5 q"
+  let &t_EI = "\<Esc>[0 q"
+endif
