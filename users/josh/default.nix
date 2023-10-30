@@ -1,8 +1,9 @@
-{ config, pkgs, lib, ... }: {
+{ pkgs, lib, ... }: {
   home.stateVersion = "23.05";
 
   home.packages = with pkgs; [
     audacity
+    bat
     unstable.blender
     darktable
     discord
@@ -18,7 +19,6 @@
     pavucontrol
     paprefs
     powerline
-    powerline-go
     scrot
     silver-searcher
     thunderbird
@@ -95,7 +95,7 @@
     ];
   };
 
-  programs.neovim = {
+  programs.neovim = { # the power of lua beckons
     enable = true;
     extraConfig = lib.fileContents config/vim/vimrc;
     coc ={ # universal lsp client
@@ -124,7 +124,7 @@
       mini-nvim          #TODO: Still unsure how to use mini.file from this, supercede oil?
       vim-fugitive       # Git interaction
       vimwiki            # Wiki notes in vim
-      fzf-vim            # file path fuzzyfind
+      fzf-vim            # file path/contents fuzzyfind
       {
         plugin = gitsigns-nvim; # git gutter and interaction
         type = "lua";
@@ -171,7 +171,7 @@
       bind -x '"\C-z":"fg"'
 
       function _update_ps1() {
-        PS1="$(powerline-go -modules 'venv,ssh,cwd,perms,git,jobs,exit,root,nix-shell' -error $?)"
+        PS1="$(${pkgs.powerline-go}/bin/powerline-go -modules 'venv,ssh,cwd,perms,git,jobs,exit,root,nix-shell' -error $?)"
       }
       PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
 

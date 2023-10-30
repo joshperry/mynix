@@ -83,8 +83,10 @@ let mapleader=","
 " clear search highlights
 nnoremap <leader>s :let @/ = ""<CR>
 
-" Filepath fuzzy find
+" File fuzzy find
+let $FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git --ignore .cache -g ""'
 nnoremap <leader>z :FZF<CR>
+nnoremap <leader>f :Ag<CR>
 
 " Navigate splits with ctrl-hjkl
 nnoremap <c-h> <c-w>h
