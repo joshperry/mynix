@@ -26,6 +26,7 @@
     ungoogled-chromium
     vlc
     xfce.thunar
+    nil
   ];
 
   programs.kitty = {
@@ -97,18 +98,43 @@
 
   programs.neovim = {
     enable = true;
-    coc.enable = true;
+    coc ={ # universal lsp client
+      enable = true;
+      settings = {
+        "suggest.noselect" = true;
+        "suggest.enablePreview" = true;
+        "suggest.enablePreselect" = false;
+        "suggest.disableKind" = true;
+        languageserver.nix = {
+          command = "${pkgs.nil}/bin/nil";
+          filetypes = ["nix"];
+          rootPatterns = ["flake.nix"];
+        };
+      };
+    };
     plugins = with pkgs.vimPlugins; [
       nvim-web-devicons
-      gruvbox
-      coc-eslint
+      gruvbox      # theme
+      coc-eslint   # CoC lsps
       coc-tsserver
-      vim-tmux-navigator
-      vim-polyglot
-      mini-nvim
-      vim-fugitive
+      coc-yaml
+      vim-tmux-navigator # allow ctrl-hjkl across panes
+      vim-polyglot       # syntax highlight all the things
+      mini-nvim          #TODO: Still unsure how to use mini.file from this, supercede oil?
+      vim-fugitive       # Git interaction
+      vimwiki            # Wiki notes in vim
       {
-        plugin = oil-nvim;
+        plugin = gitsigns-nvim; # git gutter and interaction
+        type = "lua";
+        config = "require('gitsigns').setup()";
+      }
+      {
+        plugin = lualine-nvim; #powerline-alike
+        type = "lua";
+        config = "require('lualine').setup()";
+      }
+      {
+        plugin = oil-nvim; # netrw replacement
         type = "lua";
         config = "require('oil').setup()";
       }
