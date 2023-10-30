@@ -83,13 +83,13 @@
 
   programs.tmux = {
     enable = true;
+    extraConfig = lib.fileContents config/tmux/tmux.conf;
     shortcut = "a";
     terminal = "tmux-256color";
     historyLimit = 20000;
     mouse = true;
     keyMode = "vi";
     escapeTime = 0; # no esc delay, for vim
-    extraConfig = lib.fileContents config/tmux/tmux.conf;
     tmuxinator.enable = true;
     plugins = [
       pkgs.tmuxPlugins.tmux-fzf
@@ -98,6 +98,7 @@
 
   programs.neovim = {
     enable = true;
+    extraConfig = lib.fileContents config/vim/vimrc;
     coc ={ # universal lsp client
       enable = true;
       settings = {
@@ -105,7 +106,7 @@
         "suggest.enablePreview" = true;
         "suggest.enablePreselect" = false;
         "suggest.disableKind" = true;
-        languageserver.nix = {
+        languageserver.nix = { # nix language server
           command = "${pkgs.nil}/bin/nil";
           filetypes = ["nix"];
           rootPatterns = ["flake.nix"];
@@ -123,6 +124,7 @@
       mini-nvim          #TODO: Still unsure how to use mini.file from this, supercede oil?
       vim-fugitive       # Git interaction
       vimwiki            # Wiki notes in vim
+      fzf-vim            # file path fuzzyfind
       {
         plugin = gitsigns-nvim; # git gutter and interaction
         type = "lua";
@@ -139,7 +141,6 @@
         config = "require('oil').setup()";
       }
     ];
-    extraConfig = lib.fileContents config/vim/vimrc;
   };
 
   programs.direnv = { # <-- me succumbing to direnv

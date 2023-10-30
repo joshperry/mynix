@@ -83,6 +83,9 @@ let mapleader=","
 " clear search highlights
 nnoremap <leader>s :let @/ = ""<CR>
 
+" Filepath fuzzy find
+nnoremap <leader>z :FZF<CR>
+
 " Navigate splits with ctrl-hjkl
 nnoremap <c-h> <c-w>h
 nnoremap <c-j> <c-w>j
