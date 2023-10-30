@@ -26,7 +26,6 @@
     ungoogled-chromium
     vlc
     xfce.thunar
-    nil
   ];
 
   programs.kitty = {
