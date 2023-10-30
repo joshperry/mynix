@@ -116,6 +116,7 @@
       nvim-web-devicons
       gruvbox      # theme
       coc-eslint   # CoC lsps
+      coc-go
       coc-tsserver
       coc-yaml
       vim-tmux-navigator # allow ctrl-hjkl across panes
