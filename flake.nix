@@ -62,7 +62,9 @@
           ./machines/xeeps/hardware-configuration.nix
           home-manager.nixosModules.home-manager
           {
-            home-manager.users.josh = import ./users/josh;
+            home-manager.users.josh = ({...}: {
+              imports = [./users/josh ./users/josh/solo.nix];
+            });
 
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;

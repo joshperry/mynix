@@ -68,15 +68,16 @@
 
   programs.git = {
     enable = true;
-    userName = "Joshua Perry";
+    userName = lib.mkDefault "Joshua Perry";
     userEmail = lib.mkDefault "josh@6bit.com";
-    signing = {
+    signing = lib.mkDefault {
       key = null;
       signByDefault = true;
     };
     extraConfig = {
       init.defaultBranch = "master";
       pull.rebase = true;
+      rebase.autostash = true;
     };
   };
 
