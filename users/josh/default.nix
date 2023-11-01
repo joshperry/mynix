@@ -19,6 +19,7 @@
     pavucontrol
     paprefs
     powerline
+    powerline-go
     scrot
     silver-searcher
     thunderbird
@@ -126,6 +127,7 @@
       vim-fugitive       # Git interaction
       vimwiki            # Wiki notes in vim
       fzf-vim            # file path/contents fuzzyfind
+      neo-tree-nvim
       {
         plugin = gitsigns-nvim; # git gutter and interaction
         type = "lua";
