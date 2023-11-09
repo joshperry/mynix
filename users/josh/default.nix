@@ -128,6 +128,7 @@
       vimwiki            # Wiki notes in vim
       fzf-vim            # file path/contents fuzzyfind
       neo-tree-nvim
+      pkgs.unstable.vimPlugins.openingh-nvim
       {
         plugin = gitsigns-nvim; # git gutter and interaction
         type = "lua";

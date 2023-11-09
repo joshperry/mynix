@@ -30,7 +30,7 @@ set cmdheight=2
 set showcmd			" display incomplete commands
 set cursorline
 
-set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+set statusline=%<%f\ %h%m%r%{fugitive#statusline()}%=%-14.(%l,%c%V%)\ %P
 
 " ViM, remember things on exit please
 " '100 remember marks for 100 files
@@ -83,7 +83,7 @@ let mapleader=","
 " clear search highlights
 nnoremap <leader>s :let @/ = ""<CR>
 
-
+" NeoTree
 nmap <silent><C-n> :Neotree focus toggle<CR>
 nnoremap <leader>n :Neotree reveal focus<CR>
 
@@ -91,6 +91,9 @@ nnoremap <leader>n :Neotree reveal focus<CR>
 let $FZF_DEFAULT_COMMAND = 'ag --hidden --ignore .git --ignore .cache -g ""'
 nnoremap <leader>z :FZF<CR>
 nnoremap <leader>f :Ag<CR>
+
+" Open in GH
+nmap <silent><leader>gh :OpenInGHFileLines<CR>
 
 " Navigate splits with ctrl-hjkl
 nnoremap <c-h> <c-w>h
