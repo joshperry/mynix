@@ -167,6 +167,7 @@
 
     sessionVariables = {
       EDITOR = "nvim";
+      TERMINAL = "kitty";
     };
 
     initExtra = ''
