@@ -242,12 +242,14 @@
   # Resilio Sync
   services.resilio = {
     enable = true;
+    checkForUpdates = false;
     directoryRoot = "/mnt/guiltyspark/sync";
     enableWebUI = true;
-    listeningPort = 55555;
     httpListenAddr = "127.0.0.1";
     httpLogin = "admin";
     httpPass = "admin1234";
+    listeningPort = 55555;
+    useUpnp = false;
   };
 
   # Enable the OpenSSH daemon.
