@@ -13,46 +13,10 @@
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
+  boot.initrd.luks.devices."nixos".device = "/dev/disk/by-uuid/af120a1d-621d-4381-937f-67c33f11b607";
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
+    { device = "/dev/disk/by-uuid/3a7890df-4d04-4999-908e-4ec6704e0dff";
       fsType = "btrfs";
-      options = [ "subvol=@" ];
-    };
-
-  fileSystems."/var/log" =
-    { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
-      fsType = "btrfs";
-      options = [ "subvol=@log" ];
-    };
-
-  fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
-      fsType = "btrfs";
-      options = [ "subvol=@home" ];
-    };
-
-  fileSystems."/srv" =
-    { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
-      fsType = "btrfs";
-      options = [ "subvol=@srv" ];
-    };
-
-  fileSystems."/var/tmp" =
-    { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
-      fsType = "btrfs";
-      options = [ "subvol=@tmp" ];
-    };
-
-  fileSystems."/var/cache" =
-    { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
-      fsType = "btrfs";
-      options = [ "subvol=@cache" ];
-    };
-
-  fileSystems."/root" =
-    { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
-      fsType = "btrfs";
-      options = [ "subvol=@root" ];
     };
 
   fileSystems."/boot" =
@@ -70,11 +34,6 @@
     { device = "//kago.local/media";
       fsType = "cifs";
       options = [ "credentials=/etc/nixos/kago-secrets" "uid=279" "gid=990" "file_mode=0664" "dir_mode=0775" "nofail" ];
-    };
-
-  fileSystems."/mnt/sub" =
-    { device = "/dev/disk/by-uuid/eb2dcba7-507d-42df-8311-4ba04ad3e541";
-      fsType = "btrfs";
     };
 
   fileSystems."/mnt/c" =
