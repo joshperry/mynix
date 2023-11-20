@@ -244,6 +244,7 @@
     enable = true;
     checkForUpdates = false;
     directoryRoot = "/mnt/guiltyspark/sync";
+    storagePath = "/mnt/guiltyspark/sync/db";
     enableWebUI = true;
     httpListenAddr = "127.0.0.1";
     httpLogin = "admin";
