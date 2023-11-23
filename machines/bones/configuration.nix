@@ -6,6 +6,7 @@
   system.stateVersion = "23.05";
 
   environment.systemPackages = with pkgs; [
+    ansel
     firefox
     pcsclite
     xclip
