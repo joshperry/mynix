@@ -3,7 +3,7 @@
     ../../profiles/common.nix
   ];
 
-  system.stateVersion = "23.05";
+  system.stateVersion = "23.11";
 
   environment.systemPackages = with pkgs; [
     ansel
@@ -179,8 +179,8 @@
   };
 
   fonts = {
-    enableDefaultFonts = true;
-    fonts = with pkgs; [
+    enableDefaultPackages = true;
+    packages = with pkgs; [
       powerline-symbols
       emojione
       inconsolata
