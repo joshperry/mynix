@@ -127,8 +127,18 @@
       vim-fugitive       # Git interaction
       vimwiki            # Wiki notes in vim
       fzf-vim            # file path/contents fuzzyfind
-      neo-tree-nvim
       pkgs.unstable.vimPlugins.openingh-nvim
+      {
+        plugin = neo-tree-nvim;
+        type = "lua";
+        config = ''
+          require('neo-tree').setup({
+            filesystem = {
+              use_libuv_file_watcher = true,
+            },
+          })
+        '';
+      }
       {
         plugin = gitsigns-nvim; # git gutter and interaction
         type = "lua";
