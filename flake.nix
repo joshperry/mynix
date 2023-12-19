@@ -3,20 +3,20 @@
 
   inputs = {
     nixpkgs = { url = "github:nixos/nixpkgs/nixos-23.11"; };
-    nixos-unstable = { url = "github:nixos/nixpkgs/nixos-unstable"; };
+    nixpkgs-unstable = { url = "github:nixos/nixpkgs/nixos-unstable"; };
     home-manager = {
       url = "github:nix-community/home-manager/release-23.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ nixpkgs, nixos-unstable, home-manager, ... }:
+  outputs = inputs@{ nixpkgs, nixpkgs-unstable, home-manager, ... }:
   let
     packages = { ... }: {
       nixpkgs.overlays = [
         #pkgs.unstable
         (final: prev: {
-          unstable = nixos-unstable.legacyPackages."${prev.system}";
+          unstable = nixpkgs-unstable.legacyPackages."${prev.system}";
         })
 
         # Want python310
@@ -31,6 +31,12 @@
         )
       ]; 
     };
+    registry = _: {
+      nix.registry = {
+        nixpkgs.flake = inputs.nixpkgs;
+        nixpkgs-unstable.flake = inputs.nixpkgs-unstable;
+      };
+    };
   in
   {
     nixosConfigurations = {
@@ -39,6 +45,7 @@
         system = "x86_64-linux";
         modules = [
           packages
+          registry
           ./modules
           ./machines/bones/configuration.nix
           ./machines/bones/hardware-configuration.nix
@@ -56,7 +63,7 @@
         system = "x86_64-linux";
         modules = [
           packages
-          (_: { nix.registry.nixpkgs.flake = inputs.nixpkgs; })
+          registry
           ./modules
           ./machines/xeeps/configuration.nix
           ./machines/xeeps/hardware-configuration.nix
