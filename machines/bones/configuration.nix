@@ -8,6 +8,7 @@
   environment.systemPackages = with pkgs; [
     ansel
     firefox
+    signal-desktop
     pcsclite
     xclip
     yubikey-personalization
