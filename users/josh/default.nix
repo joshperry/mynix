@@ -100,6 +100,7 @@
   programs.neovim = { # the power of lua beckons
     enable = true;
     extraConfig = lib.fileContents config/vim/vimrc;
+    vimAlias = true;
     coc ={ # universal lsp client
       enable = true;
       settings = {
