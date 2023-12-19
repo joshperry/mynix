@@ -4,7 +4,7 @@
     ../../profiles/common.nix
   ];
 
-  system.stateVersion = "23.05";
+  system.stateVersion = "23.11";
 
   boot.initrd.secrets = {
     "/crypto_keyfile.bin" = null;

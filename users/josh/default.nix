@@ -1,5 +1,5 @@
 { pkgs, lib, ... }: {
-  home.stateVersion = "23.05";
+  home.stateVersion = "23.11";
 
   home.packages = with pkgs; [
     audacity
