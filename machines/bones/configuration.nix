@@ -8,6 +8,7 @@
   environment.systemPackages = with pkgs; [
     ansel
     firefox
+    irssi
     signal-desktop
     pcsclite
     xclip
