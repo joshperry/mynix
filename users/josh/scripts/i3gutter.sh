@@ -56,8 +56,10 @@ if [[ -z $gutters ]]; then
   i3-msg [con_mark=rightgutter$cfw] move right
 
   # resize
-  i3-msg [con_mark=leftgutter$cfw] resize shrink width 90
-  i3-msg [con_mark=rightgutter$cfw] resize shrink width 90
+  # focused window width = sw - (sw - leftw) + (sw - rightw)
+  # (sw = screen-width)
+  i3-msg [con_mark=leftgutter$cfw] resize shrink width 800
+  i3-msg [con_mark=rightgutter$cfw] resize shrink width 800
 
 # gutters exist, so toggle them off
 else
