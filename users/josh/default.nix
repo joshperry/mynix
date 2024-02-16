@@ -67,6 +67,11 @@
     executable = true;
   };
 
+  home.file.".local/bin/i3gutter" = {
+    source = ./scripts/i3gutter.sh;
+    executable = true;
+  };
+
   programs.git = {
     enable = true;
     userName = lib.mkDefault "Joshua Perry";
