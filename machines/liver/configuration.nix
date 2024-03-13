@@ -42,7 +42,7 @@
   };
 
   networking.firewall = {
-    enabled = true;
+    enable = true;
   };
 
   networking.hostName = "liver";
