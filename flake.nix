@@ -59,6 +59,24 @@
         ];
       };
 
+      liver = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          packages
+          registry
+          ./modules
+          ./machines/liver/configuration.nix
+          ./machines/liver/hardware-configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.josh = import ./users/josh/server.nix;
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
+      };
+
       xeeps = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
