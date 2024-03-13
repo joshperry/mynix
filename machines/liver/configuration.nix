@@ -5,10 +5,7 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [ ./hardware-configuration.nix ];
 
   # Use the GRUB 2 boot loader.
   boot.loader.grub = {
@@ -24,11 +21,6 @@
   };
   boot.loader.timeout = 10;
   boot.kernelParams = [ "console=ttyS0,19200n8" ];
-
-  # Don't use special names for linode
-  networking.usePredictableInterfaceNames = false;
-  networking.useDHCP = false;
-  networking.interfaces.eth0.useDHCP = true;
 
   environment.systemPackages = with pkgs; [
     inetutils
