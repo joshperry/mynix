@@ -72,6 +72,12 @@
     executable = true;
   };
 
+  services.gpg-agent = {
+    enable = true;
+    defaultCacheTtl = 1800;
+    enableSshSupport = true;
+  };
+
   programs.git = {
     enable = true;
     userName = lib.mkDefault "Joshua Perry";
@@ -105,7 +111,9 @@
   programs.neovim = { # the power of lua beckons
     enable = true;
     extraConfig = lib.fileContents config/vim/vimrc;
+    extraLuaConfig = lib.fileContents config/vim/init.lua;
     vimAlias = true;
+    vimdiffAlias = true;
     coc ={ # universal lsp client
       enable = true;
       settings = {
@@ -209,7 +217,6 @@
       PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
 
       set -o vi
-      gpgconf --launch gpg-agent
     '';
   };
 }
