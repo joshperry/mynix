@@ -128,6 +128,7 @@
         };
       };
     };
+
     plugins = with pkgs.vimPlugins; [
       nvim-web-devicons
       gruvbox      # theme
@@ -208,8 +209,6 @@
 
     initExtra = ''
       PATH=/home/josh/.local/bin:$PATH
-      stty susp undef
-      bind -x '"\C-z":"fg"'
 
       function _update_ps1() {
         PS1="$(${pkgs.powerline-go}/bin/powerline-go -modules 'venv,ssh,cwd,perms,git,jobs,exit,root,nix-shell' -error $?)"

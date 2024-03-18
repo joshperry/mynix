@@ -22,6 +22,16 @@
   boot.loader.timeout = 10;
   boot.kernelParams = [ "console=ttyS0,19200n8" ];
 
+  system.autoUpgrade = {
+    enable = true;
+    dates = "04:00";
+    flake = "${config.users.users.josh.home}/dev/mynix";
+    flags = [
+      "--update-input" "nixpkgs"
+    ];
+    allowReboot = true;
+  };
+
   environment.systemPackages = with pkgs; [
     inetutils
     mtr
@@ -72,4 +82,3 @@
   system.stateVersion = "23.05"; # Did you read the comment?
 
 }
-

@@ -126,16 +126,13 @@
 
     sessionVariables = {
       EDITOR = "nvim";
-      TERMINAL = "kitty";
     };
 
     initExtra = ''
       PATH=/home/josh/.local/bin:$PATH
-      stty susp undef
-      bind -x '"\C-z":"fg"'
 
       function _update_ps1() {
-        PS1="$(${pkgs.powerline-go}/bin/powerline-go -modules 'venv,ssh,cwd,perms,git,jobs,exit,root,nix-shell' -error $?)"
+        PS1="$(${pkgs.powerline-go}/bin/powerline-go -modules 'venv,ssh,host,cwd,perms,git,jobs,exit,root,nix-shell' -error $?)"
       }
       PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
 

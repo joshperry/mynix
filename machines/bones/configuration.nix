@@ -13,6 +13,8 @@
     pcsclite
     xclip
     yubikey-personalization
+    unstable.k3d
+    cura
 
     # Install xss-lock branch that comms with logind
     # https://chat.openai.com/c/6f543d75-9dbb-4b0c-8188-08152032821a
@@ -60,6 +62,7 @@
     "steam-original"
     "steam-run"
     "resilio-sync"
+    "plexamp-4.8.3"
   ];
 
   #nixpkgs.overlays = [
@@ -299,7 +302,7 @@
   ];
 
   services.kubo = {
-    enable = true;
+    enable = false;
   };
 
   ###
