@@ -3,16 +3,15 @@
 # Copied from: https://gist.github.com/spinus/be0ca03def0c856ada86b16d1727d09d
 
 {
-  options.programs.falcon =
-    {
-      enable = lib.mkOption {
-        default = false;
-        example = true;
-        description = ''
-          Whether to install Falcon Sensor from CrowdStrike.
-        '';
-      };
+  options.programs.falcon = {
+    enable = lib.mkOption {
+      default = false;
+      example = true;
+      description = ''
+        Whether to install Falcon Sensor from CrowdStrike.
+      '';
     };
+  };
 
   config =
     let
