@@ -6,6 +6,7 @@
   system.stateVersion = "23.11";
 
   environment.systemPackages = with pkgs; [
+    arduino
     firefox
     irssi
     signal-desktop
@@ -35,6 +36,7 @@
     extraGroups = [
       "wheel"     # Enable ‘sudo’ for the user.
       "plugdev"   # Access to usb devices
+      "dialout"   # Access serial ports
       "wireshark" # Access to packet capture
     ];
   };
