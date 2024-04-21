@@ -93,6 +93,10 @@
     };
   };
 
+  programs.gpg = {
+    publicKeys = [ { source = ./config/gpgpubkeys.kbx; } ];
+  };
+
   programs.tmux = {
     enable = true;
     extraConfig = lib.fileContents config/tmux/tmux.conf;
