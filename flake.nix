@@ -37,82 +37,60 @@
         nixpkgs-unstable.flake = inputs.nixpkgs-unstable;
       };
     };
+    nixosSystem = { name, system, users }: 
+      nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [
+          packages
+          registry
+          ./modules
+          ./machines/${name}/configuration.nix
+          ./machines/${name}/hardware-configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users = users;
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
+      };
   in
   {
     nixosConfigurations = {
 
-      bones = nixpkgs.lib.nixosSystem {
+      bones = nixosSystem {
+        name = "bones";
         system = "x86_64-linux";
-        modules = [
-          packages
-          registry
-          ./modules
-          ./machines/bones/configuration.nix
-          ./machines/bones/hardware-configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.users.josh = import ./users/josh;
-
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-        ];
+        users = {
+          josh = import ./users/josh;
+        };
       };
 
-      liver = nixpkgs.lib.nixosSystem {
+      liver = nixosSystem {
+        name = "liver";
         system = "x86_64-linux";
-        modules = [
-          packages
-          registry
-          ./modules
-          ./machines/liver/configuration.nix
-          ./machines/liver/hardware-configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.users.josh = import ./users/josh/server.nix;
-
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-        ];
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
       };
 
-      mantissa = nixpkgs.lib.nixosSystem {
+      mantissa = nixosSystem {
+        name = "mantissa";
         system = "x86_64-linux";
-        modules = [
-          packages
-          registry
-          ./modules
-          ./machines/mantissa/configuration.nix
-          ./machines/mantissa/hardware-configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.users.josh = import ./users/josh;
-
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-        ];
+        users = {
+          josh = import ./users/josh;
+        };
       };
 
-      xeeps = nixpkgs.lib.nixosSystem {
+      xeeps = nixosSystem {
+        name = "xeeps";
         system = "x86_64-linux";
-        modules = [
-          packages
-          registry
-          ./modules
-          ./machines/xeeps/configuration.nix
-          ./machines/xeeps/hardware-configuration.nix
-          home-manager.nixosModules.home-manager
-          {
-            home-manager.users.josh = ({...}: {
-              imports = [./users/josh ./users/josh/solo.nix];
-            });
-
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-          }
-        ];
+        users = {
+          josh = ({...}: {
+            imports = [./users/josh ./users/josh/solo.nix];
+          });
+        };
       };
       
     };
