@@ -94,6 +94,7 @@
   };
 
   programs.gpg = {
+    enable = true;
     publicKeys = [ { source = ./config/gpgpubkeys.kbx; } ];
   };
 

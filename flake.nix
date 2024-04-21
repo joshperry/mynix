@@ -77,6 +77,24 @@
         ];
       };
 
+      mantissa = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          packages
+          registry
+          ./modules
+          ./machines/mantissa/configuration.nix
+          ./machines/mantissa/hardware-configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.users.josh = import ./users/josh;
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
+      };
+
       xeeps = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
