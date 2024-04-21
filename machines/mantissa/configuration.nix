@@ -5,10 +5,30 @@
 
   system.stateVersion = "23.11";
 
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  security.polkit.enable = true;
+
+  networking.hostName = "mantissa"; # Define your hostname.
+  networking.networkmanager.enable = true;
+  # Open ports in the firewall.
+  # networking.firewall.allowedTCPPorts = [ ... ];
+  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.enable = true;
+
+  # Set your time zone.
+  time.timeZone = "MST7MDT";
+
+  # Select internationalisation properties.
+  i18n.defaultLocale = "en_US.UTF-8";
+
   environment.systemPackages = with pkgs; [
     firefox
     irssi
     pcsclite
+    spice
     xclip
     yubikey-personalization
 
@@ -34,6 +54,7 @@
       "plugdev"   # Access to usb devices
       "dialout"   # Access to serials ports
       "wireshark" # Access to packet capture
+      "libvirtd"  # virtmanager
     ];
   };
 
@@ -75,24 +96,13 @@
     package = pkgs.wireshark;
   };
 
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  programs.virt-manager = {
+    enable = true;
+  };
 
-  security.polkit.enable = true;
-
-  networking.hostName = "mantissa"; # Define your hostname.
-  networking.networkmanager.enable = true;
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  networking.firewall.enable = true;
-
-  # Set your time zone.
-  time.timeZone = "MST7MDT";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_US.UTF-8";
+  virtualisation.libvirtd = {
+    enable = true;
+  };
 
   ###
   # Hardware
