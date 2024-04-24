@@ -8,6 +8,7 @@
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.blacklistedKernelModules = [ "nouveau" "nvidia" ];
 
   security.polkit.enable = true;
 
@@ -100,10 +101,6 @@
     enable = true;
   };
 
-  virtualisation.libvirtd = {
-    enable = true;
-  };
-
   ###
   # Hardware
   sound.enable = true;
@@ -116,14 +113,21 @@
   };
 
   # OpenGL
-  #hardware.opengl = {
-  #  enable = true;
-  #  extraPackages = [
-  #    pkgs.nvidia-vaapi-driver
-  #    pkgs.vaapiVdpau
-  #    pkgs.libvdpau-va-gl
-  #  ];
-  #};
+  hardware.opengl = {
+    enable = true;
+    driSupport = true;
+    extraPackages = with pkgs; [
+      intel-media-driver
+      intel-vaapi-driver
+      libvdpau-va-gl
+      vaapiIntel
+      vaapiVdpau
+    ];
+  };
+
+  environment.sessionVariables = {
+    LIBVA_DRIVER_NAME = "iHD";
+  };
   ## Modeset driver plz
   #hardware.nvidia.modesetting.enable = true;
 
@@ -132,7 +136,7 @@
   services.xserver = {
     enable = true;
 
-    #videoDrivers = [ "nvidia" ];
+    videoDrivers = [ "intel" ];
 
     desktopManager = {
       xterm.enable = false;
@@ -140,9 +144,9 @@
 
     displayManager = {
       defaultSession = "none+i3";
-#      setupCommands = ''
-#        ${pkgs.xorg.xrandr}/bin/xrandr --output DVI-D-0 --mode 2560x1600 --pos 3840x0 --rotate left --output HDMI-0 --off --output DP-0 --off --output DP-1 --off --output DP-2 --primary --mode 3840x1600 --pos 0x960 --rotate normal --output DP-3 --off --output DP-4 --off --output DP-5 --off
-#      '';
+      setupCommands = ''
+        ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --mode 1920x1080 --pos 0x0 --rotate normal --primary
+      '';
     };
 
     # map caps to escape.
@@ -207,6 +211,10 @@
   };
 
   virtualisation = {
+    libvirtd = {
+      enable = true;
+    };
+
     podman = {
       enable = true;
 
