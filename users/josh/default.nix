@@ -72,6 +72,10 @@
     executable = true;
   };
 
+  home.file.".config/powerline/themes/tmux/default.json" = {
+    source = ./config/powerline/tmux/default.json;
+  };
+
   services.gpg-agent = {
     enable = true;
     defaultCacheTtl = 1800;
