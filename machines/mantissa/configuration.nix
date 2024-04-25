@@ -28,6 +28,7 @@
   environment.systemPackages = with pkgs; [
     firefox
     irssi
+    light
     pcsclite
     spice
     xclip
@@ -56,6 +57,7 @@
       "dialout"   # Access to serials ports
       "wireshark" # Access to packet capture
       "libvirtd"  # virtmanager
+      "video"     # backlight et al
     ];
   };
 
