@@ -45,14 +45,6 @@
    gid = 1000;
   };
 
-  # User for camera FTP uploads
-  users.users.janus = {
-    group = "josh";
-    home = "/mnt/kago/pic/camftp";
-    initialHashedPassword = "$6$rounds=1000$M3h5rHnoZ8NVtllY$Sa4PhtobRQA6.wn7tvJoYdPo06kGc9vgdcCT0Wtbpt20RB3A6Ck7C.5g8d1F1X1.kYw.3RXaPXkHXeP6X0Afz.";
-    isSystemUser = true;
-  };
-
   ###
   # Which unfree packages to allow
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
@@ -111,10 +103,6 @@
   networking.firewall.enable = true;
 
   networking.firewall.allowedTCPPorts = [ 21 ];
-  networking.firewall.allowedTCPPortRanges = [
-    # vsftpd pasv ports
-    { from = 51000; to = 51009; }
-  ];
   # Set your time zone.
   time.timeZone = "MST7MDT";
 
@@ -130,6 +118,23 @@
     enable = true;
     alsa.enable = true;
     pulse.enable = true;
+  };
+
+  services.printing = {
+    enable = true;
+    drivers = [
+      pkgs.hplip
+    ];
+  };
+  hardware.printers = {
+    ensurePrinters = [
+      {
+        name = "HP-P2015";
+        location = "Home";
+        deviceUri = "usb://HP/LaserJet%20P2015%20Series?serial=00CNB1R45127";
+        model = "HP/hp-laserjet_p2015_series-pcl3.ppd.gz";
+      }
+    ];
   };
 
   # OpenGL
@@ -275,6 +280,22 @@
       workstation = true;
     };
   };
+
+
+  ## FTP Setup
+
+  # User for camera FTP uploads
+  users.users.janus = {
+    group = "josh";
+    home = "/mnt/kago/pic/camftp";
+    initialHashedPassword = "$6$rounds=1000$M3h5rHnoZ8NVtllY$Sa4PhtobRQA6.wn7tvJoYdPo06kGc9vgdcCT0Wtbpt20RB3A6Ck7C.5g8d1F1X1.kYw.3RXaPXkHXeP6X0Afz.";
+    isSystemUser = true;
+  };
+
+  networking.firewall.allowedTCPPortRanges = [
+    # vsftpd pasv ports
+    { from = 51000; to = 51009; }
+  ];
 
   services.vsftpd = {
     enable = true;
