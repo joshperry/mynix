@@ -59,6 +59,7 @@
     "steam"
     "steam-original"
     "steam-run"
+    "steam-unwrapped"
     "resilio-sync"
     "plexamp-4.8.3"
   ];
