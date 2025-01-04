@@ -215,9 +215,7 @@
       };
     };
     extraPortals = [
-      (pkgs.xdg-desktop-portal-gtk.override {
-        buildPortalsInGnome = false;
-      })
+      pkgs.xdg-desktop-portal-gtk
     ];
   };
 
