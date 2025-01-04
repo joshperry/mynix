@@ -45,30 +45,31 @@
   fileSystems."/mnt/c" =
     { device = "/dev/disk/by-uuid/0A8CFD018CFCE859";
       fsType = "ntfs3";
-      options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" ];
+      options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" "nofail" ];
     };
 
   fileSystems."/mnt/bu" =
     { device = "/dev/disk/by-uuid/88F0B74CF0B73F6E";
       fsType = "ntfs3";
-      options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" ];
+      options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" "nofail" ];
     };
 
   fileSystems."/mnt/deuce" =
     { device = "/dev/disk/by-uuid/44FDD4B725A6CD68";
       fsType = "ntfs3";
-      options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" ];
+      options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" "nofail" ];
     };
 
   fileSystems."/mnt/massflash" =
     { device = "/dev/disk/by-uuid/4A18E92218E90E2F";
       fsType = "ntfs3";
-      options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" ];
+      options = [ "uid=1000" "gid=1000" "fmask=0177" "dmask=0077" "nofail" ];
     };
 
   fileSystems."/mnt/guiltyspark" =
     { device = "/dev/disk/by-uuid/c5131001-51c7-4424-8a79-74f3b12b9853";
       fsType = "btrfs";
+      options = [ "nofail" ];
     };
 
   swapDevices = [ ];
