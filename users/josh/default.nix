@@ -146,6 +146,8 @@
       coc-tsserver
       coc-yaml
       coc-rust-analyzer
+      coc-cmake
+      coc-clangd
       vim-tmux-navigator # allow ctrl-hjkl across panes
       vim-polyglot       # syntax highlight all the things
       mini-nvim          #TODO: Still unsure how to use mini.file from this, supercede oil?
