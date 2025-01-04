@@ -112,7 +112,6 @@
 
   ###
   # Hardware
-  sound.enable = true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -138,8 +137,14 @@
     ];
   };
 
+  # Video card driver
+  hardware.nvidia = {
+    open = false;
+    modesetting.enable = true;
+  };
+
   # OpenGL
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
     extraPackages = [
       pkgs.nvidia-vaapi-driver
@@ -147,8 +152,6 @@
       pkgs.libvdpau-va-gl
     ];
   };
-  # Modeset driver plz
-  hardware.nvidia.modesetting.enable = true;
 
   ###
   # X11 windowing system.
@@ -162,7 +165,6 @@
     };
 
     displayManager = {
-      defaultSession = "none+i3";
       setupCommands = ''
         ${pkgs.xorg.xrandr}/bin/xrandr --output DVI-D-0 --mode 2560x1600 --pos 3840x0 --rotate left --output HDMI-0 --off --output DP-0 --off --output DP-1 --off --output DP-2 --primary --mode 3840x1600 --pos 0x960 --rotate normal --output DP-3 --off --output DP-4 --off --output DP-5 --off
       '';
@@ -174,7 +176,7 @@
     };
 
     # map caps to escape.
-    xkbOptions = "caps:escape";
+    xkb.options = "caps:escape";
 
     windowManager.i3 = {
       enable = true;
@@ -190,6 +192,9 @@
     };
   };
 
+  services.displayManager = {
+    defaultSession = "none+i3";
+  };
   fonts = {
     enableDefaultPackages = true;
     packages = with pkgs; [
@@ -271,7 +276,7 @@
 
   services.avahi = {
     enable = true;
-    nssmdns = true;
+    nssmdns4 = true;
     openFirewall = true;
     domainName = "local";
     publish = {

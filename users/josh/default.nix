@@ -31,7 +31,7 @@
 
   programs.kitty = {
     enable = true;
-    theme = "Gruvbox Dark";
+    themeFile = "gruvbox-dark";
     font = {
       name = "Source Code Pro for Powerline Regular";
       size = 11;
