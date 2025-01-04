@@ -64,8 +64,14 @@
     "plexamp-4.8.3"
   ];
 
-  #nixpkgs.overlays = [
-  #  (final: prev: {
+  nixpkgs.overlays = [
+    (final: prev: {
+      xdg-desktop-portal = prev.xdg-desktop-portal.override {
+        enableGeoLocation = false;
+      };
+    })
+  ];
+
   #    steam = prev.steam.override {
   #      extraPkgs = pkgs': with pkgs'; [
   #        qt5.qtbase
@@ -200,6 +206,21 @@
   services.displayManager = {
     defaultSession = "none+i3";
   };
+
+  xdg.portal = {
+    enable = true;
+    config = {
+      common = {
+        default = [ "xfce" ];
+      };
+    };
+    extraPortals = [
+      (pkgs.xdg-desktop-portal-gtk.override {
+        buildPortalsInGnome = false;
+      })
+    ];
+  };
+
   fonts = {
     enableDefaultPackages = true;
     packages = with pkgs; [
