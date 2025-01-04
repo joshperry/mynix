@@ -36,6 +36,7 @@
     extraGroups = [
       "wheel"     # Enable ‘sudo’ for the user.
       "plugdev"   # Access to usb devices
+      "input"     # USB device input
       "dialout"   # Access serial ports
       "wireshark" # Access to packet capture
     ];
