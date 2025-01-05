@@ -31,6 +31,7 @@
     light
     pcsclite
     spice
+    saleae-logic-2
     xclip
     yubikey-personalization
 
@@ -70,6 +71,7 @@
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
     "discord"
     "resilio-sync"
+    "saleae-logic"
   ];
 
   #nixpkgs.overlays = [
@@ -123,6 +125,10 @@
       vaapiIntel
       vaapiVdpau
     ];
+  };
+
+  hardware.saleae-logic = {
+    enable = true;
   };
 
   environment.sessionVariables = {
