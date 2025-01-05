@@ -105,7 +105,6 @@
 
   ###
   # Hardware
-  sound.enable = true;
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
@@ -115,9 +114,8 @@
   };
 
   # OpenGL
-  hardware.opengl = {
+  hardware.graphics = {
     enable = true;
-    driSupport = true;
     extraPackages = with pkgs; [
       intel-media-driver
       intel-vaapi-driver
@@ -138,21 +136,22 @@
   services.xserver = {
     enable = true;
 
-    videoDrivers = [ "intel" ];
+    videoDrivers = [ "modesetting" ];
 
     desktopManager = {
       xterm.enable = false;
     };
 
     displayManager = {
-      defaultSession = "none+i3";
       setupCommands = ''
         ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --mode 1920x1080 --pos 0x0 --rotate normal --primary
       '';
     };
 
-    # map caps to escape.
-    xkbOptions = "caps:escape";
+    xkb = {
+      # map caps to escape.
+      options = "caps:escape";
+    };
 
     windowManager.i3 = {
       enable = true;
@@ -253,7 +252,7 @@
 
   services.avahi = {
     enable = true;
-    nssmdns = true;
+    nssmdns4 = true;
     openFirewall = true;
     domainName = "local";
     publish = {
@@ -262,6 +261,10 @@
       addresses = true;
       workstation = true;
     };
+  };
+
+  services.displayManager = {
+    defaultSession = "none+i3";
   };
 
   services.kubo = {
