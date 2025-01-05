@@ -216,6 +216,8 @@
       enable = true;
     };
 
+    spiceUSBRedirection.enable = true;
+
     podman = {
       enable = true;
 
