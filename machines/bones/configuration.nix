@@ -72,16 +72,6 @@
     })
   ];
 
-  #    steam = prev.steam.override {
-  #      extraPkgs = pkgs': with pkgs'; [
-  #        qt5.qtbase
-  #        audit
-  #        libsForQt5.qt5.qtmultimedia
-  #      ];
-  #    };
-  #  })
-  #];
-
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
