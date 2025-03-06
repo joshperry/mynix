@@ -10,6 +10,7 @@
     firefox
     inkscape
     aseprite
+    HELI-X
     irssi
     signal-desktop
     pcsclite
