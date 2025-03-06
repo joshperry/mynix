@@ -201,11 +201,13 @@
     enable = true;
     config = {
       common = {
-        default = [ "xfce" ];
+        default = [
+          "lxqt"
+        ];
       };
     };
-    extraPortals = [
-      pkgs.xdg-desktop-portal-gtk
+    extraPortals = with pkgs; [
+      lxqt.xdg-desktop-portal-lxqt
     ];
   };
 
