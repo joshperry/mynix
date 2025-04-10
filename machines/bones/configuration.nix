@@ -150,8 +150,6 @@
     enable = true;
     extraPackages = [
       pkgs.nvidia-vaapi-driver
-      pkgs.vaapiVdpau
-      pkgs.libvdpau-va-gl
     ];
   };
 
