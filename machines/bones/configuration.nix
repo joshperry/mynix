@@ -212,6 +212,7 @@
 
   fonts = {
     enableDefaultPackages = true;
+    fontDir.enable = true;
     packages = with pkgs; [
       powerline-symbols
       emojione
