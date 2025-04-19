@@ -2,6 +2,11 @@
   home.stateVersion = "23.11";
 
   home.packages = with pkgs; [
+    # My scripts
+    (writeShellScriptBin "dev" (lib.fileContents scripts/dev.sh))
+    (writeShellScriptBin "i3gutter" (lib.fileContents scripts/i3gutter.sh))
+    (writeShellScriptBin "session-lock" (lib.fileContents config/i3/scripts/session-lock.sh))
+
     audacity
     bat
     unstable.blender
@@ -62,18 +67,12 @@
     };
   };
 
-  home.file.".local/bin/dev" = {
-    source = ./scripts/dev.sh;
-    executable = true;
-  };
-
-  home.file.".local/bin/i3gutter" = {
-    source = ./scripts/i3gutter.sh;
-    executable = true;
-  };
-
   home.file.".config/powerline/themes/tmux/default.json" = {
     source = ./config/powerline/tmux/default.json;
+  };
+
+  home.file.".config/i3/config" = {
+    source = ./config/i3/config;
   };
 
   services.gpg-agent = {
