@@ -87,7 +87,7 @@
     userEmail = lib.mkDefault "josh@6bit.com";
     signing = lib.mkDefault {
       key = null;
-      signByDefault = true;
+      signByDefault = false;
     };
     extraConfig = {
       init.defaultBranch = "master";
@@ -98,7 +98,7 @@
 
   programs.gpg = {
     enable = true;
-    publicKeys = [ { source = ./config/gpgpubkeys.kbx; } ];
+    #publicKeys = [ { source = ./config/gpgpubkeys.kbx; } ];
   };
 
   programs.tmux = {
