@@ -8,6 +8,7 @@
       url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    impermanence = { url = "github:nix-community/impermanence"; };
   };
 
   outputs = inputs@{ nixpkgs, nixpkgs-unstable, home-manager, ... }:
@@ -37,7 +38,7 @@
         nixpkgs-unstable.flake = inputs.nixpkgs-unstable;
       };
     };
-    nixosSystem = { name, system, users }: 
+    nixosSystem = { name, system, users, sysmodules ? [] }: 
       nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
@@ -53,7 +54,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
           }
-        ];
+        ] ++ sysmodules;
       };
   in
   {
@@ -81,6 +82,17 @@
         users = {
           josh = import ./users/josh;
         };
+      };
+
+      signi = nixosSystem {
+        name = "signi";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh;
+        };
+        sysmodules = [
+          inputs.impermanence.nixosModules.impermanence
+        ];
       };
 
       xeeps = nixosSystem {
