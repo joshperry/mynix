@@ -156,16 +156,6 @@
       trouble-nvim
       pkgs.unstable.vimPlugins.openingh-nvim
       {
-        plugin = pkgs.unstable.vimPlugins.ChatGPT-nvim;
-        type = "lua";
-        config = ''
-          local home = vim.fn.expand("$HOME")
-          require('chatgpt').setup({
-            api_key_cmd = "cat " .. home .. "/.config/openai/key",
-          })
-        '';
-      }
-      {
         plugin = neo-tree-nvim;
         type = "lua";
         config = ''
