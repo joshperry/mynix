@@ -46,7 +46,7 @@ bindsym $mod+space exec --no-startup-id "rofi -combi-modi window,drun,ssh -show 
 # i3-dmenu-desktop
 
 # Bind $mod+F12 to lock the screen using the session-lock.sh script
-bindsym $mod+F12 exec --no-startup-id ~/.config/i3/scripts/session-lock.sh
+bindsym $mod+F12 exec --no-startup-id session-lock
 
 # change focus
 bindsym $mod+h focus left
