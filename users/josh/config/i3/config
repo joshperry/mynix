@@ -232,9 +232,9 @@ bindsym XF86AudioStop exec playerctl stop
 # Screen brightness controls with notification
 # https://cialu.net/brightness-control-not-work-i3wm/
 # increase screen brightness with notification
-bindsym XF86MonBrightnessUp exec "light -A 5; notify-send 'brightness up'"
+#bindsym XF86MonBrightnessUp exec "light -A 5; notify-send 'brightness up'"
 # decrease screen brightness with notification
-bindsym XF86MonBrightnessDown exec "light -U 5; notify-send 'brightness down'"
+#bindsym XF86MonBrightnessDown exec "light -U 5; notify-send 'brightness down'"
 
 #######
 # Window specific Settings
