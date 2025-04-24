@@ -19,17 +19,7 @@
     unstable.k3d
     cura
     visidata
-
-    # Install xss-lock branch that comms with logind
-    # https://chat.openai.com/c/6f543d75-9dbb-4b0c-8188-08152032821a
-    (xss-lock.overrideAttrs (_: {
-      src = fetchFromGitHub {
-        owner = "xdbob";
-        repo = "xss-lock";
-        rev = "7b0b4dc83ff3716fd3051e6abf9709ddc434e985";
-        sha256 = "TG/H2dGncXfdTDZkAY0XAbZ80R1wOgufeOmVL9yJpSk=";
-      };
-    }))
+    xss-lock-hinted
   ];
 
   users.users.josh = {

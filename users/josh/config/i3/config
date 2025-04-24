@@ -45,7 +45,7 @@ bindsym $mod+Shift+q kill
 bindsym $mod+space exec --no-startup-id "rofi -combi-modi window,drun,ssh -show combi"
 # i3-dmenu-desktop
 
-# Bind $mod+F12 to lock the screen using the session-lock.sh script
+# Bind $mod+F12 to lock the screen using the session lock script
 bindsym $mod+F12 exec --no-startup-id session-lock
 
 # change focus
@@ -265,7 +265,7 @@ bindsym $mod+x nop
 # Set current screen config
 #exec --no-startup-id /home/josh/.config/i3/scripts/screen-current.sh
 
-# Sets up logind comms for lock/unlock commands/notifications + DPMS and i3lock
+# Use xss-lock to tap into the X screensaver for calling our session locking script on inactivity
 exec_always --no-startup-id xss-lock --transfer-sleep-lock -- session-lock
 
 # Start up a compsitor
