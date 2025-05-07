@@ -213,7 +213,7 @@
 
     displayManager = {
       setupCommands = ''
-        ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1-1 --mode 1920x1200 --pos 0x0 --rotate normal --primary
+        ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --mode 1920x1200 --pos 0x0 --rotate normal --primary
       '';
     };
 
