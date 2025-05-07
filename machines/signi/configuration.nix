@@ -66,11 +66,14 @@
     firefox
     irssi
     pcsclite
-    spice
     saleae-logic-2
+    spice
+    steam
     xclip
     yubikey-personalization
-    xss-lock-hinted
+    
+    mynix.xss-lock-hinted
+    mynix.HELI-X
   ];
 
   users.users.josh = {
@@ -98,8 +101,11 @@
     "nvidia-x11"
     "nvidia-settings"
     "discord"
+    "HELI-X"
     "resilio-sync"
     "saleae-logic"
+    "steam"
+    "steam-unwrapped"
   ];
 
   #nixpkgs.overlays = [

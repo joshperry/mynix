@@ -10,16 +10,17 @@
     firefox
     inkscape
     aseprite
-    HELI-X
     irssi
     signal-desktop
     pcsclite
     xclip
     yubikey-personalization
     unstable.k3d
-    cura
     visidata
-    xss-lock-hinted
+
+    mynix.cura
+    mynix.HELI-X
+    mynix.xss-lock-hinted
   ];
 
   users.users.josh = {
