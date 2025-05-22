@@ -15,11 +15,6 @@
   let
     packages = { ... }: {
       nixpkgs.overlays = [
-        #pkgs.unstable
-        (final: prev: {
-          unstable = nixpkgs-unstable.legacyPackages."${prev.system}";
-        })
-
         # Want python310
         #(final: prev: {
         #  python3 = final.python310;
@@ -47,6 +42,17 @@
           ./modules
           ./machines/${name}/configuration.nix
           ./machines/${name}/hardware-configuration.nix
+          ({config, ...}: {
+            nixpkgs.overlays = [
+              #pkgs.unstable
+              (final: prev: {
+                unstable = import nixpkgs-unstable {
+                  inherit system;
+                  config.allowUnfreePredicate = config.nixpkgs.config.allowUnfreePredicate; 
+                };
+              })
+            ];
+          })
           home-manager.nixosModules.home-manager
           {
             home-manager.users = users;
