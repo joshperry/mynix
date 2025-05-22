@@ -3,6 +3,49 @@
     ../../profiles/common.nix
   ];
 
+  environment.systemPackages = with pkgs; [
+    firefox
+    irssi
+    unstable.lmstudio
+    pcsclite
+    saleae-logic-2
+    spice
+    #(mynix.NvidiaOffloadApp steam "steam")
+    steam
+    xclip
+    yubikey-personalization
+    
+    mynix.xss-lock-hinted
+    #(mynix.NvidiaOffloadApp mynix.HELI-X "HELI-X")
+    mynix.HELI-X
+  ];
+
+  ###
+  # Which unfree packages to allow
+  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
+    "nvidia-x11"
+    "nvidia-settings"
+    "discord"
+    "HELI-X"
+    "lmstudio"
+    "resilio-sync"
+    "saleae-logic"
+    "steam"
+    "steam-unwrapped"
+  ];
+
+  #nixpkgs.overlays = [
+  #  (final: prev: {
+  #    steam = prev.steam.override {
+  #      extraPkgs = pkgs': with pkgs'; [
+  #        qt5.qtbase
+  #        audit
+  #        libsForQt5.qt5.qtmultimedia
+  #      ];
+  #    };
+  #  })
+  #];
+
   system.stateVersion = "24.11";
 
   # Use the systemd-boot EFI boot loader.
@@ -61,22 +104,6 @@
   # Even root should use the daemon for builds to avoid /tmp cache
   environment.variables.NIX_REMOTE = "daemon";
 
-
-  environment.systemPackages = with pkgs; [
-    firefox
-    irssi
-    unstable.lmstudio
-    pcsclite
-    saleae-logic-2
-    spice
-    steam
-    xclip
-    yubikey-personalization
-    
-    mynix.xss-lock-hinted
-    mynix.HELI-X
-  ];
-
   users.users.josh = {
     uid = 1000;
     group = "josh";
@@ -95,32 +122,6 @@
   users.groups.josh = {
    gid = 1000;
   };
-
-  ###
-  # Which unfree packages to allow
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
-    "nvidia-x11"
-    "nvidia-settings"
-    "discord"
-    "HELI-X"
-    "lmstudio"
-    "resilio-sync"
-    "saleae-logic"
-    "steam"
-    "steam-unwrapped"
-  ];
-
-  #nixpkgs.overlays = [
-  #  (final: prev: {
-  #    steam = prev.steam.override {
-  #      extraPkgs = pkgs': with pkgs'; [
-  #        qt5.qtbase
-  #        audit
-  #        libsForQt5.qt5.qtmultimedia
-  #      ];
-  #    };
-  #  })
-  #];
 
   programs.gnupg.agent = {
     enable = true;
