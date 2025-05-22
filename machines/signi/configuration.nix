@@ -58,13 +58,14 @@
     };
   };
   
-  # Even root should use the daemon for builds
+  # Even root should use the daemon for builds to avoid /tmp cache
   environment.variables.NIX_REMOTE = "daemon";
 
 
   environment.systemPackages = with pkgs; [
     firefox
     irssi
+    unstable.lmstudio
     pcsclite
     saleae-logic-2
     spice
@@ -102,6 +103,7 @@
     "nvidia-settings"
     "discord"
     "HELI-X"
+    "lmstudio"
     "resilio-sync"
     "saleae-logic"
     "steam"
