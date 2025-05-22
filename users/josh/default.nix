@@ -15,7 +15,7 @@
     fzf
     gimp-with-plugins
     gitmux
-    unstable.godot_4
+    unstable.godot
     imagemagick
     libcanberra-gtk3
     networkmanagerapplet
