@@ -1,6 +1,6 @@
 ({ pkgs, config, ... }: {
   imports = [
-    ../../profiles/common.nix
+    ../../profiles/graphical.nix
   ];
 
   environment.systemPackages = with pkgs; [
@@ -29,7 +29,7 @@
     "HELI-X"
     "lmstudio"
     "resilio-sync"
-    "saleae-logic"
+    "saleae-logic-2"
     "steam"
     "steam-unwrapped"
   ];
@@ -246,9 +246,7 @@
       emojione
       inconsolata
       font-awesome
-      (nerdfonts.override { fonts = [
-        "SourceCodePro"
-      ];})
+      nerd-fonts.sauce-code-pro
     ];
     fontconfig = {
       antialias = true;

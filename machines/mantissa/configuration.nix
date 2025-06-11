@@ -1,6 +1,6 @@
 ({ pkgs, ... }: {
   imports = [
-    ../../profiles/common.nix
+    ../../profiles/graphical.nix
   ];
 
   system.stateVersion = "23.11";
@@ -170,9 +170,7 @@
       emojione
       inconsolata
       font-awesome
-      (nerdfonts.override { fonts = [
-        "SourceCodePro"
-      ];})
+      nerd-fonts.sauce-code-pro
     ];
     fontconfig = {
       antialias = true;
