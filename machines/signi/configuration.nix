@@ -57,6 +57,9 @@
 
   networking.hostName = "signi"; # Define your hostname.
   networking.networkmanager.enable = true;
+  networking.networkmanager.wifi.powersave = true;
+  networking.networkmanager.wifi.scanRandMacAddress = true;
+  networking.networkmanager.wifi.macAddress = "random";
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   # networking.firewall.allowedUDPPorts = [ ... ];
