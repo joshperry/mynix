@@ -345,7 +345,7 @@
   services.fwupd.enable = true;
 
   services.kubo = {
-    enable = true;
+    enable = false;
   };
 
   ###
