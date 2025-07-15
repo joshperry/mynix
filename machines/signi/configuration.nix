@@ -159,6 +159,9 @@
     pulse.enable = true;
   };
 
+  # Power/Thermal management
+  services.thermald.enable = true;
+
   # OpenGL
   hardware.graphics = {
     enable = true;
