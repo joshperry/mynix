@@ -68,7 +68,7 @@
     group = "josh";
     isNormalUser = true;
     extraGroups = [ "wheel" ];
-    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE/W42ehUPgwbpGOe9agkr1t9m/hNpnxtq77F+DSoxeA josh@6bit.com" ];
+    openssh.authorizedKeys.keys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsPaFplk95wdbZnGF9q1LnQUKy36Lh+4dSHyFJwMeUK josh@6bit.com" ];
   };
 
   users.groups.josh = {
