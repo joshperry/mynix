@@ -15,6 +15,7 @@
     xclip
     yubikey-personalization
     
+    mynix.rotorflight-configurator
     mynix.xss-lock-hinted
     #(mynix.NvidiaOffloadApp mynix.HELI-X "HELI-X")
     mynix.HELI-X
