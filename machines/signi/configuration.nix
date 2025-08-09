@@ -4,6 +4,7 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    arduino
     edgetx
     firefox
     irssi
