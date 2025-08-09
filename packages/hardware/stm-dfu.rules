@@ -1,0 +1,2 @@
+# allow non-root users to access to stm32 device in dfu mode (bootloader)
+SUBSYSTEM=="usb", ACTION=="add", ATTR{product}=="STM32  BOOTLOADER", GROUP="plugdev", MODE="0660"

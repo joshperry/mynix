@@ -6,6 +6,7 @@
     HELI-X = pkgs.callPackage ./games/HELI-X.nix {};
     rotorflight-blackbox = pkgs.callPackage ./applications/misc/rotorflight-blackbox.nix {};
     rotorflight-configurator = pkgs.callPackage ./applications/misc/rotorflight-configurator.nix {};
+    stm-dfu-udev-rules = pkgs.callPackage ./hardware/stm-dfu-udev-rules.nix {};
     # xss-lock branch that calls logind's SetLockedHint
     xss-lock-hinted = pkgs.xss-lock.overrideAttrs (_: {
       src = pkgs.fetchFromGitHub {
