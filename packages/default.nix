@@ -4,6 +4,7 @@
     ansel = pkgs.callPackage ./graphics/ansel.nix {};
     cura = pkgs.callPackage ./applications/misc/cura.nix {};
     HELI-X = pkgs.callPackage ./games/HELI-X.nix {};
+    rotorflight-blackbox = pkgs.callPackage ./applications/misc/rotorflight-blackbox.nix {};
     rotorflight-configurator = pkgs.callPackage ./applications/misc/rotorflight-configurator.nix {};
     # xss-lock branch that calls logind's SetLockedHint
     xss-lock-hinted = pkgs.xss-lock.overrideAttrs (_: {
