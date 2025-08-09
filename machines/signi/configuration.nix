@@ -4,6 +4,7 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    edgetx
     firefox
     irssi
     unstable.lmstudio
@@ -163,6 +164,10 @@
 
   # Power/Thermal management
   services.thermald.enable = true;
+
+  services.udev.packages = [ 
+    pkgs.mynix.stm-dfu-udev-rules
+  ];
 
   # OpenGL
   hardware.graphics = {
