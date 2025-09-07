@@ -13,7 +13,6 @@
     saleae-logic-2
     spice
     #(mynix.NvidiaOffloadApp steam "steam")
-    steam
     xclip
     yubikey-personalization
     
@@ -129,6 +128,8 @@
   users.groups.josh = {
    gid = 1000;
   };
+
+  programs.steam.enable = true;
 
   programs.gnupg.agent = {
     enable = true;
