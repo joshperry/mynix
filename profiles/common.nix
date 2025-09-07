@@ -20,6 +20,7 @@
     pv
     wget
     unzip
+    usbutils
     yq
     zip
   ];
