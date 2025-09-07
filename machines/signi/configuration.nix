@@ -169,6 +169,7 @@
 
   services.udev.packages = [ 
     pkgs.mynix.stm-dfu-udev-rules
+    pkgs.android-udev-rules
   ];
 
   # OpenGL
