@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# Example locker script -- demonstrates how to use the --transfer-sleep-lock
-# option with i3lock's forking mode to delay sleep until the screen is locked.
+# Uses the --transfer-sleep-lock option with i3lock's forking mode to delay
+# sleep until the screen is locked. Supports killing i3lock when a loop running
+# fprintd-verify sees a valid fingerprint scan, when `fprintd-verify` exists.
 
 ## CONFIGURATION ##############################################################
 BLANK='#ffffff88'
@@ -60,6 +61,22 @@ post_lock() {
   return
 }
 
+kill_i3lock() {
+    pkill -xu $EUID "$@" i3lock-color
+}
+
+wait_fingerprint() {
+    while pidof i3lock-color > /dev/null; do
+        if (timeout 5 fprintd-verify | grep -q verify-match); then
+            kill_i3lock
+        fi
+    done
+}
+
+have_fingerpint() {
+    command -v fprintd-verify >/dev/null 2>&1
+}
+
 ###############################################################################
 
 pre_lock
@@ -68,10 +85,6 @@ pre_lock
 # wait for it to exit. The waiting is not that straightforward when the locker
 # forks, so we use this polling only if we have a sleep lock to deal with.
 if [[ -e /dev/fd/${XSS_SLEEP_LOCK_FD:--1} ]]; then
-    kill_i3lock() {
-        pkill -xu $EUID "$@" i3lock-color
-    }
-
     trap kill_i3lock TERM INT
 
     # we have to make sure the locker does not inherit a copy of the lock fd
@@ -80,13 +93,22 @@ if [[ -e /dev/fd/${XSS_SLEEP_LOCK_FD:--1} ]]; then
     # now close our fd (only remaining copy) to indicate we're ready to sleep
     exec {XSS_SLEEP_LOCK_FD}<&-
 
-    while kill_i3lock -0; do
-        sleep 0.5
-    done
+    if ! have_fingerpint; then
+        while kill_i3lock -0; do
+            sleep 0.5
+        done
+    else
+        wait_fingerprint
+    fi
 else
     trap 'kill %%' TERM INT
     i3lock-color -n "${i3lock_options[@]}" &
-    wait
+
+    if ! have_fingerpint; then
+        wait
+    else
+        wait_fingerprint
+    fi
 fi
 
 post_lock
