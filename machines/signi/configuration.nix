@@ -9,6 +9,7 @@
     firefox
     irssi
     unstable.lmstudio
+    unstable.obsidian
     pcsclite
     saleae-logic-2
     spice
@@ -35,6 +36,7 @@
     "saleae-logic-2"
     "steam"
     "steam-unwrapped"
+    "obsidian"
   ];
 
   #nixpkgs.overlays = [
