@@ -31,6 +31,7 @@
     "nvidia-settings"
     "discord"
     "HELI-X"
+    "libfprint-2-tod1-goodix-550a"
     "lmstudio"
     "resilio-sync"
     "saleae-logic-2"
@@ -168,6 +169,18 @@
 
   # Power/Thermal management
   services.thermald.enable = true;
+
+  services.fprintd = {
+    enable = true;
+    tod = {
+      enable = true;
+      driver = pkgs.libfprint-2-tod1-goodix-550a;
+    };
+  };
+  systemd.services.fprintd = {
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig.Type = "simple";
+  };
 
   services.udev.packages = [ 
     pkgs.mynix.stm-dfu-udev-rules
