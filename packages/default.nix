@@ -17,5 +17,19 @@
         sha256 = "TG/H2dGncXfdTDZkAY0XAbZ80R1wOgufeOmVL9yJpSk=";
       };
     });
+
+    i3lock-color = pkgs.i3lock-color.overrideAttrs (prev: {
+      version = "7d337d9";
+      src = pkgs.fetchFromGitHub {
+        owner = "PandorasFox";
+        repo = "i3lock-color";
+        rev = "7d337d9133853109d7443a0150ccd26a6b1c02da";
+        sha256 = "sha256-arIfZthTJ27MBmTbX0BjQ341nHrsyyFef/Wqx5kMnxI=";
+      };
+
+      buildInputs = prev.buildInputs ++ [
+        pkgs.giflib
+      ];
+    });
   };
 }

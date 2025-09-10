@@ -264,7 +264,7 @@
         dunst
         i3status
         i3lock
-        i3lock-color
+        mynix.i3lock-color
         i3blocks
       ];
     };
