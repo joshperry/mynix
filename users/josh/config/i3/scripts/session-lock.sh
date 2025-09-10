@@ -40,6 +40,7 @@ i3lock_options=(
 --screen 1
 --blur 8
 --ignore-empty-password
+--composite
 --clock
 --indicator
 --time-str="%H:%M:%S"
