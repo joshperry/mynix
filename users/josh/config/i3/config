@@ -45,8 +45,8 @@ bindsym $mod+Shift+q kill
 bindsym $mod+space exec --no-startup-id "rofi -combi-modi window,drun,ssh -show combi"
 # i3-dmenu-desktop
 
-# Bind $mod+F12 to lock the screen using the session lock script
-bindsym $mod+F12 exec --no-startup-id session-lock
+# Bind $mod+F12 to activate the screensave, which locks the screen
+bindsym $mod+F12 exec --no-startup-id xset s activate
 
 # change focus
 bindsym $mod+h focus left
