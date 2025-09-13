@@ -68,6 +68,8 @@ kill_i3lock() {
 
 wait_fingerprint() {
     while pidof i3lock-color > /dev/null; do
+        # The amount of time the sensor is active could be a concern that needs
+        # addressing with some readers.
         if (timeout 5 fprintd-verify | grep -q verify-match); then
             kill_i3lock
         fi
@@ -95,10 +97,13 @@ if [[ -e /dev/fd/${XSS_SLEEP_LOCK_FD:--1} ]]; then
     exec {XSS_SLEEP_LOCK_FD}<&-
 
     if ! have_fingerpint; then
+        # -0 is null signal, poor-man's pgrep
         while kill_i3lock -0; do
             sleep 0.5
         done
     else
+        # In this case we instead engage in a mexican-standoff with the
+        # fingerprint reader and the user.
         wait_fingerprint
     fi
 else
