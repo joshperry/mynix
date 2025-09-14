@@ -188,6 +188,9 @@
     pkgs.android-udev-rules
   ];
 
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
+
   # OpenGL
   hardware.graphics = {
     enable = true;
