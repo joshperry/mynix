@@ -41,14 +41,14 @@ set viminfo='100,<50,h
 " ---------------
 " Behaviors
 " ---------------
-set wildmenu           "show all file autocompletion options
+set wildmenu              "show all file autocompletion options
 set wildmode=list:longest
-set autoread           " Automatically reload changes if detected
-set history=768        " Number of things to remember in history.
-set cf                 " Enable error files & error jumping.
-set clipboard=unnamed  " Yanks go on clipboard instead.
-set autowrite          " Writes on make/shell commands
-set timeoutlen=500     " Time to wait for a command (after leader for example)
+set autoread              " Automatically reload changes if detected
+set history=768           " Number of things to remember in history.
+set cf                    " Enable error files & error jumping.
+set clipboard=unnamedplus " Yanks go on clipboard instead.
+set autowrite             " Writes on make/shell commands
+set timeoutlen=500        " Time to wait for a command (after leader for example)
 set formatoptions=crql
 nnoremap <C-e> 3<C-e>
 nnoremap <C-y> 3<C-y>
