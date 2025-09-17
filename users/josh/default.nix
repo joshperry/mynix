@@ -211,7 +211,7 @@
       pbpaste = "xclip -o";
       cdf = "cd $(find . -maxdepth 2 -type d -print | fzf)"; # Don't use this much with `dev` alias
       tdie = "tmux killw";
-      ndi = "nix develop --impure"; # <-- me avoiding direnv
+      nd = "nix develop"; # <-- me avoiding direnv
     };
 
     sessionVariables = {
