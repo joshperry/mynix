@@ -4,6 +4,7 @@
     ansel = pkgs.callPackage ./graphics/ansel.nix {};
     cura = pkgs.callPackage ./applications/misc/cura.nix {};
     HELI-X = pkgs.callPackage ./games/HELI-X.nix {};
+    HELI-X11 = pkgs.callPackage ./games/HELI-X11.nix {};
     rotorflight-blackbox = pkgs.callPackage ./applications/misc/rotorflight-blackbox.nix {};
     rotorflight-configurator = pkgs.callPackage ./applications/misc/rotorflight-configurator.nix {};
     stm-dfu-udev-rules = pkgs.callPackage ./hardware/stm-dfu-udev-rules.nix {};
