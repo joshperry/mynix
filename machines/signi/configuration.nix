@@ -297,6 +297,32 @@
     };
   };
 
+  specialisation = {
+    nvidia-primary.configuration = {
+      environment.sessionVariables = {
+        VK_DRIVER_FILES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json";
+        VK_ICD_FILENAMES = "/run/opengl-driver/share/vulkan/icd.d/nvidia_icd.x86_64.json";
+        NODEVICE_SELECT = "1"; 
+      };
+
+      hardware.nvidia = {
+        powerManagement.finegrained = lib.mkForce false;
+        powerManagement.enable = true;
+        prime = {
+          sync.enable = true;
+          offload = {
+            enable = lib.mkForce false;
+            enableOffloadCmd = lib.mkForce false;
+          };
+        };
+      };
+
+      services.xserver.displayManager.setupCommands = lib.mkForce ''
+        ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1-1 --mode 1920x1200 --pos 0x0 --rotate normal --primary
+      '';
+    };
+  };
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
