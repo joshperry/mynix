@@ -22,6 +22,7 @@
     mynix.xss-lock-hinted
     #(mynix.NvidiaOffloadApp mynix.HELI-X "HELI-X")
     mynix.HELI-X
+    mynix.HELI-X11
   ];
 
   ###
