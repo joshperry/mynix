@@ -50,8 +50,8 @@
 
   programs.rofi = {
     enable = true;
-    font = "SauceCodePro Nerd Font Mono Regular";
-    terminal = "${pkgs.terminator}/bin/terminator";
+    font = "SauceCodePro Nerd Font Mono Bold 12";
+    terminal = lib.getExe pkgs.kitty;
     theme = "gruvbox-dark-hard";
     plugins = with pkgs; [
       rofi-file-browser
