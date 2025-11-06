@@ -231,6 +231,19 @@
                 enabled = true,
               },
               use_libuv_file_watcher = true,
+              window = {
+                mappings = {
+                  ["o"] = "system_open",
+                },
+              },
+            },
+            commands = {
+              system_open = function(state)
+                local node = state.tree:get_node()
+                local path = node:get_id()
+                -- Linux: open file in default application
+                vim.fn.jobstart({ "xdg-open", path }, { detach = true })
+              end,
             },
           })
         '';
