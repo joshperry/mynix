@@ -10,13 +10,18 @@
     irssi
     unstable.lmstudio
     unstable.obsidian
+    prismlauncher
     pcsclite
+    powertop
     saleae-logic-2
     spice
     #(mynix.NvidiaOffloadApp steam "steam")
     xclip
+    xr-hardware
     yubikey-personalization
     
+    mynix.itunes-backup-explorer
+    mynix.blhelisuite32
     mynix.rotorflight-blackbox
     mynix.rotorflight-configurator
     mynix.xss-lock-hinted
