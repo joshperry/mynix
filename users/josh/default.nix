@@ -130,12 +130,38 @@
       settings = {
         "suggest.noselect" = true;
         "suggest.enablePreview" = true;
-        "suggest.enablePreselect" = false;
+        "suggest.enablePreselect" = true;
         "suggest.disableKind" = true;
-        languageserver.nix = { # nix language server
-          command = "${pkgs.nil}/bin/nil";
-          filetypes = ["nix"];
-          rootPatterns = ["flake.nix"];
+        languageserver = {
+          nix = { # nix language server
+            command = lib.getExe pkgs.nil;
+            filetypes = ["nix"];
+            rootPatterns = ["flake.nix"];
+          };
+
+          beancount = {
+            command = lib.getExe pkgs.beancount-language-server;
+            args = [ "--stdio" ];
+            filetypes = [ "beancount" ];
+            rootPatterns = [ ".git" ];
+            settings = {
+              journal_file = "main.beancount";
+              formatting = {
+                prefix_width = 30;
+                num_width = 10;
+                currency_column = 60;
+                account_amount_spacing = 2;
+                number_currency_spacing = 1;
+              };
+            };
+          };
+
+          svelte = {
+            command = lib.getExe pkgs.svelte-language-server;
+            args = [ "--stdio" ];
+            filetypes = ["svelte"];
+            rootPatterns = ["package.json"];
+          };
         };
       };
     };
@@ -144,24 +170,28 @@
       nvim-web-devicons
       gruvbox      # theme
       coc-eslint   # CoC lsps
+      coc-cmake
+      coc-html
       coc-go
       coc-tsserver
       coc-yaml
       coc-rust-analyzer
       coc-cmake
       coc-clangd
-      vim-tmux-navigator # allow ctrl-hjkl across panes
-      vim-polyglot       # syntax highlight all the things
+      vim-tmux-navigator # allow ctrl-hjkl across vim and tmux internal panes
       mini-nvim          #TODO: Still unsure how to use mini.file from this, supercede oil?
-      vim-fugitive       # Git interaction
+      vim-fugitive       # A dash of tpope Git interaction goodness cref vintage:
+                         # http://vimcasts.org/episodes/fugitive-vim---a-complement-to-command-line-git/
       vimwiki            # Wiki notes in vim
       fzf-vim            # file path/contents fuzzyfind
-      trouble-nvim
-      pkgs.unstable.vimPlugins.openingh-nvim
-      {
+      trouble-nvim       # LSP UI
+      pkgs.unstable.vimPlugins.openingh-nvim  # UI exposing "navigate to the current cursor location in
+                                              # the {github|gitlab|bitbucket}.com web code editor" functionality
+      { # Left side file/project browser, originally targeted at cref: `scripts/dev.sh`
         plugin = neo-tree-nvim;
         type = "lua";
-        config = ''
+        config = #lua
+        ''
           require('neo-tree').setup({
             close_if_last_window = true,
             buffers = {
