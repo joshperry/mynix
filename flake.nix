@@ -9,9 +9,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     impermanence = { url = "github:nix-community/impermanence"; };
+    flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = inputs@{ nixpkgs, nixpkgs-unstable, home-manager, ... }:
+
+  outputs = inputs@{ nixpkgs, nixpkgs-unstable, home-manager, flake-parts, ... }:
   let
     packages = { ... }: {
       nixpkgs.overlays = [
@@ -23,30 +25,30 @@
         
         # Private package overlay set
         (final: prev:
-          import ./packages { pkgs = final; }
+          import ./packages { pkgs = prev; }
         )
       ]; 
     };
     registry = _: {
-      nix.registry = {
+      nix.registry = { #def.registry
         nixpkgs.flake = inputs.nixpkgs;
         nixpkgs-unstable.flake = inputs.nixpkgs-unstable;
       };
     };
-    nixosSystem = { name, system, users, sysmodules ? [] }: 
+      
+    nixosSystem = { name, system, users, sysmodules ? [] }: #def.nixosSystem
       nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           packages
           registry
           ./modules
-          ./machines/${name}/configuration.nix
+          ./machines/${name}/configuration.nix #def.machineConfig
           ./machines/${name}/hardware-configuration.nix
           ({config, ...}: {
             nixpkgs.overlays = [
-              #pkgs.unstable
               (final: prev: {
-                unstable = import nixpkgs-unstable {
+                unstable = import nixpkgs-unstable { #def.unstable
                   inherit system;
                   config.allowUnfreePredicate = config.nixpkgs.config.allowUnfreePredicate; 
                 };
@@ -55,7 +57,7 @@
           })
           home-manager.nixosModules.home-manager
           {
-            home-manager.users = users;
+            home-manager.users = users;  #ref.hmUsers
 
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -63,13 +65,58 @@
         ] ++ sysmodules;
       };
   in
-  {
-    nixosConfigurations = {
+  flake-parts.lib.mkFlake { inherit inputs; } {
+    systems = [ "x86_64-linux" "aarch64-linux" ];
+
+    perSystem = { pkgs, system, ... }: {
+      # A shell interface with useful tools for modifying and realizing mynix
+      devShells.default = pkgs.mkShell{ #def.devShell
+        packages = with pkgs; [
+          #def.buildsys
+          (writers.writeBashBin "buildsys" ''
+            set -e
+
+            function verify_me() {
+              read -p "$1 " choice
+              case "''${choice,,}" in 
+                y|yes ) echo "yes";;
+                * ) echo "no";;
+              esac
+            }
+
+            nixos-rebuild build --flake . --show-trace
+            ${lib.getExe pkgs.nvd} diff /run/current-system result
+
+            if [[ "yes" == $(verify_me "Switch?") ]]; then
+              sudo nix-env -p /nix/var/nix/profiles/system --set ./result
+              sudo result/bin/switch-to-configuration switch
+              unlink result
+            fi
+          '')
+          #def.updatesys
+          (writers.writeBashBin "updatesys" ''
+            set -e
+
+            nix flake update
+          '')
+        ];
+
+        shellHook = ''
+          echo
+          echo "================= mYniX ================="
+          echo '- `buildsys`: Build, review, and apply current host'
+          echo '- `updatesys`: Update the flake.lock'
+          echo
+        '';
+      };
+    };
+
+    flake.nixosConfigurations = { #def.nixosConfigurations
 
       bones = nixosSystem {
         name = "bones";
         system = "x86_64-linux";
-        users = {
+        users = { #def.hmUsers
           josh = import ./users/josh;
         };
       };
@@ -96,7 +143,7 @@
         users = {
           josh = import ./users/josh;
         };
-        sysmodules = [
+        sysmodules = [ #ref.sysmodules
           inputs.impermanence.nixosModules.impermanence
         ];
       };
