@@ -28,7 +28,6 @@
     scrot
     silver-searcher
     thunderbird
-    terminator
     ungoogled-chromium
     vlc
     xfce.thunar
