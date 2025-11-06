@@ -274,6 +274,10 @@
       enable = true;
       enableBashIntegration = true;
       nix-direnv.enable = true;
+      config = {
+        # Wall of text is unhelpful, never read it close enough to "audit"
+        global.hide_env_diff = true;
+      };
   };
 
   programs.bash = { # This is the most sane way to configure bash for login shells I've ever experienced...
