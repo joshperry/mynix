@@ -166,6 +166,23 @@
     };
 
     plugins = with pkgs.vimPlugins; [
+      { # Lets us bind ViM config specializations for direnv projects,
+        # including plugin installation like LSPs.
+        plugin = pkgs.mynix.dev.direnv-nvim;
+        type="lua";
+        config = # lua
+        ''
+          vim.g.coc_start_at_startup = 0
+          require('direnv-nvim').setup({
+            async = true,
+            on_direnv_finished = function ()
+                -- Facilitate async project-specific vim tooling installed by nix-direnv
+                -- by bindings to things installed by it (like LSPs) in this function.
+                vim.cmd('CocStart')
+            end
+          })
+        '';
+      }
       nvim-web-devicons
       gruvbox      # theme
       coc-eslint   # CoC lsps

@@ -1,5 +1,6 @@
 { pkgs }: {
   mynix = {
+  mynix = { #def.mynix
     drata = pkgs.callPackage ./tools/security/drata.nix {};
     ansel = pkgs.callPackage ./graphics/ansel.nix {};
     cura = pkgs.callPackage ./applications/misc/cura.nix {};
@@ -9,6 +10,11 @@
     rotorflight-configurator = pkgs.callPackage ./applications/misc/rotorflight-configurator.nix {};
     stm-dfu-udev-rules = pkgs.callPackage ./hardware/stm-dfu-udev-rules.nix {};
     itunes-backup-explorer = pkgs.callPackage ./tools/itunes-backup-explorer.nix {};
+
+    dev = {
+      direnv-nvim = pkgs.callPackage ./dev/direnv-nvim.nix {inherit buildVimPlugin;};
+    };
+
     # xss-lock branch that calls logind's SetLockedHint
     xss-lock-hinted = pkgs.xss-lock.overrideAttrs (_: {
       src = pkgs.fetchFromGitHub {
@@ -21,6 +27,7 @@
     });
 
     i3lock-color = pkgs.i3lock-color.overrideAttrs (prev: {
+      # fork with gif support
       version = "7d337d9";
       src = pkgs.fetchFromGitHub {
         owner = "PandorasFox";
