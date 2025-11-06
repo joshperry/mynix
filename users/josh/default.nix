@@ -121,8 +121,8 @@
 
   programs.neovim = { # the power of lua beckons
     enable = true;
-    extraConfig = lib.fileContents config/vim/vimrc;
-    extraLuaConfig = lib.fileContents config/vim/init.lua;
+    extraConfig = lib.fileContents ./config/vim/vimrc;
+    extraLuaConfig = lib.fileContents ./config/vim/init.lua;
     vimAlias = true;
     vimdiffAlias = true;
     coc ={ # universal lsp client
@@ -187,6 +187,33 @@
       trouble-nvim       # LSP UI
       pkgs.unstable.vimPlugins.openingh-nvim  # UI exposing "navigate to the current cursor location in
                                               # the {github|gitlab|bitbucket}.com web code editor" functionality
+      { # Treesitter grammar parser and plugins (should find a way to pull plugins in at the project-level as well)
+        plugin = (nvim-treesitter.withPlugins (p: [
+          # Organized by OSI-ish layer order; user this end
+          p.svelte
+          p.css
+          p.scss
+          p.html
+          p.beancount
+          p.typescript
+          p.javascript
+          p.nix
+          p.bash
+        ]));
+        type = "lua";
+        config = #lua
+        ''
+          require('nvim-treesitter.configs').setup({
+            highlight = { enable = true }, incremental_selection = { enable = true },
+            indent = { enable = true },
+          })
+          -- Use treesitter for folding
+          vim.wo.foldmethod = 'expr'
+          vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+          -- default folds to open
+          vim.opt.foldenable = false 
+        '';
+      }
       { # Left side file/project browser, originally targeted at cref: `scripts/dev.sh`
         plugin = neo-tree-nvim;
         type = "lua";
@@ -208,20 +235,24 @@
           })
         '';
       }
-      {
-        plugin = gitsigns-nvim; # git gutter and interaction
+      { # git gutter and interaction
+        plugin = gitsigns-nvim;
         type = "lua";
         config = "require('gitsigns').setup()";
       }
-      {
-        plugin = lualine-nvim; #powerline-alike
+      { #powerline-alike
+        plugin = lualine-nvim;
         type = "lua";
         config = "require('lualine').setup()";
       }
-      {
-        plugin = oil-nvim; # netrw replacement
+      { # netrw replacement
+        plugin = oil-nvim;
         type = "lua";
-        config = "require('oil').setup()";
+        config = #lua
+        ''
+          require('oil').setup({
+          });
+        '';
       }
     ];
   };
@@ -232,24 +263,27 @@
       nix-direnv.enable = true;
   };
 
-  programs.bash = {
+  programs.bash = { # This is the most sane way to configure bash for login shells I've ever experienced...
+                    # my arch+zsh-weilding friend once asking this question:
+                    # https://unix.stackexchange.com/questions/45684/what-is-the-difference-between-profile-and-bash-profile
     enable = true;
 
     shellAliases = {
       ll = "ls --color=auto";
       pbcopy = "xclip -sel clip"; # I used macs for a decade
       pbpaste = "xclip -o";
-      cdf = "cd $(find . -maxdepth 2 -type d -print | fzf)"; # Don't use this much with `dev` alias
+      cdf = "cd $(find . -maxdepth 2 -type d -print | fzf)"; # Don't use this much with `scripts/dev.sh` alias
       tdie = "tmux killw";
       nd = "nix develop"; # <-- me avoiding direnv
     };
 
     sessionVariables = {
-      EDITOR = "nvim";
-      TERMINAL = "kitty";
+      EDITOR = "nvim";    
+      TERMINAL = "kitty"; 
     };
 
-    initExtra = ''
+    initExtra = #bash
+    ''
       PATH=/home/josh/.local/bin:$PATH
 
       function _update_ps1() {
