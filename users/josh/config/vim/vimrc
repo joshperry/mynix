@@ -1,3 +1,5 @@
+set shortmess-=F
+
 let g:gruvbox_italic=1
 colorscheme gruvbox
 
@@ -114,3 +116,19 @@ else
   let &t_SI = "\<Esc>[5 q"
   let &t_EI = "\<Esc>[0 q"
 endif
+
+" override default vimwiki link handling - could be extended to add
+" custom link types, etc.  Right now all it does is use vim itself
+" to handle files, crudely.
+function! VimwikiLinkHandler(link)
+  if a:link =~# '^file:'
+    try
+      " chop off the leading file: - see :h expr-[:] for syntax:
+      execute ':drop ' . a:link[5:]
+      return 1
+    catch
+      echo "Failed opening file in vim."
+    endtry
+  endif
+  return 0
+endfunction
