@@ -214,6 +214,7 @@
   #  LIBVA_DRIVER_NAME = "iHD";
   #};
   ## Modeset driver plz
+
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.finegrained = true;
@@ -224,16 +225,15 @@
         enable = true;
         enableOffloadCmd = true;
       };
-      #sync.enable = true;
       
       nvidiaBusId = "PCI:1:0:0";
       intelBusId = "PCI:0:2:0";
     };
     package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-      version = "570.181";
-      openSha256 = "sha256-U/uqAhf83W/mns/7b2cU26B7JRMoBfQ3V6HiYEI5J48=";
-      settingsSha256 = "sha256-iBx/X3c+1NSNmG+11xvGyvxYSMbVprijpzySFeQVBzs=";
-      sha256_64bit = "sha256-8G0lzj8YAupQetpLXcRrPCyLOFA9tvaPPvAWurjj3Pk=";
+      version = "580.95.05";
+      openSha256 = "sha256-RFwDGQOi9jVngVONCOB5m/IYKZIeGEle7h0+0yGnBEI=";
+      settingsSha256 = "sha256-F2wmUEaRrpR1Vz0TQSwVK4Fv13f3J9NJLtBe4UP2f14=";
+      sha256_64bit = "sha256-hJ7w746EK5gGss3p8RwTA9VPGpp2lGfk5dlhsv4Rgqc=";
       sha256_aarch64 = "";
       persistencedSha256 = "";
     };
