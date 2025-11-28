@@ -29,6 +29,7 @@
         )
       ]; 
     };
+
     registry = _: {
       nix.registry = { #def.registry
         nixpkgs.flake = inputs.nixpkgs;
@@ -141,7 +142,9 @@
         name = "signi";
         system = "x86_64-linux";
         users = {
-          josh = import ./users/josh;
+          josh = { imports = [
+            ./users/josh/machines/signi
+          ]; };
         };
         sysmodules = [ #ref.sysmodules
           inputs.impermanence.nixosModules.impermanence
