@@ -1,4 +1,4 @@
-{ lib, fetchFromGitHub, jre, makeWrapper, maven, libGL, gtk3, glib, xorg }:
+{ lib, makeDesktopItem, copyDesktopItems, fetchFromGitHub, jre, makeWrapper, maven, libGL, gtk3, glib, xorg }:
 let
   runtimeLibs = [
     libGL
@@ -20,6 +20,10 @@ in maven.buildMavenPackage rec {
 
   mvnHash = "sha256-fB40gA8aVVdb13UAULlXRj3GTNAqKka6uCKWf2MtKUU=";
 
+  nativeBuildInputs = [
+    copyDesktopItems
+  ];
+
   buildInputs = [
     makeWrapper
   ];
@@ -35,6 +39,16 @@ in maven.buildMavenPackage rec {
       --prefix XDG_DATA_DIRS : "${gtk3}/share/gsettings-schemas/${gtk3.name}" \
       --add-flags "-jar $out/share/itunes-backup-explorer/app.jar"
   '';
+
+  passthru.desktopItems = [
+    (makeDesktopItem {
+      name = "itunes-backup-explorer";
+      exec = "itunes-backup-explorer";
+      comment = "iOS backup UI";
+      desktopName = "iTunes Backup Explorer";
+      genericName = "iTunes Backup Explorer UI";
+    })
+  ];
 
   meta = with lib; {
     description = "A graphical tool that can extract and replace files from encrypted and non-encrypted iOS backups";

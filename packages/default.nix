@@ -1,19 +1,32 @@
-{ pkgs }: {
-  mynix = {
+{ pkgs }: 
+let
+  patchDesktop = pkg: appName: from: to: pkgs.lib.hiPrio (
+    pkgs.runCommand "$patched-desktop-entry-for-${appName}" {} ''
+      ${pkgs.coreutils}/bin/mkdir -p $out/share/applications
+      ${pkgs.gnused}/bin/sed 's#${from}#${to}#g' < ${pkg}/share/applications/${appName}.desktop > $out/share/applications/${appName}.desktop
+    '');
+  inherit (pkgs.vimUtils.override { inherit (pkgs) vim; }) buildVimPlugin;
+  inherit (pkgs.neovimUtils) buildNeovimPlugin;
+in
+{
   mynix = { #def.mynix
     drata = pkgs.callPackage ./tools/security/drata.nix {};
     ansel = pkgs.callPackage ./graphics/ansel.nix {};
+    blhelisuite32 = pkgs.callPackage ./hardware/blhelisuite32.nix{};
     cura = pkgs.callPackage ./applications/misc/cura.nix {};
     HELI-X = pkgs.callPackage ./games/HELI-X.nix {};
     HELI-X11 = pkgs.callPackage ./games/HELI-X11.nix {};
     rotorflight-blackbox = pkgs.callPackage ./applications/misc/rotorflight-blackbox.nix {};
     rotorflight-configurator = pkgs.callPackage ./applications/misc/rotorflight-configurator.nix {};
+    inav-configurator = pkgs.callPackage ./applications/misc/inav-configurator.nix {};
     stm-dfu-udev-rules = pkgs.callPackage ./hardware/stm-dfu-udev-rules.nix {};
     itunes-backup-explorer = pkgs.callPackage ./tools/itunes-backup-explorer.nix {};
 
     dev = {
       direnv-nvim = pkgs.callPackage ./dev/direnv-nvim.nix {inherit buildVimPlugin;};
     };
+
+    NvidiaOffloadApp = pkg: desktopName: patchDesktop pkg desktopName "^Exec=" "Exec=nvidia-offload ";
 
     # xss-lock branch that calls logind's SetLockedHint
     xss-lock-hinted = pkgs.xss-lock.overrideAttrs (_: {
@@ -39,6 +52,14 @@
       buildInputs = prev.buildInputs ++ [
         pkgs.giflib
       ];
+    });
+  };
+
+  gnuradio = pkgs.gnuradio.override {
+    extraPackages = grPkgs: [ grPkgs.limesdr ];
+  } // {
+    pkgs = pkgs.gnuradio.pkgs.overrideScope (grFinal: grPrev: {
+      limesdr = grPrev.callPackage ./gr-limesdr.nix { };
     });
   };
 }
