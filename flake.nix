@@ -345,6 +345,8 @@
         users = {
           josh = { imports = [
             ./users/josh/machines/signi
+            nix-snapshotter.homeModules.default
+            nix-snapshotter.homeModules.k3s-rootless
           ]; };
 
           # Ada, my coding collaborator
@@ -352,6 +354,7 @@
         };
         sysmodules = [ #ref.sysmodules
           inputs.impermanence.nixosModules.impermanence
+          nix-snapshotter.nixosModules.default
         ];
       };
 

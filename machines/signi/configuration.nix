@@ -24,10 +24,10 @@ in {
     xr-hardware
     yubikey-personalization
     
-    mynix.itunes-backup-explorer
     mynix.blhelisuite32
     mynix.rotorflight-blackbox
     mynix.rotorflight-configurator
+    mynix.inav-configurator
     mynix.xss-lock-hinted
     #(mynix.NvidiaOffloadApp mynix.HELI-X "HELI-X")
     mynix.HELI-X
@@ -95,14 +95,22 @@ in {
     }
   ];
 
+  security.tpm2.enable = true;
+  security.tpm2.pkcs11.enable = true;  # expose /run/current-system/sw/lib/libtpm2_pkcs11.so
+  security.tpm2.tctiEnvironment.enable = true;  # TPM2TOOLS_TCTI and TPM2_PKCS11_TCTI env variables
+
   networking.hostName = "signi"; # Define your hostname.
   networking.networkmanager.enable = true;
-  networking.networkmanager.wifi.powersave = true;
+#  networking.networkmanager.wifi.powersave = true;
   networking.networkmanager.wifi.scanRandMacAddress = true;
   networking.networkmanager.wifi.macAddress = "random";
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
+  networking.firewall.allowedUDPPorts = [
+    # For networkmanager internet connection sharing dhcp dns
+    53 67 
+    3333
+  ];
   networking.firewall.enable = true;
 
   # Set your time zone.
@@ -160,6 +168,15 @@ in {
       "wireshark" # Access to packet capture
       "libvirtd"  # virtmanager
       "video"     # backlight et al
+      "tss"       # TPM
+    ];
+
+    # Add large subuid/subgid ranges for k3s
+    subUidRanges = [
+      { startUid = 100000; count = 4294304; }
+    ];
+    subGidRanges = [
+      { startGid = 100000; count = 4294304; }
     ];
   };
 
@@ -219,6 +236,7 @@ in {
   # Power/Thermal management
   services.thermald.enable = true;
 
+  # Fingerprint auth
   services.fprintd = {
     enable = true;
     tod = {
@@ -230,11 +248,31 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig.Type = "simple";
   };
+  security.pam.lidCheck = {
+      enable = true;
+      services.swaylock.enable = false;
+  };
 
-  services.udev.packages = [ 
-    pkgs.mynix.stm-dfu-udev-rules
-    pkgs.android-udev-rules
+  services.udev.packages = [
+    # pkgs.mynix.stm-dfu-udev-rules  # Disabled: conflicts with ada setfacl rules below
+    pkgs.qmk-udev-rules
   ];
+  services.udev.extraRules = ''
+    # LimeSuite
+    SUBSYSTEM=="usb", ATTR{idVendor}=="04b4", ATTR{idProduct}=="8613", SYMLINK+="stream-%k", MODE="666"
+    SUBSYSTEM=="usb", ATTR{idVendor}=="04b4", ATTR{idProduct}=="00f1", SYMLINK+="stream-%k", MODE="666"
+    SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="601f", SYMLINK+="stream-%k", MODE="666"
+    SUBSYSTEM=="usb", ATTR{idVendor}=="1d50", ATTR{idProduct}=="6108", SYMLINK+="stream-%k", MODE="666"
+    SUBSYSTEM=="xillybus", MODE="666"
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="0666"
+
+    # Give ada access to betaflight/rotorflight FCs
+    # MODE="0660" + GROUP="plugdev" for josh (and other plugdev members), setfacl for ada
+    # $env{DEVNAME} expands to the device node path (e.g., /dev/ttyACM0 or /dev/bus/usb/003/020)
+    SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0660", GROUP="plugdev", RUN+="${pkgs.acl}/bin/setfacl -m u:ada:rw $env{DEVNAME}"
+    SUBSYSTEM=="usb", ACTION=="add|bind", ATTR{product}=="STM32  BOOTLOADER", MODE="0660", GROUP="plugdev", RUN+="${pkgs.acl}/bin/setfacl -m u:ada:rw $env{DEVNAME}"
+    SUBSYSTEM=="usb", ACTION=="add|bind", ATTR{product}=="DFU in FS Mode", MODE="0660", GROUP="plugdev", RUN+="${pkgs.acl}/bin/setfacl -m u:ada:rw $env{DEVNAME}"
+  '';
 
   hardware.bluetooth.enable = true;
   services.blueman.enable = true;
@@ -245,9 +283,8 @@ in {
     extraPackages = with pkgs; [
       intel-media-driver
       intel-vaapi-driver
+      libva-vdpau-driver
       libvdpau-va-gl
-      vaapiIntel
-      vaapiVdpau
     ];
   };
 
@@ -259,7 +296,6 @@ in {
   #  LIBVA_DRIVER_NAME = "iHD";
   #};
   ## Modeset driver plz
-
   hardware.nvidia = {
     modesetting.enable = true;
     powerManagement.finegrained = true;
@@ -275,10 +311,10 @@ in {
       intelBusId = "PCI:0:2:0";
     };
     package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-      version = "580.95.05";
-      openSha256 = "sha256-RFwDGQOi9jVngVONCOB5m/IYKZIeGEle7h0+0yGnBEI=";
-      settingsSha256 = "sha256-F2wmUEaRrpR1Vz0TQSwVK4Fv13f3J9NJLtBe4UP2f14=";
-      sha256_64bit = "sha256-hJ7w746EK5gGss3p8RwTA9VPGpp2lGfk5dlhsv4Rgqc=";
+      version = "580.126.09";
+      openSha256 = "sha256-ychsaurbQ2KNFr/SAprKI2tlvAigoKoFU1H7+SaxSrY=";
+      settingsSha256 = "sha256-4SfCWp3swUp+x+4cuIZ7SA5H7/NoizqgPJ6S9fm90fA=";
+      sha256_64bit = "sha256-TKxT5I+K3/Zh1HyHiO0kBZokjJ/YCYzq/QiKSYmG7CY=";
       sha256_aarch64 = "";
       persistencedSha256 = "";
     };
@@ -294,6 +330,7 @@ in {
     dpi = 96;
 
     desktopManager = {
+      runXdgAutostartIfNone = true;
       xterm.enable = false;
     };
 
@@ -318,8 +355,13 @@ in {
         i3lock
         mynix.i3lock-color
         i3blocks
+        wireplumber
       ];
     };
+  };
+
+  services.displayManager = {
+    defaultSession = "none+i3";
   };
 
   fonts = {
@@ -390,10 +432,9 @@ in {
     deps = [ "users" ];
   };
 
-  systemd = {
-  };
-
   virtualisation = {
+    containers.enable = true;
+
     libvirtd = {
       enable = true;
     };
@@ -411,11 +452,20 @@ in {
     };
   };
 
+  services.k3s.rootless.enable = true;
+
   # smartcard
   services.pcscd.enable = true;
   # Thunar services
   services.gvfs.enable = true;
   services.tumbler.enable = true; 
+
+  services.printing = {
+    enable = true;
+  };
+
+  # iDevice comms
+  #services.usbmuxd.enable = true;
 
   # Resilio Sync
 #  services.resilio = {
@@ -445,10 +495,6 @@ in {
       addresses = true;
       workstation = true;
     };
-  };
-
-  services.displayManager = {
-    defaultSession = "none+i3";
   };
 
   services.fwupd.enable = true;

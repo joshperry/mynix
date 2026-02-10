@@ -10,11 +10,27 @@
 
   boot.initrd.availableKernelModules = [ "xhci_pci" "thunderbolt" "vmd" "nvme" "usb_storage" "sd_mod" ];
   boot.initrd.kernelModules = [ ];
-  boot.kernelPackages = pkgs.linuxPackages_6_17;
+  boot.kernelPackages = pkgs.linuxPackages_6_18;
   boot.kernelModules = [ "kvm-intel" ];
   boot.extraModulePackages = [ ];
 
   boot.initrd.luks.devices."mainenc".device = "/dev/disk/by-uuid/e464c097-5f99-4eab-b453-f43186b0f38e";
+
+  boot.initrd.systemd.services.rollback-agents = {
+    description = "Rollback /agents to blank snapshot";
+    wantedBy = [ "initrd.target" ];
+    after = [ "cryptsetup.target" ];
+    before = [ "sysroot.mount" ];
+    unitConfig.DefaultDependencies = "no";
+    serviceConfig.Type = "oneshot";
+    script = ''
+      mkdir -p /mnt
+      mount -t btrfs -o subvol=/ /dev/disk/by-uuid/38b243a0-c875-4758-8998-cc6c6a4c451e /mnt
+      btrfs subvolume delete /mnt/@agents
+      btrfs subvolume snapshot /mnt/@agents-blank /mnt/@agents
+      umount /mnt
+    '';
+  };
 
   fileSystems."/" =
     { device = "none";
@@ -39,11 +55,29 @@
       options = [ "subvol=@home" "noatime" ];
     };
 
+  fileSystems."/agents" = {
+    device = "/dev/disk/by-uuid/38b243a0-c875-4758-8998-cc6c6a4c451e";
+    fsType = "btrfs";
+    options = [ "subvol=@agents" "noatime" ];
+  };
+
   fileSystems."/persist" =
     { device = "/dev/disk/by-uuid/38b243a0-c875-4758-8998-cc6c6a4c451e";
       fsType = "btrfs";
       neededForBoot = true;
       options = [ "subvol=@persist" "noatime" ];
+    };
+
+  fileSystems."/mnt/kago" =
+    { device = "//kago.local/media";
+      fsType = "cifs";
+      options = [ "credentials=/etc/nixos/kago-secrets" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
+    };
+  
+  fileSystems."/mnt/kagobu" =
+    { device = "//kago.local/bu";
+      fsType = "cifs";
+      options = [ "credentials=/etc/nixos/kago-secrets" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
     };
 
   swapDevices = [ ];

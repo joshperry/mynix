@@ -77,6 +77,15 @@
     source = ./config/i3/config;
   };
 
+  virtualisation.containerd.rootless = {
+    enable = true;
+    nixSnapshotterIntegration = true;
+  };
+
+  services.nix-snapshotter.rootless = {
+    enable = true;
+  };
+
   services.gpg-agent = {
     enable = true;
     defaultCacheTtl = 1800;
