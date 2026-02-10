@@ -1,7 +1,6 @@
 { pkgs, lib, ... }: {
   imports = [
     ./cli.nix
-    ../../modules/home-manager/sudo-approval-daemon.nix
   ];
 
   home.stateVersion = "23.11";
@@ -90,10 +89,6 @@
     enable = true;
     defaultCacheTtl = 1800;
     enableSshSupport = true;
-  };
-
-  services.sudo-approval-daemon = {
-    enable = true;
   };
 
   # Desktop-specific bash additions

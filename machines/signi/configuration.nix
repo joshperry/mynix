@@ -7,6 +7,96 @@ in {
     ../../profiles/graphical.nix
   ];
 
+  # ── Nuketown: AI agent framework ──────────────────────────────
+  nuketown = {
+    enable = true;
+    domain = "signi.local";
+    humanUser = "josh";
+    btrfsDevice = "38b243a0-c875-4758-8998-cc6c6a4c451e";
+
+    agents.ada = {
+      enable = true;
+      uid = 1100;
+      role = "software";
+      description = ''
+        Software collaborator on signi. Works with josh on embedded systems
+        (Rotorflight, Betaflight, STM32), NixOS configuration, and web projects.
+      '';
+
+      git = {
+        name = "Ada";
+        email = "ada@signi.local";
+        signing = false;
+      };
+
+      persist = [
+        "projects"
+        ".config/claude"
+      ];
+
+      sudo.enable = true;
+      portal.enable = true;
+
+      devices = [
+        {
+          subsystem = "tty";
+          action = "add";
+          attrs = { idVendor = "0483"; idProduct = "5740"; };
+        }
+        {
+          subsystem = "usb";
+          attrs = { product = "STM32  BOOTLOADER"; };
+        }
+        {
+          subsystem = "usb";
+          attrs = { product = "DFU in FS Mode"; };
+        }
+      ];
+
+      claudeCode = {
+        enable = true;
+        settings = {
+          env = {
+            CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+          };
+          permissions = {
+            defaultMode = "bypassPermissions";
+            additionalDirectories = [
+              "/home/josh/dev"
+            ];
+          };
+        };
+        extraPrompt = ''
+          ## Working Style
+
+          - Read the project's CLAUDE.md before starting work
+          - Prefer editing existing files over creating new ones
+          - You cannot use interactive commands (no TTY)
+
+          ## NixOS Workflow
+
+          To build and apply system configuration changes:
+          1. `nixos-rebuild build --flake . --show-trace`
+          2. `nvd diff /run/current-system result`
+          3. `sudo sh -c 'nix-env -p /nix/var/nix/profiles/system --set ./result && ./result/bin/switch-to-configuration switch'`
+          4. `unlink result`
+        '';
+      };
+
+      extraHomeConfig = {
+        home.stateVersion = "25.11";
+        programs.neovim = {
+          enable = true;
+          vimAlias = true;
+          defaultEditor = true;
+        };
+        programs.bash.shellAliases = {
+          ll = "ls --color=auto";
+        };
+      };
+    };
+  };
+
   environment.systemPackages = with pkgs; [
     arduino
     edgetx
@@ -74,26 +164,6 @@ in {
 
   security.polkit.enable = true;
   security.soteria.enable = true; # polkit auth agent
-
-  # Allow ada to run sudo commands with josh's approval
-  security.sudo-approval = {
-    enable = true;
-    socketOwner = "josh";
-    delegatedUsers = [ "ada" ];
-  };
-
-  # Allow josh to run machinectl shell without password
-  security.sudo.extraRules = [
-    {
-      users = [ "josh" ];
-      commands = [
-        {
-          command = "/run/current-system/sw/bin/machinectl shell *";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
 
   security.tpm2.enable = true;
   security.tpm2.pkcs11.enable = true;  # expose /run/current-system/sw/lib/libtpm2_pkcs11.so
@@ -184,19 +254,6 @@ in {
    gid = 1000;
   };
 
-  users.users.ada = {
-    uid = 1100;
-    group = "ada";
-    isNormalUser = true;
-    home = "/agents/ada";
-    shell = pkgs.bash;
-    extraGroups = [];
-  };
-
-  users.groups.ada = {
-    gid = 1100;
-  };
-
   programs.steam.enable = true;
   hardware.steam-hardware.enable = true;
 
@@ -266,12 +323,6 @@ in {
     SUBSYSTEM=="xillybus", MODE="666"
     SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="0666"
 
-    # Give ada access to betaflight/rotorflight FCs
-    # MODE="0660" + GROUP="plugdev" for josh (and other plugdev members), setfacl for ada
-    # $env{DEVNAME} expands to the device node path (e.g., /dev/ttyACM0 or /dev/bus/usb/003/020)
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", MODE="0660", GROUP="plugdev", RUN+="${pkgs.acl}/bin/setfacl -m u:ada:rw $env{DEVNAME}"
-    SUBSYSTEM=="usb", ACTION=="add|bind", ATTR{product}=="STM32  BOOTLOADER", MODE="0660", GROUP="plugdev", RUN+="${pkgs.acl}/bin/setfacl -m u:ada:rw $env{DEVNAME}"
-    SUBSYSTEM=="usb", ACTION=="add|bind", ATTR{product}=="DFU in FS Mode", MODE="0660", GROUP="plugdev", RUN+="${pkgs.acl}/bin/setfacl -m u:ada:rw $env{DEVNAME}"
   '';
 
   hardware.bluetooth.enable = true;

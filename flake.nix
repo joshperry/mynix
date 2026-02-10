@@ -22,9 +22,15 @@
       url = "path:/home/josh/dev/litnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nuketown = {
+      url = "path:/home/josh/dev/nuketown";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+      inputs.impermanence.follows = "impermanence";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nix-snapshotter, litnix, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nix-snapshotter, litnix, nuketown, flake-parts, ... }:
   let
     packages = { ... }: {
       nixpkgs.overlays = [
@@ -347,14 +353,15 @@
             ./users/josh/machines/signi
             nix-snapshotter.homeModules.default
             nix-snapshotter.homeModules.k3s-rootless
+            nuketown.homeManagerModules.approvalDaemon
+            { nuketown.approvalDaemon.enable = true; }
           ]; };
-
-          # Ada, my coding collaborator
-          ada = import ./users/ada;
+          # ada removed — nuketown manages ada's home-manager
         };
         sysmodules = [ #ref.sysmodules
           inputs.impermanence.nixosModules.impermanence
           nix-snapshotter.nixosModules.default
+          nuketown.nixosModules.default
         ];
       };
 
