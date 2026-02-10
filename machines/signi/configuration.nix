@@ -1,4 +1,7 @@
-({ pkgs, config, ... }: {
+({ pkgs, config, lib, ... }:
+let
+  mkUserDefault = lib.mkOverride 999;
+in {
   imports = [
     ./hardware-configuration.nix
     ../../profiles/graphical.nix
@@ -46,6 +49,7 @@
     "steam"
     "steam-unwrapped"
     "obsidian"
+    "claude-code"
   ];
   nixpkgs.config.joypixels.acceptLicense = true;
 
@@ -70,6 +74,26 @@
 
   security.polkit.enable = true;
   security.soteria.enable = true; # polkit auth agent
+
+  # Allow ada to run sudo commands with josh's approval
+  security.sudo-approval = {
+    enable = true;
+    socketOwner = "josh";
+    delegatedUsers = [ "ada" ];
+  };
+
+  # Allow josh to run machinectl shell without password
+  security.sudo.extraRules = [
+    {
+      users = [ "josh" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/machinectl shell *";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 
   networking.hostName = "signi"; # Define your hostname.
   networking.networkmanager.enable = true;
@@ -141,6 +165,19 @@
 
   users.groups.josh = {
    gid = 1000;
+  };
+
+  users.users.ada = {
+    uid = 1100;
+    group = "ada";
+    isNormalUser = true;
+    home = "/agents/ada";
+    shell = pkgs.bash;
+    extraGroups = [];
+  };
+
+  users.groups.ada = {
+    gid = 1100;
   };
 
   programs.steam.enable = true;
@@ -337,6 +374,22 @@
 
   ###
   # SERVICES
+
+  # Set ACLs to allow ada user to access josh's projects
+  # This runs on every activation (including nixos-rebuild switch)
+  system.activationScripts.adaProjectAccess = lib.mkForce {
+    text = ''
+      # Ensure directories exist before setting ACLs
+      if [ -d /home/josh ]; then
+        ${pkgs.acl}/bin/setfacl -m u:ada:x /home/josh || true
+      fi
+      if [ -d /home/josh/dev ]; then
+        ${pkgs.acl}/bin/setfacl -m u:ada:x /home/josh/dev || true
+      fi
+    '';
+    deps = [ "users" ];
+  };
+
   systemd = {
   };
 

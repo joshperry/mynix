@@ -31,6 +31,6 @@ fi
 name=`basename $path`
 
 tmux new-window -c "$path" -n $name
-tmux send-keys 'nvim +Neotree\ focus\ toggle' C-m
+tmux send-keys "sudo machinectl shell --setenv=PWD=$path ada@ /usr/bin/env bash -l -c 'exec claude --dangerously-skip-permissions'" C-m
 tmux split-window -v -l 25% -c "$path"
 tmux last-pane

@@ -346,6 +346,9 @@
           josh = { imports = [
             ./users/josh/machines/signi
           ]; };
+
+          # Ada, my coding collaborator
+          ada = import ./users/ada;
         };
         sysmodules = [ #ref.sysmodules
           inputs.impermanence.nixosModules.impermanence
