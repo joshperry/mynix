@@ -63,6 +63,9 @@
     package = pkgs.unstable.claude-code;
 
     settings = {
+      env = {
+        CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+      };
       permissions = {
         # Ada uses an approval-gated sudo wrapper, so privileged operations
         # go through josh's GUI approval. Default mode is still ask-based
