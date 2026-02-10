@@ -327,6 +327,18 @@
         };
       };
 
+      mino = nixosSystem {
+        name = "mino";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+        sysmodules = [
+          inputs.disko.nixosModules.disko
+          inputs.impermanence.nixosModules.impermanence
+        ];
+      };
+
       signi = nixosSystem {
         name = "signi";
         system = "x86_64-linux";
