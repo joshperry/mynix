@@ -1,5 +1,6 @@
 ({ pkgs, config, ... }: {
   imports = [
+    ./hardware-configuration.nix
     ../../profiles/graphical.nix
   ];
 
@@ -37,6 +38,7 @@
     "nvidia-settings"
     "discord"
     "HELI-X"
+    "joypixels"
     "libfprint-2-tod1-goodix-550a"
     "lmstudio"
     "resilio-sync"
@@ -45,6 +47,7 @@
     "steam-unwrapped"
     "obsidian"
   ];
+  nixpkgs.config.joypixels.acceptLicense = true;
 
   #nixpkgs.overlays = [
   #  (final: prev: {
@@ -286,7 +289,7 @@
     enableDefaultPackages = true;
     packages = with pkgs; [
       powerline-symbols
-      emojione
+      joypixels
       inconsolata
       font-awesome
       nerd-fonts.sauce-code-pro

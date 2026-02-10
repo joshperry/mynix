@@ -128,7 +128,8 @@
       EDITOR = "nvim";
     };
 
-    initExtra = ''
+    initExtra = #bash 
+    ''
       PATH=/home/josh/.local/bin:$PATH
 
       function _update_ps1() {

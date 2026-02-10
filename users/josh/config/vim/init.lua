@@ -1,6 +1,10 @@
+
+--Leave carriage return here for concatenation
+
 vim.opt.backup = false
 
 local keyset = vim.keymap.set
+
 -- GoTo code navigation
 keyset("n", "gd", "<Plug>(coc-definition)", {silent = true})
 keyset("n", "gy", "<Plug>(coc-type-definition)", {silent = true})
@@ -21,3 +25,6 @@ end
 keyset("n", "K", '<CMD>lua _G.show_docs()<CR>', {silent = true})
 
 vim.api.nvim_create_user_command("OR", "call CocActionAsync('runCommand', 'editor.action.organizeImport')", {})
+
+--Leave carriage return here for concatenation
+

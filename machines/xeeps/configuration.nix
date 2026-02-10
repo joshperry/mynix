@@ -1,6 +1,7 @@
 ({ pkgs, config, ... }:
 {
   imports = [
+    ./hardware-configuration.nix
     ../../profiles/graphical.nix
   ];
 
@@ -186,7 +187,7 @@
     enableDefaultPackages = true;
     packages = with pkgs; [
       powerline-symbols
-      emojione
+      joypixels
       inconsolata
       font-awesome
       nerd-fonts.sauce-code-pro

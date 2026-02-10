@@ -1,5 +1,6 @@
 ({ pkgs, ... }: {
   imports = [
+    ./hardware-configuration.nix
     ../../profiles/graphical.nix
   ];
 
@@ -206,7 +207,7 @@
     fontDir.enable = true;
     packages = with pkgs; [
       powerline-symbols
-      emojione
+      joypixels
       inconsolata
       font-awesome
       nerd-fonts.sauce-code-pro

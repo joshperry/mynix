@@ -1,5 +1,6 @@
 ({ pkgs, ... }: {
   imports = [
+    ./hardware-configuration.nix
     ../../profiles/graphical.nix
   ];
 
@@ -60,6 +61,7 @@
   # Which unfree packages to allow
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (pkgs.lib.getName pkg) [
     "discord"
+    "joypixels"
     "resilio-sync"
     "saleae-logic"
   ];
@@ -167,7 +169,7 @@
     enableDefaultPackages = true;
     packages = with pkgs; [
       powerline-symbols
-      emojione
+      joypixels
       inconsolata
       font-awesome
       nerd-fonts.sauce-code-pro

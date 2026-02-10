@@ -50,6 +50,9 @@ i3lock_options=(
 
 # Run before starting the locker
 pre_lock() {
+  # Pixelated image
+  #ffmpeg-full -- -f x11grab -video_size $(xrandr | grep 'current' | sed -E 's/.*current\s([0-9]+)\sx\s([0-9]+).*/\1x\2/') -y -i $DISPLAY -vf 'frei0r=filter_name=pixeliz0r:filter_params=0.01|0.01' -vframes 1 -loglevel quiet out.png
+
   # Sleep the monitors after 10s
   xset dpms 300 300 600
   return
