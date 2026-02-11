@@ -292,6 +292,108 @@
             echo "Building and flashing installer for $1 to $2..."
             nix run .#nixosConfigurations.$1.installer.isoScript -- "$2"
           '')
+          #def.cloud-create
+          google-cloud-sdk
+          (writers.writeBashBin "cloud-create" ''
+            set -e
+
+            HOSTNAME="''${1:-cloudtest}"
+            ZONE="''${2:-us-west1-b}"
+            MACHINE_TYPE="''${3:-e2-medium}"
+            DISK_SIZE="''${4:-20GB}"
+
+            if ! ${google-cloud-sdk}/bin/gcloud auth list --filter=status:ACTIVE --format="value(account)" 2>/dev/null | grep -q .; then
+              echo "Not authenticated. Run: gcloud auth login"
+              exit 1
+            fi
+
+            echo "Creating GCE instance: $HOSTNAME"
+            echo "  Zone: $ZONE"
+            echo "  Type: $MACHINE_TYPE"
+            echo "  Disk: $DISK_SIZE"
+            echo ""
+
+            ${google-cloud-sdk}/bin/gcloud compute instances create "$HOSTNAME" \
+              --zone="$ZONE" \
+              --machine-type="$MACHINE_TYPE" \
+              --image-family=debian-12 \
+              --image-project=debian-cloud \
+              --boot-disk-size="$DISK_SIZE" \
+              --metadata=enable-oslogin=TRUE
+
+            echo ""
+            IP=$(${google-cloud-sdk}/bin/gcloud compute instances describe "$HOSTNAME" \
+              --zone="$ZONE" \
+              --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+            echo "Instance ready: $IP"
+            echo ""
+            echo "Next: cloud-deploy $HOSTNAME $IP"
+          '')
+          #def.cloud-deploy
+          (writers.writeBashBin "cloud-deploy" ''
+            set -e
+
+            HOSTNAME="''${1}"
+            IP="''${2}"
+
+            if [[ -z "$HOSTNAME" ]] || [[ -z "$IP" ]]; then
+              echo "Usage: cloud-deploy <hostname> <ip>"
+              echo ""
+              echo "Deploys a nixosConfiguration to a running VM via nixos-anywhere."
+              echo "The VM should be running any Linux distro with root SSH access."
+              echo ""
+              echo "Available cloud-ready hosts:"
+              ls -1 machines/
+              exit 1
+            fi
+
+            if [[ ! -d "machines/$HOSTNAME" ]]; then
+              echo "Error: machines/$HOSTNAME does not exist"
+              exit 1
+            fi
+
+            echo "Deploying .#$HOSTNAME to $IP via nixos-anywhere..."
+            echo ""
+
+            nix run github:nix-community/nixos-anywhere -- \
+              --flake ".#$HOSTNAME" \
+              "root@$IP"
+          '')
+          #def.cloud-ssh
+          (writers.writeBashBin "cloud-ssh" ''
+            HOSTNAME="''${1:-cloudtest}"
+            ZONE="''${2:-us-west1-b}"
+            USER="''${3:-josh}"
+
+            IP=$(${google-cloud-sdk}/bin/gcloud compute instances describe "$HOSTNAME" \
+              --zone="$ZONE" \
+              --format='get(networkInterfaces[0].accessConfigs[0].natIP)' 2>/dev/null)
+
+            if [[ -z "$IP" ]]; then
+              echo "Error: could not find instance $HOSTNAME in zone $ZONE"
+              exit 1
+            fi
+
+            echo "Connecting to $HOSTNAME ($IP) as $USER..."
+            exec ssh "$USER@$IP"
+          '')
+          #def.cloud-destroy
+          (writers.writeBashBin "cloud-destroy" ''
+            set -e
+
+            HOSTNAME="''${1:-cloudtest}"
+            ZONE="''${2:-us-west1-b}"
+
+            echo "This will DELETE instance: $HOSTNAME (zone: $ZONE)"
+            read -p "Continue? [y/N] " confirm
+            [[ "''${confirm,,}" != y* ]] && exit 1
+
+            ${google-cloud-sdk}/bin/gcloud compute instances delete "$HOSTNAME" \
+              --zone="$ZONE" \
+              --quiet
+
+            echo "Instance $HOSTNAME deleted."
+          '')
         ];
 
         shellHook = ''
@@ -300,6 +402,12 @@
           echo '- `buildsys`: Build, review, and apply current host'
           echo '- `updatesys`: Update the flake.lock'
           echo '- `flash-installer <machine> <usbdev>`: Create minimal installer ISO with prebuilt system and write it to USB'
+          echo ""
+          echo "Cloud:"
+          echo '- `cloud-create [host] [zone] [type] [disk]`: Create a GCE VM'
+          echo '- `cloud-deploy <host> <ip>`: Deploy NixOS config via nixos-anywhere'
+          echo '- `cloud-ssh [host] [zone] [user]`: SSH into a GCE instance'
+          echo '- `cloud-destroy [host] [zone]`: Tear down a GCE instance'
           echo
         '';
       };
@@ -362,6 +470,17 @@
           inputs.impermanence.nixosModules.impermanence
           nix-snapshotter.nixosModules.default
           nuketown.nixosModules.default
+        ];
+      };
+
+      cloudtest = nixosSystem {
+        name = "cloudtest";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+        sysmodules = [
+          inputs.disko.nixosModules.disko
         ];
       };
 

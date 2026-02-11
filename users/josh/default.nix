@@ -29,7 +29,7 @@
     pasystray
     pavucontrol
     paprefs
-    scrot
+    flameshot
     thunderbird
     ungoogled-chromium
     vlc

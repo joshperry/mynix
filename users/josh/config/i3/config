@@ -250,12 +250,12 @@ for_window [class="zoom" title="Zoom Meeting"] floating disable # don't float th
 bindsym $mod+Ctrl+l move workspace to output right
 bindsym $mod+Ctrl+h move workspace to output left
 
-# scrot & gimp - root
-bindsym Print exec scrot -e 'mv $f /tmp/ && gimp /tmp/$f'
-# scrot to clipboard - select window or rectangle
-bindsym --release $mod+Print exec scrot -s -e 'xclip -selection clipboard -t image/png $f && rm $f'
-# scrot to file - select window or rectangle
-bindsym --release $mod+Shift+Print exec scrot -s -e 'mv $f /tmp/'
+# flameshot - select region, annotate, copy to clipboard
+bindsym Print exec flameshot gui
+# flameshot - full screen to clipboard
+bindsym $mod+Print exec flameshot full -c
+# flameshot - full screen to file
+bindsym $mod+Shift+Print exec flameshot full -p /tmp/
 
 # toggle max width mode for single window on widescreen
 bindsym $mod+z exec ~/.local/bin/i3gutter
