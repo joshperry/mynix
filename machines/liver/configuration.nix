@@ -107,6 +107,11 @@ in
     depends = [ "/mnt/old" ];
     options = [ "bind" ];
   };
+  fileSystems."/var/www/6bit.com" = {
+    device = "/mnt/old/var/www/6bit.com";
+    depends = [ "/mnt/old" ];
+    options = [ "bind" "ro" ];
+  };
 
   # ── ACME / Let's Encrypt ──────────────────────────────────────
   security.acme = {
@@ -420,7 +425,7 @@ in
         proxyPass = "http://localhost:5984/";
       };
       locations."/spub/" = {
-        alias = "/var/sync/folders/public/";
+        alias = "/var/lib/docker/volumes/sync_storage/_data/folders/public/";
         extraConfig = "autoindex on;";
       };
     };
