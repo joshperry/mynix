@@ -308,8 +308,8 @@
         "sops-nix": "sops-nix"
       },
       "locked": {
-        "lastModified": 1770758725,
-        "narHash": "sha256-GaaFaOeKCwm4kbu2JaalexKvCcQOdvzxz20AFb5jgnM=",
+        "lastModified": 1770853861,
+        "narHash": "sha256-tNuictyI4StETIC+DruV49uHiWC0koHWYUm4UBCykWw=",
         "path": "/home/josh/dev/nuketown",
         "type": "path"
       },
@@ -328,13 +328,34 @@
         "nix-snapshotter": "nix-snapshotter",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-unstable": "nixpkgs-unstable",
-        "nuketown": "nuketown"
+        "nuketown": "nuketown",
+        "sops-nix": "sops-nix_2"
       }
     },
     "sops-nix": {
       "inputs": {
         "nixpkgs": [
           "nuketown",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1770683991,
+        "narHash": "sha256-xVfPvXDf9QN3Eh9dV+Lw6IkWG42KSuQ1u2260HKvpnc=",
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "rev": "8b89f44c2cc4581e402111d928869fe7ba9f7033",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Mic92",
+        "repo": "sops-nix",
+        "type": "github"
+      }
+    },
+    "sops-nix_2": {
+      "inputs": {
+        "nixpkgs": [
           "nixpkgs"
         ]
       },

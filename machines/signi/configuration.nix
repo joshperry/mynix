@@ -7,12 +7,19 @@ in {
     ../../profiles/graphical.nix
   ];
 
+  # ── Secrets (sops-nix) ────────────────────────────────────────
+  sops = {
+    defaultSopsFile = ../../secrets/signi.yaml;
+    age.keyFile = "/run/sops-age/keys.txt";
+  };
+
   # ── Nuketown: AI agent framework ──────────────────────────────
   nuketown = {
     enable = true;
     domain = "signi.local";
     humanUser = "josh";
     btrfsDevice = "38b243a0-c875-4758-8998-cc6c6a4c451e";
+    sopsFile = ../../secrets/signi.yaml;
 
     agents.ada = {
       enable = true;
@@ -36,6 +43,8 @@ in {
 
       sudo.enable = true;
       portal.enable = true;
+
+      secrets.sshKey = "ada/ssh-key";
 
       devices = [
         {
@@ -188,6 +197,10 @@ in {
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
+
+  # GPG-encrypted age key — placed by nix, decrypted at runtime via broker
+  environment.etc."sops-age-key.gpg".source = ./age-key.txt.gpg;
+
 
   # Impermanence mappings
   environment.persistence."/persist" = {

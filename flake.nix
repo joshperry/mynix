@@ -28,9 +28,13 @@
       inputs.home-manager.follows = "home-manager";
       inputs.impermanence.follows = "impermanence";
     };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nix-snapshotter, litnix, nuketown, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nix-snapshotter, litnix, nuketown, sops-nix, flake-parts, ... }:
   let
     packages = { ... }: {
       nixpkgs.overlays = [
@@ -67,6 +71,7 @@
           packages
           registry
           ./modules
+          sops-nix.nixosModules.sops
           ./machines/${name}/configuration.nix #def.machineConfig
           ({config, ...}: {
             nixpkgs.overlays = [
