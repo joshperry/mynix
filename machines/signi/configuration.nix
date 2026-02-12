@@ -273,6 +273,9 @@ in {
   # Even root should use the daemon for builds to avoid /tmp cache
   environment.variables.NIX_REMOTE = "daemon";
 
+  # Default umask 027: new files not world-readable for any user
+  security.loginDefs.settings.UMASK = "027";
+
   users.users.josh = {
     uid = 1000;
     group = "josh";
