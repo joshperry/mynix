@@ -214,6 +214,7 @@ in
         command = "smtpd";
         args = [
           "-o" "syslog_name=postfix/submission"
+          "-o" "smtpd_tls_security_level=encrypt"
         ];
       };
       smtps = {
