@@ -45,6 +45,7 @@ in {
 
       secrets.sshKey = "ada/ssh-key";
       secrets.gpgKey = "ada/gpg-key";
+      secrets.extraSecrets.email-password = "ada/email-password";
 
       devices = [
         {
@@ -98,10 +99,35 @@ in {
         programs.git.signing.key = "6CD1AEABA566EC82";
         # Import GPG key from sops secret on login
         programs.bash.profileExtra = ''
-          if [ -f /run/secrets/ada/gpg-key ]; then
-            gpg --batch --import /run/secrets/ada/gpg-key 2>/dev/null || true
+          if [ -f ${config.sops.secrets."ada/gpg-key".path} ]; then
+            gpg --batch --import ${config.sops.secrets."ada/gpg-key".path} 2>/dev/null || true
           fi
         '';
+        accounts.email.accounts.ada = {
+          primary = true;
+          address = "ada@6bit.com";
+          realName = "Ada";
+          imap = {
+            host = "mail.6bit.com";
+            port = 993;
+          };
+          smtp = {
+            host = "mail.6bit.com";
+            port = 587;
+            tls.useStartTls = true;
+          };
+          userName = "ada@6bit.com";
+          passwordCommand = "cat ${config.sops.secrets."ada/email-password".path}";
+          msmtp.enable = true;
+          neomutt = {
+            enable = true;
+            extraConfig = ''
+              set sort = reverse-date
+            '';
+          };
+        };
+        programs.msmtp.enable = true;
+        programs.neomutt.enable = true;
         programs.neovim = {
           enable = true;
           vimAlias = true;
@@ -250,6 +276,7 @@ in {
   users.users.josh = {
     uid = 1000;
     group = "josh";
+    homeMode = "750";
     initialHashedPassword = "$6$rounds=3000000$plps8mAYoxl.ngM7$UICj9iFn3SvWEBmD6Zsv0pWu8fru2jGNqvXazc7BjM9CJJxCna.du8yytejQeAL9yjQ.943AXyv8fjgSxOX.4.";
     isNormalUser = true;
     extraGroups = [
