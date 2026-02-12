@@ -32,8 +32,7 @@ in {
 
       git = {
         name = "Ada";
-        email = "ada@signi.local";
-        signing = false;
+        email = "ada@6bit.com";
       };
 
       persist = [
@@ -45,6 +44,7 @@ in {
       portal.enable = true;
 
       secrets.sshKey = "ada/ssh-key";
+      secrets.gpgKey = "ada/gpg-key";
 
       devices = [
         {
@@ -94,6 +94,14 @@ in {
 
       extraHomeConfig = {
         home.stateVersion = "25.11";
+        programs.gpg.enable = true;
+        programs.git.signing.key = "6CD1AEABA566EC82";
+        # Import GPG key from sops secret on login
+        programs.bash.profileExtra = ''
+          if [ -f /run/secrets/ada/gpg-key ]; then
+            gpg --batch --import /run/secrets/ada/gpg-key 2>/dev/null || true
+          fi
+        '';
         programs.neovim = {
           enable = true;
           vimAlias = true;
