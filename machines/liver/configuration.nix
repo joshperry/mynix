@@ -200,11 +200,14 @@ in
         "reject_rbl_client bl.spamcop.net"
       ];
 
-      # SpamAssassin content filter
-      content_filter = "spamfilter";
     };
 
     masterConfig = {
+      # content_filter on smtp inet only — NOT in main.cf — so that
+      # re-injected mail via sendmail/pickup doesn't loop back through the filter
+      smtp_inet = {
+        args = [ "-o" "content_filter=spamfilter" ];
+      };
       submission = {
         type = "inet";
         private = false;
@@ -228,13 +231,14 @@ in
         chroot = false;
         command = "pipe";
         args = [
-          "flags=hu"
+          "flags=Rhu"
           "user=spamd"
           "argv=${pkgs.spamassassin}/bin/spamc"
           "-u" "\${user}@\${domain}"
           "-e" "/run/wrappers/bin/sendmail"
-          "-oi" "-f" "\${sender}" "\${user}@\${domain}"
+          "-oi" "-f" "\${sender}" "\${recipient}"
         ];
+        maxproc = 10;
       };
     };
 
