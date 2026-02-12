@@ -425,7 +425,7 @@ in
         proxyPass = "http://localhost:5984/";
       };
       locations."/spub/" = {
-        alias = "/var/lib/docker/volumes/sync_storage/_data/folders/public/";
+        alias = "/mnt/old/var/lib/docker/volumes/sync_sync_storage/_data/folders/public/";
         extraConfig = "autoindex on;";
       };
     };
