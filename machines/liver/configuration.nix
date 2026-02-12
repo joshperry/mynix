@@ -276,7 +276,7 @@ in
       last_valid_uid = 5000
 
       service lmtp {
-        unix_listener /var/spool/postfix/private/dovecot-lmtp {
+        unix_listener /var/lib/postfix/queue/private/dovecot-lmtp {
           user = postfix
           group = postfix
           mode = 0666
@@ -284,7 +284,7 @@ in
       }
 
       service auth {
-        unix_listener /var/spool/postfix/private/dovecot-auth {
+        unix_listener /var/lib/postfix/queue/private/dovecot-auth {
           user = postfix
           group = postfix
           mode = 0666
