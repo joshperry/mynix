@@ -23,7 +23,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nuketown = {
-      url = "path:/home/josh/dev/nuketown";
+      url = "github:joshperry/nuketown";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
       inputs.impermanence.follows = "impermanence";
