@@ -112,6 +112,11 @@ in
     depends = [ "/mnt/old" ];
     options = [ "bind" "ro" ];
   };
+  fileSystems."/var/www/spub" = {
+    device = "/mnt/old/var/lib/docker/volumes/sync_sync_storage/_data/folders/public";
+    depends = [ "/mnt/old" ];
+    options = [ "bind" "ro" ];
+  };
 
   # ── ACME / Let's Encrypt ──────────────────────────────────────
   security.acme = {
@@ -425,7 +430,7 @@ in
         proxyPass = "http://localhost:5984/";
       };
       locations."/spub/" = {
-        alias = "/mnt/old/var/lib/docker/volumes/sync_sync_storage/_data/folders/public/";
+        alias = "/var/www/spub/";
         extraConfig = "autoindex on;";
       };
     };
