@@ -257,7 +257,6 @@
 
     initExtra = #bash
     ''
-      umask 027
       PATH=$HOME/.local/bin:$PATH
 
       function _update_ps1() {
