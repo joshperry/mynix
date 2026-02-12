@@ -73,7 +73,7 @@ in
   users.users.vmail = {
     uid = 5000;
     group = "vmail";
-    home = "/var/mail/vhosts";
+    home = "/var/spool/mail/vhosts";
     isSystemUser = true;
   };
   users.groups.vmail = { gid = 5000; };
@@ -91,8 +91,8 @@ in
   };
 
   # ── Bind mounts (old Gentoo disk at /mnt/old) ────────────────
-  fileSystems."/var/mail/vhosts" = {
-    device = "/mnt/old/var/mail/vhosts";
+  fileSystems."/var/spool/mail/vhosts" = {
+    device = "/mnt/old/var/spool/mail/vhosts";
     options = [ "bind" ];
   };
   fileSystems."/var/lib/couchdb" = {
@@ -230,7 +230,7 @@ in
     enable = true;
     enableImap = true;
     enableLmtp = true;
-    mailLocation = "maildir:/var/mail/vhosts/%d/%n/.maildir";
+    mailLocation = "maildir:/var/spool/mail/vhosts/%d/%n/.maildir";
     sslServerCert = "/var/lib/acme/6bit.com/fullchain.pem";
     sslServerKey = "/var/lib/acme/6bit.com/key.pem";
     enablePAM = false;
@@ -246,7 +246,7 @@ in
       }
       userdb {
         driver = static
-        args = uid=5000 gid=5000 home=/var/mail/vhosts/%d/%n
+        args = uid=5000 gid=5000 home=/var/spool/mail/vhosts/%d/%n
       }
 
       # Sieve via couchmail
@@ -301,15 +301,24 @@ in
     socket = "inet:8891@localhost";
   };
 
-  # Copy DKIM key from old disk on first boot
-  system.activationScripts.dkimKey = ''
-    mkdir -p /var/lib/opendkim/keys/6bit.com
-    if [ ! -f /var/lib/opendkim/keys/6bit.com/dkim.private ] && [ -f /mnt/old/etc/opendkim/dkim.private ]; then
-      cp /mnt/old/etc/opendkim/dkim.private /var/lib/opendkim/keys/6bit.com/dkim.private
+  # Copy DKIM key from old disk on first boot (runs as a oneshot before opendkim)
+  systemd.services.opendkim-key-init = {
+    description = "Initialize OpenDKIM key from old disk";
+    before = [ "opendkim.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      mkdir -p /var/lib/opendkim/keys/6bit.com
+      if [ ! -f /var/lib/opendkim/keys/6bit.com/dkim.private ] && [ -f /mnt/old/etc/opendkim/dkim.private ]; then
+        cp /mnt/old/etc/opendkim/dkim.private /var/lib/opendkim/keys/6bit.com/dkim.private
+      fi
       chown -R opendkim:opendkim /var/lib/opendkim
       chmod 600 /var/lib/opendkim/keys/6bit.com/dkim.private
-    fi
-  '';
+    '';
+  };
 
   # ── Postgrey ──────────────────────────────────────────────────
   services.postgrey = {
@@ -319,6 +328,11 @@ in
       mode = "0666";
     };
   };
+
+  # Ensure postgrey socket dir exists inside the postfix chroot
+  systemd.tmpfiles.rules = [
+    "d /var/spool/postfix/postgrey 0755 postgrey postgrey -"
+  ];
 
   # ── SpamAssassin ──────────────────────────────────────────────
   services.spamassassin.enable = true;
