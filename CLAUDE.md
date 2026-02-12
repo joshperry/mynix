@@ -150,3 +150,27 @@ When Claude Code runs as user `ada`, it runs in non-interactive bash sessions so
    ```
 
 This workflow mirrors what `buildsys` does, but works in non-interactive sessions with explicit approval required for privileged operations.
+
+## Active Work
+
+### sops-age-yubikey boot decryption
+
+Module: `modules/security/sops-age-yubikey.nix`, configured in `machines/signi/configuration.nix:225-229`.
+
+**Previous fixes** (already in place):
+- Systemd deps changed from `pcscd.service` to `pcscd.socket`
+- `--card-status` retries in a loop (30 attempts, 1s sleep) instead of silent `|| true`
+- gpg-agent.conf written before key import
+- Clearer tty1 prompts
+
+**Bug 1 (fixed)**: `$(which pinentry-curses)` resolved to empty string — `which` not in
+service PATH. gpg-agent got empty `pinentry-program`, died exit 2, killed script via `set -e`.
+Fix: nix interpolation `${pkgs.pinentry-curses}/bin/pinentry-curses`.
+
+**Bug 2 (fixed)**: Pinentry prompt appeared on tty1 but display-manager started X
+immediately, covering it before user could interact. Fix: added `display-manager.service`
+to the unit's `before` list so X waits for decryption to complete.
+
+**Status**: Both fixes switched, needs reboot to verify. On reboot tty1 should show
+pinentry prompt with no X covering it. Touch YubiKey when prompted.
+If it fails, check `sudo journalctl -b -u sops-age-yubikey.service`.

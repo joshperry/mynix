@@ -71,13 +71,13 @@
   fileSystems."/mnt/kago" =
     { device = "//kago.local/media";
       fsType = "cifs";
-      options = [ "credentials=/etc/nixos/kago-secrets" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
+      options = [ "credentials=${config.sops.secrets."kago/credentials".path}" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
     };
-  
+
   fileSystems."/mnt/kagobu" =
     { device = "//kago.local/bu";
       fsType = "cifs";
-      options = [ "credentials=/etc/nixos/kago-secrets" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
+      options = [ "credentials=${config.sops.secrets."kago/credentials".path}" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
     };
 
   swapDevices = [ ];

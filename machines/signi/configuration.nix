@@ -11,6 +11,7 @@ in {
   sops = {
     defaultSopsFile = ../../secrets/signi.yaml;
     age.keyFile = "/run/sops-age/keys.txt";
+    secrets."kago/credentials" = { };
   };
 
   # ── Nuketown: AI agent framework ──────────────────────────────
@@ -37,7 +38,7 @@ in {
 
       persist = [
         "projects"
-        ".config/claude"
+        ".claude"
       ];
 
       sudo.enable = true;
@@ -219,8 +220,13 @@ in {
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # GPG-encrypted age key — placed by nix, decrypted at runtime via broker
+  # Decrypt sops age key via YubiKey GPG at boot (touch prompt on tty1)
   environment.etc."sops-age-key.gpg".source = ./age-key.txt.gpg;
+  security.sops-age-yubikey = {
+    enable = true;
+    encryptedKeyFile = "/etc/sops-age-key.gpg";
+    gpgPublicKey = ./josh-gpg-public.asc;
+  };
 
 
   # Impermanence mappings
@@ -279,7 +285,7 @@ in {
       "tss"       # TPM
     ];
 
-    # Add large subuid/subgid ranges for k3s
+    # Large subuid/subgid ranges (were needed for k3s rootless, keeping for podman)
     subUidRanges = [
       { startUid = 100000; count = 4294304; }
     ];
@@ -524,8 +530,6 @@ in {
       defaultNetwork.settings.dns_enabled = true;
     };
   };
-
-  services.k3s.rootless.enable = true;
 
   # smartcard
   services.pcscd.enable = true;

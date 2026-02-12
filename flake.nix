@@ -12,10 +12,6 @@
       url = "github:nix-community/disko/latest";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-snapshotter = {
-      url = "path:/home/josh/dev/nix-snapshotter";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     impermanence = { url = "github:nix-community/impermanence"; };
     flake-parts.url = "github:hercules-ci/flake-parts";
     litnix = {
@@ -34,7 +30,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nix-snapshotter, litnix, nuketown, sops-nix, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, litnix, nuketown, sops-nix, flake-parts, ... }:
   let
     packages = { ... }: {
       nixpkgs.overlays = [
@@ -43,9 +39,6 @@
         #  python3 = final.python310;
         #  python3Packages = final.python310.pkgs;
         #})
-
-        # nix->OCI interface
-        nix-snapshotter.overlays.default
 
         litnix.overlays.default
         
@@ -464,8 +457,6 @@
         users = {
           josh = { imports = [
             ./users/josh/machines/signi
-            nix-snapshotter.homeModules.default
-            nix-snapshotter.homeModules.k3s-rootless
             nuketown.homeManagerModules.approvalDaemon
             { nuketown.approvalDaemon.enable = true; }
           ]; };
@@ -473,7 +464,6 @@
         };
         sysmodules = [ #ref.sysmodules
           inputs.impermanence.nixosModules.impermanence
-          nix-snapshotter.nixosModules.default
           nuketown.nixosModules.default
         ];
       };

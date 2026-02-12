@@ -12,13 +12,13 @@
 
   programs.git = {
     enable = true;
-    userName = lib.mkDefault "Joshua Perry";
-    userEmail = lib.mkDefault "josh@6bit.com";
     signing = lib.mkDefault {
       key = null;
       signByDefault = true;
     };
-    extraConfig = {
+    settings = {
+      user.name = lib.mkDefault "Joshua Perry";
+      user.email = lib.mkDefault "josh@6bit.com";
       init.defaultBranch = "master";
       pull.rebase = true;
       rebase.autostash = true;
