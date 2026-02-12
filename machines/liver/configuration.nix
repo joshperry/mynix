@@ -147,8 +147,8 @@ in
   # ── Postfix ───────────────────────────────────────────────────
   services.postfix = {
     enable = true;
-    hostname = "6bit.com";
-    origin = "$myhostname";
+    hostname = "mail.6bit.com";
+    origin = "$mydomain";
     destination = [ "localhost.$mydomain" "localhost" "$myhostname" ];
 
     config = {
