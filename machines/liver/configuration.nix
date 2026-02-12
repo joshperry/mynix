@@ -153,7 +153,7 @@ in
 
     config = {
       # TLS
-      smtpd_use_tls = "yes";
+      smtpd_tls_security_level = "may";
       smtpd_tls_auth_only = "yes";
       smtpd_tls_cert_file = "/var/lib/acme/6bit.com/fullchain.pem";
       smtpd_tls_key_file = "/var/lib/acme/6bit.com/key.pem";
