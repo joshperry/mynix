@@ -56,6 +56,7 @@ in
     inetutils
     mtr
     sysstat
+    dovecot_pigeonhole
   ];
 
   # ── Users ─────────────────────────────────────────────────────
