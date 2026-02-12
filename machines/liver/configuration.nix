@@ -120,6 +120,7 @@ in
       credentialFiles = {
         "GCE_SERVICE_ACCOUNT_FILE" = config.sops.secrets."acme/gce_credentials".path;
       };
+      reloadServices = [ "postfix.service" "dovecot2.service" "prosody.service" ];
       group = "nginx";
     };
 
