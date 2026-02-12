@@ -511,6 +511,13 @@ in
   };
 
 
+  # ── IPv6 ─────────────────────────────────────────────────────
+  # Docker enables IPv6 forwarding, which disables accept_ra.
+  # Set accept_ra=2 to accept RAs even with forwarding enabled.
+  boot.kernel.sysctl = {
+    "net.ipv6.conf.eth0.accept_ra" = 2;
+  };
+
   # ── Firewall ──────────────────────────────────────────────────
   networking.firewall = {
     enable = true;
