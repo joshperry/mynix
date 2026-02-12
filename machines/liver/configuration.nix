@@ -117,7 +117,7 @@ in
       extraDomainNames = [ "*.6bit.com" ];
       dnsProvider = "gcloud";
       credentialFiles = {
-        "GCE_SERVICE_ACCOUNT_FILE" = "/mnt/old/virtrack-cert-dns.json";
+        "GCE_SERVICE_ACCOUNT_FILE" = "/mnt/old/opt/certbot/virtrack-cert-dns.json";
       };
       group = "nginx";
     };
@@ -126,7 +126,7 @@ in
       domain = "curiouslynerdy.com";
       dnsProvider = "gcloud";
       credentialFiles = {
-        "GCE_SERVICE_ACCOUNT_FILE" = "/mnt/old/virtrack-cert-dns.json";
+        "GCE_SERVICE_ACCOUNT_FILE" = "/mnt/old/opt/certbot/virtrack-cert-dns.json";
       };
       group = "nginx";
     };
