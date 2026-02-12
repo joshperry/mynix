@@ -488,22 +488,6 @@ in {
 
   ###
   # SERVICES
-
-  # Set ACLs to allow ada user to access josh's projects
-  # This runs on every activation (including nixos-rebuild switch)
-  system.activationScripts.adaProjectAccess = lib.mkForce {
-    text = ''
-      # Ensure directories exist before setting ACLs
-      if [ -d /home/josh ]; then
-        ${pkgs.acl}/bin/setfacl -m u:ada:x /home/josh || true
-      fi
-      if [ -d /home/josh/dev ]; then
-        ${pkgs.acl}/bin/setfacl -m u:ada:x /home/josh/dev || true
-      fi
-    '';
-    deps = [ "users" ];
-  };
-
   virtualisation = {
     containers.enable = true;
 
