@@ -120,7 +120,6 @@ in
       credentialFiles = {
         "GCE_SERVICE_ACCOUNT_FILE" = config.sops.secrets."acme/gce_credentials".path;
       };
-      extraLegoFlags = [ "--dns.resolvers" "8.8.8.8:53" ];
       group = "nginx";
     };
 
@@ -130,7 +129,6 @@ in
       credentialFiles = {
         "GCE_SERVICE_ACCOUNT_FILE" = config.sops.secrets."acme/gce_credentials".path;
       };
-      extraLegoFlags = [ "--dns.resolvers" "8.8.8.8:53" ];
       group = "nginx";
     };
   };
@@ -514,8 +512,10 @@ in
   # ── IPv6 ─────────────────────────────────────────────────────
   # Docker enables IPv6 forwarding, which disables accept_ra.
   # Set accept_ra=2 to accept RAs even with forwarding enabled.
+  # Disable privacy extensions — Linode only routes the SLAAC address.
   boot.kernel.sysctl = {
     "net.ipv6.conf.eth0.accept_ra" = 2;
+    "net.ipv6.conf.eth0.use_tempaddr" = lib.mkForce 0;
   };
 
   # ── Firewall ──────────────────────────────────────────────────
