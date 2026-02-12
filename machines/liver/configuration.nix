@@ -93,14 +93,17 @@ in
   # ── Bind mounts (old Gentoo disk at /mnt/old) ────────────────
   fileSystems."/var/spool/mail/vhosts" = {
     device = "/mnt/old/var/spool/mail/vhosts";
+    depends = [ "/mnt/old" ];
     options = [ "bind" ];
   };
   fileSystems."/var/lib/couchdb" = {
     device = "/mnt/old/var/lib/couchdb";
+    depends = [ "/mnt/old" ];
     options = [ "bind" ];
   };
   fileSystems."/var/lib/ghost" = {
     device = "/mnt/old/home/josh/dockstacks/curiouslynerdy/ghost/content";
+    depends = [ "/mnt/old" ];
     options = [ "bind" ];
   };
 
