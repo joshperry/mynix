@@ -162,14 +162,14 @@ in
 
       # SASL via dovecot
       smtpd_sasl_type = "dovecot";
-      smtpd_sasl_path = "/var/spool/postfix/private/dovecot-auth";
+      smtpd_sasl_path = "private/dovecot-auth";
       smtpd_sasl_auth_enable = "yes";
 
       # Virtual domains via couchmail TCP services
       virtual_mailbox_domains = "tcp:localhost:40571";
       virtual_mailbox_maps = "tcp:localhost:40572";
       virtual_alias_maps = "tcp:localhost:40573";
-      virtual_transport = "lmtp:unix:/var/spool/postfix/private/dovecot-lmtp";
+      virtual_transport = "lmtp:unix:private/dovecot-lmtp";
       virtual_uid_maps = "static:5000";
       virtual_gid_maps = "static:5000";
 
@@ -195,7 +195,7 @@ in
         "permit_sasl_authenticated"
         "reject_unauth_pipelining"
         "reject_unknown_reverse_client_hostname"
-        "check_policy_service unix:/var/spool/postfix/postgrey/socket"
+        "check_policy_service unix:postgrey/socket"
         "reject_rbl_client zen.spamhaus.org"
         "reject_rbl_client bl.spamcop.net"
       ];
@@ -208,7 +208,6 @@ in
       submission = {
         type = "inet";
         private = false;
-        chroot = false;
         command = "smtpd";
         args = [
           "-o" "syslog_name=postfix/submission"
@@ -217,7 +216,6 @@ in
       smtps = {
         type = "inet";
         private = false;
-        chroot = false;
         command = "smtpd";
         args = [
           "-o" "syslog_name=postfix/smtps"
@@ -278,7 +276,7 @@ in
       last_valid_uid = 5000
 
       service lmtp {
-        unix_listener /var/spool/postfix/private/dovecot-lmtp {
+        unix_listener /var/lib/postfix/queue/private/dovecot-lmtp {
           user = postfix
           group = postfix
           mode = 0666
@@ -286,7 +284,7 @@ in
       }
 
       service auth {
-        unix_listener /var/spool/postfix/private/dovecot-auth {
+        unix_listener /var/lib/postfix/queue/private/dovecot-auth {
           user = postfix
           group = postfix
           mode = 0666
@@ -341,14 +339,14 @@ in
   services.postgrey = {
     enable = true;
     socket = {
-      path = "/var/spool/postfix/postgrey/socket";
+      path = "/var/lib/postfix/queue/postgrey/socket";
       mode = "0666";
     };
   };
 
-  # Ensure postgrey socket dir exists inside the postfix chroot
+  # Ensure postgrey socket dir exists inside the postfix queue
   systemd.tmpfiles.rules = [
-    "d /var/spool/postfix/postgrey 0755 postgrey postgrey -"
+    "d /var/lib/postfix/queue/postgrey 0755 postgrey postgrey -"
   ];
 
   # ── SpamAssassin ──────────────────────────────────────────────
