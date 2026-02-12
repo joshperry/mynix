@@ -120,6 +120,7 @@ in
       credentialFiles = {
         "GCE_SERVICE_ACCOUNT_FILE" = config.sops.secrets."acme/gce_credentials".path;
       };
+      extraLegoFlags = [ "--dns.resolvers" "8.8.8.8:53" ];
       group = "nginx";
     };
 
@@ -129,6 +130,7 @@ in
       credentialFiles = {
         "GCE_SERVICE_ACCOUNT_FILE" = config.sops.secrets."acme/gce_credentials".path;
       };
+      extraLegoFlags = [ "--dns.resolvers" "8.8.8.8:53" ];
       group = "nginx";
     };
   };
