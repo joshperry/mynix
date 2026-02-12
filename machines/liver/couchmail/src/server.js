@@ -136,7 +136,7 @@ const dovecotAuthHandler = () => {
           case CMD_LOOKUP:
             switch(vars.table) {
               case 'auth':
-                vars.user = line.split('/')[1]
+                vars.user = line.split('/')[1].split('\t')[0]
                 console.log(`Dovecot: looking up auth for ${vars.user}`)
                 try {
                   const body = await db.get(vars.user)
@@ -152,7 +152,7 @@ const dovecotAuthHandler = () => {
 
               case 'sieve':
                 console.log(`Dovecot: looking up sieve for ${vars.user}`)
-                const paths = line.split('/')
+                const paths = line.split('\t')[0].split('/')
                 if(paths[2] === 'name') {
                   // Dovecot caches the compiled script based on the ID we return
                   // so let's return a composite key based on the _id and _rev of the script
