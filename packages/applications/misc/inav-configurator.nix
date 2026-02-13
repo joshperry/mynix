@@ -8,24 +8,30 @@
   makeDesktopItem,
   autoPatchelfHook,
   makeWrapper,
-  #gsettings-desktop-schemas,
-  #gtk3,
 }:
 
 let
   pname = "inav-configurator";
+  version = "9.0.0";
+
+  icon = fetchurl {
+    url = "https://raw.githubusercontent.com/iNavFlight/${pname}/${version}/images/inav_icon_128.png";
+    sha256 = "sha256-/EMleYuNk6s3lg4wYwXGUSLbppgmXrdJZkUX9n8jBMU=";
+  };
+
   desktopItem = makeDesktopItem {
     name = pname;
     exec = pname;
-    icon = pname;
-    comment = "inav configuration tool";
+    inherit icon;
+    comment = "INAV flight controller configuration tool";
     desktopName = "INAV Configurator";
     genericName = "Flight controller configuration tool";
+    categories = [ "Utility" ];
   };
 in
-stdenv.mkDerivation rec {
-  inherit pname;
-  version = "9.0.0";
+stdenv.mkDerivation {
+  inherit pname version;
+
   src = fetchurl {
     url = "https://github.com/iNavFlight/${pname}/releases/download/${version}/INAV-Configurator_linux_x64_${version}.zip";
     sha256 = "sha256-n56QE0ZJ2slL0WZbnBl2pEgAUoDMuh467gWt+eRwa9c=";
@@ -37,7 +43,7 @@ stdenv.mkDerivation rec {
     unzip
   ];
 
-  buildInputs = [ 
+  buildInputs = [
     musl
     stdenv.cc.cc.lib
   ];
@@ -48,8 +54,8 @@ stdenv.mkDerivation rec {
              $out/opt/${pname}
 
     cp -a ./resources/. $out/opt/${pname}/
-    #install -m 444 -D icon/bf_icon_128.png $out/share/icons/hicolor/128x128/apps/${pname}.png
-    #cp -a ${desktopItem}/share/applications $out/share/
+    install -m 444 -D ${icon} $out/share/icons/hicolor/128x128/apps/${pname}.png
+    cp -a ${desktopItem}/share/applications $out/share/
 
     makeWrapper ${electron}/bin/electron $out/bin/${pname} --add-flags "$out/opt/${pname}/app"
     runHook postInstall
