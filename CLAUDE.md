@@ -86,7 +86,7 @@ Package overlays are applied in this order (flake.nix:30-46):
 - **bones**: Graphical workstation
 - **mantissa**: Graphical workstation
 - **xeeps**: Graphical workstation with solo.nix config
-- **liver**: Server (minimal user config from users/josh/server.nix)
+- **liver**: Server (minimal user config from users/josh/server.nix). Has a mynix clone at `josh@6bit.com:~/dev/mynix` for remote builds. Ada's SSH key is in josh's account there.
 - **mino**: Server with disko and impermanence
 - **sandboxos**: Test/sandbox environment
 

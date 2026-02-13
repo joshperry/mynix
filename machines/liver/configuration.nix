@@ -461,6 +461,7 @@ in
 
   # Grant nginx access to ACME certs
   users.users.nginx.extraGroups = [ "acme" ];
+  users.users.prosody.extraGroups = [ "nginx" ];
 
   # ── Prosody (XMPP) ───────────────────────────────────────────
   services.prosody = {
