@@ -83,6 +83,25 @@ in {
 
       extraHomeConfig = {
         home.stateVersion = "25.11";
+        # Portal inner tmux — behavioral settings only, no status/keybindings
+        # (status is disabled by the portal launcher, josh's outer tmux handles chrome)
+        programs.tmux = {
+          enable = true;
+          mouse = true;
+          keyMode = "vi";
+          escapeTime = 0;
+          terminal = "tmux-256color";
+          historyLimit = 20000;
+          extraConfig = ''
+            # Match josh's scroll speed
+            bind -T copy-mode-vi WheelUpPane select-pane \; send-keys -X -N 2 scroll-up
+            bind -T copy-mode-vi WheelDownPane select-pane \; send-keys -X -N 2 scroll-down
+
+            # 24-bit color passthrough
+            set -as terminal-features ",xterm-256color:RGB"
+            set-option -g focus-events on
+          '';
+        };
         programs.gpg.enable = true;
         programs.git.signing.key = "6CD1AEABA566EC82";
         # Import GPG key from sops secret on login
