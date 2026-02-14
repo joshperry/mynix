@@ -20,6 +20,7 @@ in
     rotorflight-configurator = pkgs.callPackage ./applications/misc/rotorflight-configurator.nix {};
     inav-configurator = pkgs.callPackage ./applications/misc/inav-configurator.nix {};
     stm-dfu-udev-rules = pkgs.callPackage ./hardware/stm-dfu-udev-rules.nix {};
+    cc-prism = pkgs.callPackage ./tools/cc-prism.nix {};
     itunes-backup-explorer = pkgs.callPackage ./tools/itunes-backup-explorer.nix {};
 
     dev = {
