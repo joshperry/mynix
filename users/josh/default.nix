@@ -233,6 +233,15 @@
       bars = [{
         statusCommand = "${lib.getExe pkgs.i3status}";
         trayOutput = "primary";
+        colors = {
+          background = "#2d1220";
+          statusline = "#f8c8dc";
+          separator = "#5c2340";
+          focusedWorkspace  = { border = "#d64087"; background = "#d64087"; text = "#fff0f5"; };
+          activeWorkspace   = { border = "#5c2340"; background = "#5c2340"; text = "#f8c8dc"; };
+          inactiveWorkspace = { border = "#2d1220"; background = "#2d1220"; text = "#a06080"; };
+          urgentWorkspace   = { border = "#c44569"; background = "#c44569"; text = "#ffffff"; };
+        };
       }];
 
       window.commands = [
@@ -246,6 +255,15 @@
         { command = "${lib.getExe pkgs.pasystray}"; notification = false; }
         { command = "${lib.getExe pkgs.mynix.xss-lock-hinted} --transfer-sleep-lock -- session-lock"; always = true; notification = false; }
       ];
+
+      colors = {
+        focused         = { border = "#d64087"; background = "#5c2340"; text = "#fff0f5"; indicator = "#e84393"; childBorder = "#d64087"; };
+        focusedInactive = { border = "#5c2340"; background = "#3d1a2e"; text = "#f8c8dc"; indicator = "#8b3a62"; childBorder = "#5c2340"; };
+        unfocused       = { border = "#2d1220"; background = "#2d1220"; text = "#a06080"; indicator = "#2d1220"; childBorder = "#2d1220"; };
+        urgent          = { border = "#c44569"; background = "#c44569"; text = "#ffffff"; indicator = "#c44569"; childBorder = "#c44569"; };
+        placeholder     = { border = "#2d1220"; background = "#2d1220"; text = "#f8c8dc"; indicator = "#2d1220"; childBorder = "#2d1220"; };
+        background = "#2d1220";
+      };
 
       gaps = {
         inner = 10;
