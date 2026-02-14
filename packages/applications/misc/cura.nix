@@ -4,6 +4,7 @@
   fetchurl,
   makeDesktopItem,
   writeShellScriptBin,
+  runCommand,
 }:
 
 let
@@ -44,20 +45,26 @@ let
       homepage = "https://github.com/Ultimaker/Cura";
       license = licenses.lgpl3Plus;
       platforms = platforms.linux;
-      maintainers = with maintainers; [ abbradar gebner ];
+      maintainers = with maintainers; [ abbradar ];
     };
   };
+  wrapper = writeShellScriptBin "cura" ''
+    # AppImage version of Cura loses current working directory and treats all paths relative to $HOME.
+    # So we convert each of the files passed as argument to an absolute path.
+    # This fixes use cases like `cd /path/to/my/files; cura mymodel.stl anothermodel.stl`.
+    args=()
+    for a in "$@"; do
+      if [ -e "$a" ]; then
+        a="$(realpath "$a")"
+      fi
+      args+=("$a")
+    done
+    exec "${cura5}/bin/cura" "''${args[@]}"
+  '';
 in
-writeShellScriptBin "cura" ''
-  # AppImage version of Cura loses current working directory and treats all paths relateive to $HOME.
-  # So we convert each of the files passed as argument to an absolute path.
-  # This fixes use cases like `cd /path/to/my/files; cura mymodel.stl anothermodel.stl`.
-  args=()
-  for a in "$@"; do
-    if [ -e "$a" ]; then
-      a="$(realpath "$a")"
-    fi
-    args+=("$a")
-  done
-  exec "${cura5}/bin/cura" "''${args[@]}"
+runCommand "cura-${version}" { meta = cura5.meta; } ''
+  mkdir -p $out/bin $out/share/applications $out/share/pixmaps
+  ln -s ${wrapper}/bin/cura $out/bin/cura
+  ln -s ${desktopItem}/share/applications/* $out/share/applications/
+  ln -s ${cura5}/share/pixmaps/* $out/share/pixmaps/
 ''
