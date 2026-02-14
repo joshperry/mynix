@@ -192,7 +192,6 @@ in {
     mynix.rotorflight-blackbox
     mynix.rotorflight-configurator
     mynix.inav-configurator
-    mynix.xss-lock-hinted
     #(mynix.NvidiaOffloadApp mynix.HELI-X "HELI-X")
     mynix.HELI-X
     mynix.HELI-X11
@@ -486,15 +485,7 @@ in {
     windowManager.i3 = {
       enable = true;
       package = pkgs.i3;
-      extraPackages = with pkgs; [
-        dmenu
-        dunst
-        i3status
-        i3lock
-        mynix.i3lock-color
-        i3blocks
-        wireplumber
-      ];
+      extraPackages = [ ];
     };
   };
 
