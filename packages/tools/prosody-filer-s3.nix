@@ -19,6 +19,10 @@ buildGoModule {
     sed -i 's|minio "github.com/minio/minio-go"|minio "github.com/minio/minio-go/v7"|g' *.go
     sed -i 's|"github.com/minio/minio-go/pkg/credentials"|"github.com/minio/minio-go/v7/pkg/credentials"|g' *.go
 
+    # Add S3Region config option (needed for Linode Object Storage presigned URLs)
+    sed -i 's|S3Bucket    string|S3Bucket    string\n\tS3Region    string|' *.go
+    sed -i 's|Secure: conf.S3TLS,|Secure: conf.S3TLS,\n\t\tRegion: conf.S3Region,|' *.go
+
     cat > go.mod << 'EOF'
 module github.com/Wilm0r/prosody-filer-s3
 

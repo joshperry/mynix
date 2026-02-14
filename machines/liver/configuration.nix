@@ -625,6 +625,7 @@ in
       S3AccessKey = "F4678DQ3UU1BT8V0SWNV"
       S3Secret = "$S3_SECRET"
       S3Bucket = "xmpp-media"
+      S3Region = "us-lax-1"
       ProxyMode = false
       EOF
       chmod 640 /var/lib/prosody-filer-s3/config.toml
