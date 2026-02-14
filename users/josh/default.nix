@@ -24,9 +24,7 @@
     gimp-with-plugins
     libcanberra-gtk3
     nerdctl
-    networkmanagerapplet
     obs-studio
-    pasystray
     pavucontrol
     paprefs
     flameshot
