@@ -476,6 +476,12 @@ in
   users.users.nginx.extraGroups = [ "acme" ];
   users.users.prosody.extraGroups = [ "nginx" ];
 
+  # Dovecot creates its auth socket inside /run/prosody/ (prosody's RuntimeDirectory).
+  # If prosody restarts, systemd wipes that directory, so dovecot must also restart
+  # (after prosody) to recreate the socket.
+  systemd.services.dovecot.partOf = [ "prosody.service" ];
+  systemd.services.dovecot.after = [ "prosody.service" ];
+
   # ── Prosody (XMPP) ───────────────────────────────────────────
   services.prosody = {
     enable = true;
