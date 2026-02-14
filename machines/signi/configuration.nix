@@ -143,6 +143,30 @@ in {
         programs.bash.shellAliases = {
           ll = "ls --color=auto";
         };
+
+        # clauding.md — periodic watcher evaluator
+        # Checks ~/.claude/clauding.md for triggered conditions and starts
+        # claude-code sessions to handle them.
+        systemd.user.services.clauding-eval = {
+          Unit.Description = "Evaluate clauding.md watchers";
+          Service = {
+            Type = "oneshot";
+            ExecStart = "${pkgs.bash}/bin/bash %h/.claude/clauding-eval.sh";
+            Environment = [
+              "PATH=${lib.makeBinPath (with pkgs; [ curl coreutils gnugrep gawk gnused msmtp unstable.claude-code git ])}"
+              "HOME=%h"
+            ];
+          };
+        };
+
+        systemd.user.timers.clauding-eval = {
+          Unit.Description = "Periodic clauding.md evaluation";
+          Timer = {
+            OnCalendar = "*:0/30";
+            Persistent = true;
+          };
+          Install.WantedBy = [ "timers.target" ];
+        };
       };
     };
   };
