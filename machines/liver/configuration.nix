@@ -20,6 +20,7 @@ in
       "couchdb/env" = { };
       "ghost/env" = { };
       "acme/gce_credentials" = { };
+      "xmpp/s3secret" = { };
     };
   };
 
@@ -41,7 +42,7 @@ in
   system.stateVersion = "23.05";
 
   system.autoUpgrade = {
-    enable = true;
+    enable = false;
     dates = "04:00";
     flake = "${config.users.users.josh.home}/dev/mynix";
     flags = [ "--update-input" "nixpkgs" ];
@@ -450,6 +451,18 @@ in
       };
     };
 
+    virtualHosts."xmpp.6bit.com" = {
+      forceSSL = true;
+      useACMEHost = "6bit.com";
+      locations."/upload/" = {
+        proxyPass = "http://127.0.0.1:5050";
+        extraConfig = "client_max_body_size 500M;";
+      };
+      locations."/" = {
+        proxyPass = "http://localhost:5280";
+      };
+    };
+
     virtualHosts."sync.6bit.com" = {
       forceSSL = true;
       useACMEHost = "6bit.com";
@@ -493,12 +506,29 @@ in
       register = true;
       # Admin
       admin_adhoc = true;
+      # Mobile essentials
+      carbons = true;      # XEP-0280: sync messages across devices
+      mam = true;          # XEP-0313: message archive (history sync)
+      smacks = true;       # XEP-0198: stream management (reconnect)
+      csi = true;          # XEP-0352: client state indication (battery)
+      # Push
+      cloud_notify = true; # XEP-0357: push notifications
+      # Quality of life
+      blocklist = true;    # XEP-0191: block contacts
+      bookmarks = true;    # XEP-0402: MUC bookmarks sync
     };
 
     # mod_auth_dovecot is a community module baked into the package
     package = pkgs.prosody.override {
-      withCommunityModules = [ "auth_dovecot" ];
+      withCommunityModules = [
+        "auth_dovecot"
+        "http_upload_external"  # XEP-0363: delegates uploads to prosody-filer-s3
+        "unified_push"          # Self-hosted UnifiedPush provider
+      ];
     };
+
+    httpInterfaces = [ "127.0.0.1" ];
+    httpPorts = [ 5280 ];
 
     allowRegistration = false;
     c2sRequireEncryption = true;
@@ -510,6 +540,34 @@ in
       dovecot_auth_socket = "/run/prosody/dovecot-auth"
       auth_append_host = true
       network_backend = "event"
+
+      -- Stream management (mod_smacks)
+      smacks_hibernation_time = 300
+      smacks_max_hibernated_sessions = 10
+      smacks_max_old_sessions = 10
+
+      -- Message archive (mod_mam)
+      default_archive_policy = true
+      max_archive_query_results = 50
+
+      -- Push notifications (mod_cloud_notify)
+      push_notification_important_body = "New message"
+      push_max_errors = 16
+      push_max_devices = 5
+
+      -- File upload (mod_http_upload_external → prosody-filer-s3 → Linode S3)
+      http_upload_external_base_url = "https://xmpp.6bit.com/upload/"
+      http_upload_external_file_size_limit = 524288000 -- 500MB
+
+      -- Read HMAC secret shared with prosody-filer-s3
+      local hmac_file = io.open("/var/lib/prosody-filer-s3/hmac-secret", "r")
+      if hmac_file then
+        http_upload_external_secret = hmac_file:read("*l")
+        hmac_file:close()
+      end
+
+      -- HTTP settings for UnifiedPush endpoint
+      http_external_url = "https://xmpp.6bit.com/"
     '';
 
     virtualHosts."6bit.com" = {
@@ -524,8 +582,66 @@ in
     muc = [
       { domain = "conference.6bit.com"; }
     ];
+
   };
 
+
+  # ── Prosody Filer S3 (XEP-0363 upload handler) ───────────────
+  # Receives HMAC-signed uploads from XMPP clients, streams to Linode S3.
+  # Downloads redirect to presigned S3 URLs — liver never serves file data.
+
+  # Generate HMAC shared secret on first boot (shared between prosody + filer)
+  systemd.services.prosody-filer-s3-init = {
+    description = "Generate prosody-filer-s3 HMAC secret";
+    before = [ "prosody.service" "prosody-filer-s3.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = ''
+      mkdir -p /var/lib/prosody-filer-s3
+      if [ ! -f /var/lib/prosody-filer-s3/hmac-secret ]; then
+        ${pkgs.openssl}/bin/openssl rand -base64 32 > /var/lib/prosody-filer-s3/hmac-secret
+      fi
+      chmod 640 /var/lib/prosody-filer-s3/hmac-secret
+      chown root:prosody /var/lib/prosody-filer-s3/hmac-secret
+
+      # Build config from template + secrets
+      HMAC_SECRET=$(cat /var/lib/prosody-filer-s3/hmac-secret)
+      S3_SECRET=$(cat ${config.sops.secrets."xmpp/s3secret".path})
+      cat > /var/lib/prosody-filer-s3/config.toml << EOF
+      ListenPort = "127.0.0.1:5050"
+      Secret = "$HMAC_SECRET"
+      UploadSubDir = "upload/"
+      S3Endpoint = "us-lax-1.linodeobjects.com"
+      S3TLS = true
+      S3AccessKey = "F4678DQ3UU1BT8V0SWNV"
+      S3Secret = "$S3_SECRET"
+      S3Bucket = "xmpp-media"
+      ProxyMode = false
+      EOF
+      chmod 640 /var/lib/prosody-filer-s3/config.toml
+    '';
+  };
+
+  systemd.services.prosody-filer-s3 = {
+    description = "Prosody HTTP upload handler (S3 backend)";
+    after = [ "network.target" "prosody-filer-s3-init.service" ];
+    requires = [ "prosody-filer-s3-init.service" ];
+    wantedBy = [ "multi-user.target" ];
+
+    serviceConfig = {
+      ExecStart = "${pkgs.mynix.prosody-filer-s3}/bin/prosody-filer-s3 -config /var/lib/prosody-filer-s3/config.toml";
+      Restart = "on-failure";
+      RestartSec = 5;
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      ReadOnlyPaths = [ "/var/lib/prosody-filer-s3" ];
+    };
+  };
 
   # ── IPv6 ─────────────────────────────────────────────────────
   # Docker enables IPv6 forwarding, which disables accept_ra.

@@ -22,6 +22,7 @@ in
     stm-dfu-udev-rules = pkgs.callPackage ./hardware/stm-dfu-udev-rules.nix {};
     cc-prism = pkgs.callPackage ./tools/cc-prism.nix {};
     itunes-backup-explorer = pkgs.callPackage ./tools/itunes-backup-explorer.nix {};
+    prosody-filer-s3 = pkgs.callPackage ./tools/prosody-filer-s3.nix {};
 
     dev = {
       direnv-nvim = pkgs.callPackage ./dev/direnv-nvim.nix {inherit buildVimPlugin;};
