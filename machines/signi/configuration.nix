@@ -189,6 +189,7 @@ in {
     yubikey-personalization
     
     mynix.cc-prism
+    mynix.cura
     mynix.blhelisuite32
     mynix.rotorflight-blackbox
     mynix.rotorflight-configurator

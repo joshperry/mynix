@@ -24,11 +24,12 @@ let
   };
 
   cura5 = appimageTools.wrapType2 rec {
-    inherit name src;
+    pname = name;
+    inherit version src;
 
     extraInstallCommands =
       let
-        appimageContents = appimageTools.extractType2 { inherit name src; };
+        appimageContents = appimageTools.extractType2 { pname = name; inherit version src; };
       in
         ''
           mkdir -p $out/share/pixmaps
