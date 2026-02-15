@@ -337,6 +337,10 @@
     domain = "6bit.com";
     couchdbCredentialsFile = config.sops.secrets."couchdb/env".path;
     bridgePasswordFile = config.sops.secrets."couchmail/password".path;
+    nginx = {
+      enable = true;
+      virtualHost = "6bit.com";
+    };
   };
 
   # ── OCI Containers ────────────────────────────────────────────
@@ -387,20 +391,7 @@
       locations."/couch/" = {
         proxyPass = "http://localhost:5984/";
       };
-      # Couchmail web UI + CouchDB API for auth
-      locations."/_couchmail/" = {
-        proxyPass = "http://localhost:5984/_couchmail/";
-      };
-      locations."/_session" = {
-        proxyPass = "http://localhost:5984/_session";
-      };
-      locations."/mail/" = {
-        proxyPass = "http://localhost:5984/mail/";
-      };
-      # Couchmail bridge password change API
-      locations."/_couchmail/api/password" = {
-        proxyPass = "http://127.0.0.1:40574/password";
-      };
+      # Couchmail web UI + API locations provided by services.couchmail.nginx
       locations."/spub/" = {
         alias = "/var/www/spub/";
         extraConfig = "autoindex on;";
