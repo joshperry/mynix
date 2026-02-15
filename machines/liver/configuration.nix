@@ -397,6 +397,10 @@
       locations."/mail/" = {
         proxyPass = "http://localhost:5984/mail/";
       };
+      # Couchmail bridge password change API
+      locations."/_couchmail/api/password" = {
+        proxyPass = "http://127.0.0.1:40574/password";
+      };
       locations."/spub/" = {
         alias = "/var/www/spub/";
         extraConfig = "autoindex on;";
