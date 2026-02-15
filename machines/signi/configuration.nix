@@ -495,6 +495,18 @@ in {
     defaultSession = "none+i3";
   };
 
+  xdg.portal = {
+    enable = true;
+    config = {
+      common = {
+        default = [ "lxqt" ];
+      };
+    };
+    extraPortals = with pkgs; [
+      lxqt.xdg-desktop-portal-lxqt
+    ];
+  };
+
   fonts = {
     enableDefaultPackages = true;
     packages = with pkgs; [
