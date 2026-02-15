@@ -23,6 +23,13 @@ buildGoModule {
     sed -i 's|S3Bucket    string|S3Bucket    string\n\tS3Region    string|' *.go
     sed -i 's|Secure: conf.S3TLS,|Secure: conf.S3TLS,\n\t\tRegion: conf.S3Region,|' *.go
 
+    # Add fmt import (needed for Sprintf in HEAD handler)
+    sed -i 's|"encoding/hex"|"encoding/hex"\n\t"fmt"|' *.go
+
+    # Handle HEAD requests directly via StatObject instead of redirecting
+    # (S3 presigned URLs are method-specific; GET-signed URLs reject HEAD requests)
+    sed -i -z 's|\t\t} else {\n\t\t\tch := make(http.Header)|\t\t} else if r.Method == "HEAD" {\n\t\t\tinfo, err := s3Client.StatObject(context.Background(), conf.S3Bucket, fileStorePath, minio.StatObjectOptions{})\n\t\t\tif err != nil {\n\t\t\t\thttp.Error(w, "Not found", 404)\n\t\t\t\treturn\n\t\t\t}\n\t\t\taddContentHeaders(w.Header(), fileStorePath)\n\t\t\tw.Header().Set("Content-Length", fmt.Sprintf("%d", info.Size))\n\t\t\tw.WriteHeader(http.StatusOK)\n\t\t} else {\n\t\t\tch := make(http.Header)|' *.go
+
     cat > go.mod << 'EOF'
 module github.com/Wilm0r/prosody-filer-s3
 
