@@ -1,9 +1,5 @@
 { config, pkgs, lib, ... }:
 
-let
-  # Couchmail — Node.js bridge between CouchDB and postfix/dovecot
-  couchmail = pkgs.callPackage ./couchmail { };
-in
 {
   imports = [
     ./hardware-configuration.nix
@@ -80,13 +76,6 @@ in
     isSystemUser = true;
   };
   users.groups.vmail = { gid = 5000; };
-
-  # Couchmail service user
-  users.users.couchmail = {
-    isSystemUser = true;
-    group = "couchmail";
-  };
-  users.groups.couchmail = { };
 
   services.openssh = {
     enable = true;
@@ -167,10 +156,7 @@ in
       smtpd_sasl_path = "private/dovecot-auth";
       smtpd_sasl_auth_enable = "yes";
 
-      # Virtual domains via couchmail TCP services
-      virtual_mailbox_domains = "tcp:localhost:40571";
-      virtual_mailbox_maps = "tcp:localhost:40572";
-      virtual_alias_maps = "tcp:localhost:40573";
+      # Virtual domains via couchmail module (TCP services)
       virtual_transport = "lmtp:unix:private/dovecot-lmtp";
       virtual_uid_maps = "static:5000";
       virtual_gid_maps = "static:5000";
@@ -261,19 +247,13 @@ in
     mailPlugins.globally.enable = [ "zlib" ];
 
     extraConfig = ''
-      # Auth via couchmail dict proxy
-      passdb {
-        driver = dict
-        args = /etc/dovecot/dovecot-dict-auth.conf.ext
-      }
+      # Auth + sieve via couchmail module (passdb dict + sieve plugin)
       userdb {
         driver = static
         args = uid=5000 gid=5000 home=/var/spool/mail/vhosts/%d/%n
       }
 
-      # Sieve via couchmail
       plugin {
-        sieve = dict:proxy:/run/couchmail/dovecot-auth.sock:sieve;name=main_script
         zlib_save_level = 6
         zlib_save = gz
       }
@@ -305,14 +285,6 @@ in
       }
     '';
   };
-
-  # Dovecot dict auth config — bridges to couchmail unix socket
-  environment.etc."dovecot/dovecot-dict-auth.conf.ext".text = ''
-    uri = proxy:/run/couchmail/dovecot-auth.sock:auth
-    password_key = %u
-    user_key = %u
-    default_pass_scheme = SSHA512
-  '';
 
   # ── OpenDKIM ──────────────────────────────────────────────────
   services.opendkim = {
@@ -359,24 +331,12 @@ in
   # ── SpamAssassin ──────────────────────────────────────────────
   services.spamassassin.enable = true;
 
-  # ── Couchmail (CouchDB ↔ mail bridge) ─────────────────────────
-  systemd.services.couchmail = {
-    description = "CouchDB mail bridge for postfix/dovecot";
-    after = [ "docker-couchdb.service" "network.target" ];
-    wantedBy = [ "multi-user.target" ];
-    environment = {
-      COUCH_HOST = "localhost";
-      COUCH_USER = "mail";
-    };
-    serviceConfig = {
-      ExecStart = "${couchmail}/bin/couchmail";
-      RuntimeDirectory = "couchmail";
-      EnvironmentFile = config.sops.secrets."couchmail/password".path;
-      User = "couchmail";
-      Group = "couchmail";
-      Restart = "on-failure";
-      RestartSec = 5;
-    };
+  # ── Couchmail (CouchDB + mail bridge + web UI) ────────────────
+  services.couchmail = {
+    enable = true;
+    domain = "6bit.com";
+    couchdbCredentialsFile = config.sops.secrets."couchdb/env".path;
+    bridgePasswordFile = config.sops.secrets."couchmail/password".path;
   };
 
   # ── OCI Containers ────────────────────────────────────────────
@@ -384,15 +344,6 @@ in
   virtualisation.docker.enable = true;
 
   virtualisation.oci-containers.containers = {
-    couchdb = {
-      image = "couchdb:3";
-      ports = [ "127.0.0.1:5984:5984" ];
-      volumes = [
-        "/var/lib/couchdb:/opt/couchdb/data"
-      ];
-      environmentFiles = [ config.sops.secrets."couchdb/env".path ];
-    };
-
     ghost = {
       image = "ghost:5.75-alpine";
       ports = [ "127.0.0.1:2368:2368" ];
@@ -435,6 +386,16 @@ in
       root = "/var/www/6bit.com";
       locations."/couch/" = {
         proxyPass = "http://localhost:5984/";
+      };
+      # Couchmail web UI + CouchDB API for auth
+      locations."/_couchmail/" = {
+        proxyPass = "http://localhost:5984/_couchmail/";
+      };
+      locations."/_session" = {
+        proxyPass = "http://localhost:5984/_session";
+      };
+      locations."/mail/" = {
+        proxyPass = "http://localhost:5984/mail/";
       };
       locations."/spub/" = {
         alias = "/var/www/spub/";

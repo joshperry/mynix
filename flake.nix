@@ -24,13 +24,17 @@
       inputs.home-manager.follows = "home-manager";
       inputs.impermanence.follows = "impermanence";
     };
+    couchmail = {
+      url = "github:joshperry/couchmail";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, litnix, nuketown, sops-nix, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, litnix, nuketown, couchmail, sops-nix, flake-parts, ... }:
   let
     packages = { ... }: {
       nixpkgs.overlays = [
@@ -429,6 +433,9 @@
         users = {
           josh = import ./users/josh/server.nix;
         };
+        sysmodules = [
+          couchmail.nixosModules.default
+        ];
       };
 
       mantissa = nixosSystem {
