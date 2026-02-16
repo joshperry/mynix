@@ -38,7 +38,7 @@
   system.stateVersion = "23.05";
 
   system.autoUpgrade = {
-    enable = false;
+    enable = true;
     dates = "04:00";
     flake = "github:joshperry/mynix";
     allowReboot = true;
