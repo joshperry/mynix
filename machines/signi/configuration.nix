@@ -250,6 +250,7 @@ in {
 
   networking.hostName = "signi"; # Define your hostname.
   networking.networkmanager.enable = true;
+  networking.networkmanager.dns = "systemd-resolved";
 #  networking.networkmanager.wifi.powersave = true;
   networking.networkmanager.wifi.scanRandMacAddress = true;
   networking.networkmanager.wifi.macAddress = "random";
@@ -613,9 +614,17 @@ in {
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
 
+  # systemd-resolved handles DNS + mDNS resolution (replaces nss-mdns)
+  services.resolved = {
+    enable = true;
+    dnssec = "allow-downgrade";
+    extraConfig = "MulticastDNS=yes";
+  };
+
+  # Avahi still publishes services/hostname; resolved handles resolution
   services.avahi = {
     enable = true;
-    nssmdns4 = true;
+    nssmdns4 = false;
     openFirewall = true;
     domainName = "local";
     publish = {
