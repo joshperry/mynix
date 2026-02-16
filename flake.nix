@@ -15,7 +15,7 @@
     impermanence = { url = "github:nix-community/impermanence"; };
     flake-parts.url = "github:hercules-ci/flake-parts";
     nuketown = {
-      url = "github:joshperry/nuketown";
+      url = "github:joshperry/nuketown/cloud-design";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
       inputs.impermanence.follows = "impermanence";

@@ -44,6 +44,20 @@ in {
       sudo.enable = true;
       portal.enable = true;
 
+      daemon = {
+        enable = true;
+        repos = {
+          nuketown = { url = "git@github.com:joshperry/nuketown.git"; };
+          mynix = { url = "git@github.com:joshperry/mynix.git"; };
+        };
+      };
+
+      xmpp = {
+        enable = true;
+        jid = "ada@6bit.com";
+        passwordSecret = "ada/email-password";
+      };
+
       packages = [ pkgs.gh ];
 
       secrets.sshKey = "ada/ssh-key";
