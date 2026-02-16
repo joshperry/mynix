@@ -156,11 +156,10 @@
   # ── Postfix ───────────────────────────────────────────────────
   services.postfix = {
     enable = true;
-    hostname = "mail.6bit.com";
-    origin = "$mydomain";
-    destination = [ "localhost.$mydomain" "localhost" "$myhostname" ];
-
-    config = {
+    settings.main = {
+      myhostname = "mail.6bit.com";
+      myorigin = "$mydomain";
+      mydestination = [ "localhost.$mydomain" "localhost" "$myhostname" ];
       # TLS
       smtpd_tls_security_level = "may";
       smtpd_tls_auth_only = "yes";
@@ -208,7 +207,7 @@
 
     };
 
-    masterConfig = {
+    settings.master = {
       # content_filter on smtp inet only — NOT in main.cf — so that
       # re-injected mail via sendmail/pickup doesn't loop back through the filter
       smtp_inet = {

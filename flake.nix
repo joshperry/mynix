@@ -57,8 +57,8 @@
     nixosSystem = { name, system, users, sysmodules ? [] }: #def.nixosSystem
     let
       targetSystem = nixpkgs.lib.nixosSystem {
-        inherit system;
         modules = [
+          { nixpkgs.hostPlatform = system; }
           packages
           registry
           ./modules
