@@ -2,6 +2,7 @@ keys:
   - &admin_josh 2EE325D71601671696EBF687E45953D34C8829ED
   - &signi_age age100uztnkcqanyhq2v37lwq2jtg8563lz25w22u88qhppld526t9zsxy3n3h
   - &liver_age age1u85f62gvuk0fevmlxvsz74q8zlfdtasqrktfguxcn7q8fak5a3lq09ha7r
+  - &mino_age age1c4lf0ka5h87g98z047ljfzp2tuf6gx0csg8aw89xwsderem52fasnuc4td
 
 creation_rules:
   - path_regex: secrets/signi\.yaml$
@@ -17,6 +18,13 @@ creation_rules:
           - *admin_josh
         age:
           - *liver_age
+
+  - path_regex: secrets/mino\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *mino_age
 
   # Fallback for any other secrets files
   - path_regex: secrets/.*\.yaml$

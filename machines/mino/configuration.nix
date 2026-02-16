@@ -7,6 +7,12 @@
     ../../profiles/server.nix
   ];
 
+  sops = {
+    defaultSopsFile = ../../secrets/mino.yaml;
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    secrets."mino/wifi-psk" = {};
+  };
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -43,7 +49,7 @@
       CacheDirectory = "nix";
     };
   };
-  
+
   # Even root should use the daemon for builds to avoid /tmp cache
   environment.variables.NIX_REMOTE = "daemon";
 
@@ -63,31 +69,202 @@
     sysstat
   ];
 
+  boot.kernel.sysctl = {
+    "net.ipv4.conf.all.forwarding" = true;
+    "net.ipv6.conf.all.forwarding" = true;
+  };
+
+  networking = {
+    hostName = "mino";
+
+    vlans = {
+      mgmt = {
+        id = 10;
+        interface = "enp2s0";
+      };
+      loc = {
+        id = 20;
+        interface = "enp2s0";
+      };
+      guest = {
+        id = 30;
+        interface = "enp2s0";
+      };
+    };
+
+    interfaces = {
+      enp2s0 = {
+        useDHCP = false;
+      };
+
+      enp4s0 = {
+        useDHCP = true;
+      };
+
+      mgmt.ipv4.addresses = [
+        { address = "10.0.1.1"; prefixLength = 24; }
+      ];
+
+      loc.ipv4.addresses = [
+        { address = "10.0.2.1"; prefixLength = 24; }
+      ];
+
+      guest.ipv4.addresses = [
+        { address = "10.0.3.1"; prefixLength = 24; }
+      ];
+    };
+
+    wireless = {
+      enable = true;
+      secretsFile = config.sops.secrets."mino/wifi-psk".path;
+      networks = {
+        "Shady Acres - Guest" = {
+        };
+        "Perry7" = {
+          pskRaw = "ext:wifi_psk";
+        };
+      };
+    };
+
+    dhcpcd = {
+      enable = true;
+      persistent = true; # keep interface configuration on daemon shutdown.
+      allowInterfaces = [ "enp4s0" "wlo1" ];
+      extraConfig = ''
+        # generate a RFC 4361 complient DHCP ID
+        duid
+
+        # We don't want to expose our hw addr from the router to the internet,
+        # so we generate a RFC7217 address.
+        slaac private
+
+        # Default to no ipv6
+        noipv6rs
+
+        # settings for the interface
+        interface enp4s0
+          ipv6rs              # router advertisement solicitaion
+          iaid 1              # interface association ID
+          ia_na 1             # Request an address
+          ia_pd 2 mgmt/0 loc/1 guest/2       # request PDs for interfaces
+      '';
+    };
+
+    nat = {
+      enable = true;
+      internalInterfaces = [
+        "mgmt"
+        "loc"
+        "guest"
+      ];
+      externalInterface = "enp4s0";
+    };
+
+    nftables = {
+      enable = true;
+    };
+
+    firewall = {
+      enable = true;
+      allowedTCPPorts = [
+        53 #DNS
+      ];
+      allowedUDPPorts = [
+        53 #DNS
+        67 #DHCP
+      ];
+    };
+  };
+
+  services.dnsmasq = {
+    enable = true;
+    settings = {
+      interface = [
+        "enp2s0"
+        "mgmt"
+        "loc"
+        "guest"
+      ];
+      dhcp-range = [
+        "enp2s0,192.168.1.100,192.168.1.254,1h"
+        "mgmt,10.0.1.30,10.0.1.254,36h"
+        "loc,10.0.2.20, 10.0.2.254,36h"
+        "guest,10.0.3.10,10.0.3.254,5h"
+      ];
+      dhcp-host = [
+        "duck,10.0.1.3"
+        "bones,10.0.2.10"
+      ];
+    };
+  };
+
+  services.radvd = {
+    enable = true;
+    config = ''
+      interface mgmt {
+        AdvSendAdvert on;
+        MinRtrAdvInterval 3;
+        MaxRtrAdvInterval 10;
+        prefix ::/64 {
+          AdvOnLink on;
+          AdvAutonomous on;
+          AdvRouterAddr on;
+          AdvValidLifetime 3600;
+          AdvPreferredLifetime 3600;
+        };
+      };
+      interface loc {
+        AdvSendAdvert on;
+        MinRtrAdvInterval 3;
+        MaxRtrAdvInterval 10;
+        prefix ::/64 {
+          AdvOnLink on;
+          AdvAutonomous on;
+          AdvRouterAddr on;
+          AdvValidLifetime 3600;
+          AdvPreferredLifetime 3600;
+        };
+      };
+      interface guest {
+        AdvSendAdvert on;
+        MinRtrAdvInterval 3;
+        MaxRtrAdvInterval 10;
+        prefix ::/64 {
+          AdvOnLink on;
+          AdvAutonomous on;
+          AdvRouterAddr on;
+          AdvValidLifetime 3600;
+          AdvPreferredLifetime 3600;
+        };
+      };
+    '';
+  };
+
   services.openssh = {
     enable = true;
     settings.PermitRootLogin = "no";
   };
 
-  networking.firewall = {
+  services.avahi = {
     enable = true;
+    nssmdns4 = true;
+    domainName = "local";
+    publish = {
+      enable = true;
+      domain = true;
+      addresses = true;
+      workstation = true;
+    };
   };
-
-  networking.hostName = "mino";
 
   # Set your time zone.
   time.timeZone = "MST7MDT";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkbOptions in tty.
-  # };
 
   users.mutableUsers = false;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.josh = {
     uid = 1000;
     group = "josh";
@@ -104,12 +281,6 @@
    gid = 1000;
   };
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data, like file locations and database versions
-  # on your system were taken. It's perfectly fine and recommended to leave
-  # this value at the release version of the first install of this system.
-  # Before changing this value read the documentation for this option
-  # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.05"; # Did you read the comment?
+  system.stateVersion = "23.05";
 
 }
