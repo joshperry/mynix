@@ -14,10 +14,6 @@
     };
     impermanence = { url = "github:nix-community/impermanence"; };
     flake-parts.url = "github:hercules-ci/flake-parts";
-    litnix = {
-      url = "path:/home/josh/dev/litnix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nuketown = {
       url = "github:joshperry/nuketown";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -34,7 +30,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, litnix, nuketown, couchmail, sops-nix, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nuketown, couchmail, sops-nix, flake-parts, ... }:
   let
     packages = { ... }: {
       nixpkgs.overlays = [
@@ -44,8 +40,6 @@
         #  python3Packages = final.python310.pkgs;
         #})
 
-        litnix.overlays.default
-        
         # Private package overlay set
         (final: prev:
           import ./packages { pkgs = prev; }
