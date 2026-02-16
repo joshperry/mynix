@@ -282,6 +282,25 @@
    gid = 1000;
   };
 
+  users.users.ada = {
+    uid = 1100;
+    group = "ada";
+    isNormalUser = true;
+    hashedPassword = "!";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4wKwiX1fnwB/U4Mc7JT4ddMExopexk0DUSd7Du12Sp ada@signi"
+    ];
+  };
+  users.groups.ada = { gid = 1100; };
+
+  security.sudo.extraRules = [{
+    users = [ "ada" ];
+    commands = [
+      { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
+      { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
+    ];
+  }];
+
   system.stateVersion = "23.05";
 
 }
