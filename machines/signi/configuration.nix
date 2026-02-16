@@ -65,6 +65,10 @@ in {
           subsystem = "usb";
           attrs = { product = "DFU in FS Mode"; };
         }
+        {
+          subsystem = "tty";
+          attrs = { idVendor = "303a"; idProduct = "1001"; };
+        }
       ];
 
       claudeCode = {
