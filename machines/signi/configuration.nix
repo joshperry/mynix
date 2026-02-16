@@ -44,9 +44,12 @@ in {
       sudo.enable = true;
       portal.enable = true;
 
+      packages = [ pkgs.gh ];
+
       secrets.sshKey = "ada/ssh-key";
       secrets.gpgKey = "ada/gpg-key";
       secrets.extraSecrets.email-password = "ada/email-password";
+      secrets.extraSecrets.gh-pat = "ada/gh-pat";
 
       devices = [
         {
@@ -109,6 +112,7 @@ in {
           if [ -f ${config.sops.secrets."ada/gpg-key".path} ]; then
             gpg --batch --import ${config.sops.secrets."ada/gpg-key".path} 2>/dev/null || true
           fi
+          export GH_TOKEN="$(cat ${config.sops.secrets."ada/gh-pat".path} 2>/dev/null || true)"
         '';
         accounts.email.accounts.ada = {
           primary = true;
