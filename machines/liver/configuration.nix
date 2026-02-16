@@ -40,8 +40,7 @@
   system.autoUpgrade = {
     enable = false;
     dates = "04:00";
-    flake = "${config.users.users.josh.home}/dev/mynix";
-    flags = [ "--update-input" "nixpkgs" ];
+    flake = "github:joshperry/mynix";
     allowReboot = true;
   };
 
