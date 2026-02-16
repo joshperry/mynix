@@ -621,19 +621,8 @@ in {
     extraConfig = "MulticastDNS=yes";
   };
 
-  # Avahi still publishes services/hostname; resolved handles resolution
-  services.avahi = {
-    enable = true;
-    nssmdns4 = false;
-    openFirewall = true;
-    domainName = "local";
-    publish = {
-      enable = true;
-      domain = true;
-      addresses = true;
-      workstation = true;
-    };
-  };
+  # Avahi disabled — systemd-resolved handles mDNS resolution + hostname publishing
+  services.avahi.enable = false;
 
   services.fwupd.enable = true;
 
