@@ -10,7 +10,7 @@
   sops = {
     defaultSopsFile = ../../secrets/mino.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    secrets."wifi-psk/Perry7" = {};
+    secrets.wifi-psk = {};
   };
 
   # Use the systemd-boot EFI boot loader.
@@ -116,7 +116,7 @@
 
     wireless = {
       enable = true;
-      secretsFile = config.sops.secrets."wifi-psk/Perry7".path;
+      secretsFile = config.sops.secrets.wifi-psk.path;
       networks = {
         "Shady Acres - Guest" = {
         };
