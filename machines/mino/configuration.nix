@@ -11,7 +11,6 @@
     defaultSopsFile = ../../secrets/mino.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     secrets.wifi-psk = {};
-    secrets.josh-password.neededForUsers = true;
   };
 
   # Use the systemd-boot EFI boot loader.
@@ -269,7 +268,7 @@
   users.users.josh = {
     uid = 1000;
     group = "josh";
-    hashedPasswordFile = config.sops.secrets.josh-password.path;
+    initialHashedPassword = "$6$rounds=3000000$plps8mAYoxl.ngM7$UICj9iFn3SvWEBmD6Zsv0pWu8fru2jGNqvXazc7BjM9CJJxCna.du8yytejQeAL9yjQ.943AXyv8fjgSxOX.4.";
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
