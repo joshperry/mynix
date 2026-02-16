@@ -276,8 +276,9 @@ in {
   # networking.firewall.allowedTCPPorts = [ ... ];
   networking.firewall.allowedUDPPorts = [
     # For networkmanager internet connection sharing dhcp dns
-    53 67 
+    53 67
     3333
+    5353 # mDNS (systemd-resolved)
   ];
   networking.firewall.enable = true;
 
