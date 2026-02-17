@@ -248,11 +248,11 @@
         "sops-nix": "sops-nix"
       },
       "locked": {
-        "lastModified": 1771292161,
-        "narHash": "sha256-ruVPokOhKiNVVHC+z+0s7cRvx5W8paXgiZOFptza5ug=",
+        "lastModified": 1771292626,
+        "narHash": "sha256-+jlHcyBcePndWIv+h2Box+DXgVI9di55U1zkHTRDRCg=",
         "owner": "joshperry",
         "repo": "nuketown",
-        "rev": "7eccafc1c7dba89e580219d2db74ecf364517f59",
+        "rev": "cd0cd2e4ac00f06fef0b60040f64083dd3247d11",
         "type": "github"
       },
       "original": {
