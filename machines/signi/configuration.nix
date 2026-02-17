@@ -50,6 +50,12 @@ in {
           nuketown = { url = "git@github.com:joshperry/nuketown.git"; };
           mynix = { url = "git@github.com:joshperry/mynix.git"; };
         };
+        mail = {
+          enable = true;
+          host = "mail.6bit.com";
+          username = "ada@6bit.com";
+          passwordSecret = "ada/email-password";
+        };
       };
 
       xmpp = {
