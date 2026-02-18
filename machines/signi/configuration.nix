@@ -17,7 +17,7 @@ in {
   # ── Nuketown: AI agent framework ──────────────────────────────
   nuketown = {
     enable = true;
-    domain = "signi.local";
+    domain = "6bit.com";
     humanUser = "josh";
     btrfsDevice = "38b243a0-c875-4758-8998-cc6c6a4c451e";
     sopsFile = ../../secrets/signi.yaml;
@@ -181,6 +181,7 @@ in {
     edgetx
     firefox
     irssi
+    kdePackages.kdenlive
     unstable.lmstudio
     unstable.obsidian
     prismlauncher
