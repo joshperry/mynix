@@ -28,20 +28,7 @@
     };
   };
 
-  programs.tmux = {
-    enable = true;
-    extraConfig = lib.fileContents config/tmux/tmux.conf;
-    shortcut = "a";
-    terminal = "tmux-256color";
-    historyLimit = 20000;
-    mouse = true;
-    keyMode = "vi";
-    escapeTime = 0; # no esc delay, for vim
-    tmuxinator.enable = true;
-    plugins = [
-      pkgs.tmuxPlugins.tmux-fzf
-    ];
-  };
+  imports = [ ./tmux.nix ];
 
   programs.neovim = { # the power of lua beckons
     enable = true;

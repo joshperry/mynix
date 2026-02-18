@@ -1,0 +1,104 @@
+{ pkgs, ... }: {
+
+  programs.tmux = {
+    enable = true;
+    shortcut = "a";
+    terminal = "tmux-256color";
+    historyLimit = 20000;
+    mouse = true;
+    keyMode = "vi";
+    escapeTime = 0; # no esc delay, for vim
+    tmuxinator.enable = true;
+    plugins = [
+      pkgs.tmuxPlugins.tmux-fzf
+    ];
+    extraConfig = # tmux
+    ''
+      # Setup powerline
+      run-shell "${pkgs.powerline}/bin/powerline-daemon -q || true"
+      set-environment -g POWERLINE_COMMAND ${pkgs.powerline}/bin/powerline
+      set -g status on
+      set -g status-interval 2
+      set -g status-style fg=colour231,bg=colour234
+      set -g status-left-length 20
+      set -g status-left '#[bg=red, fg=colour232, bold]#{?window_zoomed_flag, 🔎 #[bg=black],}#[fg=colour16,bg=colour254,bold] #S #[fg=colour254,bg=colour234,nobold]#(eval $POWERLINE_COMMAND tmux left)'
+      set -g status-right-length 100
+      set -g status-right '#(eval $POWERLINE_COMMAND tmux right) #(gitmux "#{pane_current_path}") '
+      set -g window-status-format "#[fg=colour244,bg=colour234]#I #[fg=colour240] #[default]#W "
+      set -g window-status-current-format "#[fg=colour234,bg=colour31]#[fg=colour117,bg=colour31] #I  #[fg=colour231,bold]#W #[fg=colour31,bg=colour234,nobold]"
+      set-window-option -g window-status-style fg=colour249
+      set-window-option -g window-status-activity-style fg=yellow,none
+      set-window-option -g window-status-bell-style fg=red,none
+
+      # highlight window when it has new activity
+      setw -g monitor-activity on
+      set -g visual-activity on
+
+      # set color window borders
+      set -g pane-border-style fg=colour148
+      set -g pane-active-border-style fg=colour069
+
+      # quick pane cycling
+      unbind ^A
+      bind ^A select-pane -t :.+
+
+      # Handle cursor keys per-pane for VIM cursor toggle between modes
+      set-option -g terminal-overrides '*88col*:colors=88,*256col*:colors=256,xterm*:XT:Ms=\E]52;%p1%s;%p2%s\007:Cs=\E]12;%p1%s\007:Cr=\E]112\007:Ss=\E]50;CursorShape=%?%p1%{3}%<%t%{0}%e%p1%{2}%-%;%d\007'
+
+      # Enable focus events for nvim tmux
+      set-option -g focus-events on
+
+      # Support 24-bit color
+      set -as terminal-features ",xterm-256color:RGB"
+
+      # Smart pane switching with awareness of Vim splits.
+      # See: https://github.com/christoomey/vim-tmux-navigator
+      is_vim="ps -o state= -o comm= -t '#{pane_tty}' \
+          | grep -iqE '^[^TXZ ]+ +(\\S+\\/)?g?(view|n?vim?x?|\.vim\-wrapped)(diff)?$'"
+      bind-key -n C-h if-shell "$is_vim" "send-keys C-h"  "select-pane -L"
+      bind-key -n C-j if-shell "$is_vim" "send-keys C-j"  "select-pane -D"
+      bind-key -n C-k if-shell "$is_vim" "send-keys C-k"  "select-pane -U"
+      bind-key -n C-l if-shell "$is_vim" "send-keys C-l"  "select-pane -R"
+      bind-key -n 'C-\' if-shell "$is_vim" "send-keys C-\\" "select-pane -l"
+      bind-key -T copy-mode-vi C-h select-pane -L
+      bind-key -T copy-mode-vi C-j select-pane -D
+      bind-key -T copy-mode-vi C-k select-pane -U
+      bind-key -T copy-mode-vi C-l select-pane -R
+      bind-key -T copy-mode-vi 'C-\' select-pane -l
+      # Copies in tmux will go to clipboard
+      bind-key -T copy-mode-vi y send-keys -X copy-pipe "xclip -r -selection clipboard"
+      # Navigate windows with ctrl-alt-(l|h)
+      bind-key -n C-M-h select-window -t -1
+      bind-key -n C-M-l select-window -t +1
+      # Toggle zoom with ctrl-alt-z
+      bind-key -n C-M-z resize-pane -Z
+      # Enter copy mode with C-M-[
+      bind-key -n C-M-[ copy-mode
+
+      # Ctrl-Alt-F: jump to tmux-fzf window picker
+      bind-key -n C-M-f run-shell -b "${pkgs.tmuxPlugins.tmux-fzf}/share/tmux-plugins/tmux-fzf/scripts/window.sh switch"
+
+      # Make splits default to the current pane's path
+      bind '"' split-window -c "#{pane_current_path}"
+      bind % split-window -h -c "#{pane_current_path}"
+
+      # [next two credit to Alexey] (https://medium.freecodecamp.org/tmux-in-practice-scrollback-buffer-47d5ffa71c93)
+      # Do not copy selection and cancel copy mode on drag end event
+      # Prefer iTerm style selection: select, then mouse click to copy to buffer
+      unbind -T copy-mode-vi MouseDragEnd1Pane
+      bind -T copy-mode-vi MouseDown1Pane select-pane \;\
+        send-keys -X copy-pipe "pbcopy" \;\
+        send-keys -X clear-selection
+
+      # When scrolling with mouse wheel, reduce number of scrolled rows per tick to "2" (default is 5)
+      bind -T copy-mode-vi WheelUpPane select-pane \; send-keys -X -N 2 scroll-up
+      bind -T copy-mode-vi WheelDownPane select-pane \; send-keys -X -N 2 scroll-down
+      # /Thanks Alexey!
+    '';
+  };
+
+  home.file.".config/powerline/themes/tmux/default.json" = {
+    source = ./config/powerline/tmux/default.json;
+  };
+
+}
