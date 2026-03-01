@@ -42,6 +42,22 @@
         "type": "github"
       }
     },
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1733328505,
+        "narHash": "sha256-NeCCThCEP3eCl2l/+27kNNK7QrwZB1IJCrXfrbv5oqU=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "ff81ac966bb2cae68946d5ed5fc4994f96d0ffec",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -75,6 +91,48 @@
       "original": {
         "owner": "hercules-ci",
         "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_3": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "nix-snapshotter",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1733312601,
+        "narHash": "sha256-4pDvzqnegAfRkPwO3wmwBhVi/Sye1mzps0zHWYnP88c=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "globset": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "nix-snapshotter",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1729844927,
+        "narHash": "sha256-nBkQx23jgpGPk3aU2KcqJCoYvzjsKEjWBePmc2z8N3k=",
+        "owner": "pdtpartners",
+        "repo": "globset",
+        "rev": "eb9d9e64b7ab0a64c34ba4a5a990b66506401c35",
+        "type": "github"
+      },
+      "original": {
+        "owner": "pdtpartners",
+        "repo": "globset",
         "type": "github"
       }
     },
@@ -136,6 +194,30 @@
       "original": {
         "owner": "nix-community",
         "repo": "impermanence",
+        "type": "github"
+      }
+    },
+    "nix-snapshotter": {
+      "inputs": {
+        "flake-compat": "flake-compat",
+        "flake-parts": "flake-parts_3",
+        "globset": "globset",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1772343176,
+        "narHash": "sha256-y8bwCN7RKRLpLy2gD3UwHLL3R0FTaBhgksof2j3KH68=",
+        "owner": "joshperry",
+        "repo": "nix-snapshotter",
+        "rev": "612ccfc691822a29dac9fd181953bb85e676b9b3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "joshperry",
+        "ref": "k3s-1.34-support",
+        "repo": "nix-snapshotter",
         "type": "github"
       }
     },
@@ -269,6 +351,7 @@
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
+        "nix-snapshotter": "nix-snapshotter",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nuketown": "nuketown",

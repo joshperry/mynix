@@ -178,6 +178,7 @@ in {
 
   environment.systemPackages = with pkgs; [
     arduino
+    audacity
     edgetx
     firefox
     irssi
@@ -300,6 +301,20 @@ in {
       "/etc/ssh/ssh_host_ed25519_key"
       "/etc/ssh/ssh_host_rsa_key.pub"
       "/etc/ssh/ssh_host_rsa_key"
+    ];
+  };
+
+  # k3s rootless with nix-snapshotter
+  services.k3s.rootless = {
+    enable = true;
+    snapshotter = "nix";
+    setKubeConfig = true;
+    setEmbeddedContainerd = true;
+    extraFlags = [
+      "--disable traefik"
+      "--disable servicelb"
+      "--disable metrics-server"
+      "--write-kubeconfig-mode 644"
     ];
   };
 
@@ -620,7 +635,7 @@ in {
   # systemd-resolved handles DNS + mDNS resolution (replaces nss-mdns)
   services.resolved = {
     enable = true;
-    dnssec = "allow-downgrade";
+    #dnssec = "allow-downgrade";
     extraConfig = "MulticastDNS=yes";
   };
 

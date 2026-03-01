@@ -28,6 +28,10 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-snapshotter = {
+      url = "github:joshperry/nix-snapshotter/k3s-1.34-support";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nuketown, couchmail, sops-nix, flake-parts, ... }:
@@ -466,6 +470,8 @@
         sysmodules = [ #ref.sysmodules
           inputs.impermanence.nixosModules.impermanence
           nuketown.nixosModules.default
+          inputs.nix-snapshotter.nixosModules.default
+          { nixpkgs.overlays = [ inputs.nix-snapshotter.overlays.default ]; }
         ];
       };
 
