@@ -304,20 +304,6 @@ in {
     ];
   };
 
-  # k3s rootless with nix-snapshotter
-  services.k3s.rootless = {
-    enable = true;
-    snapshotter = "nix";
-    setKubeConfig = true;
-    setEmbeddedContainerd = true;
-    extraFlags = [
-      "--disable traefik"
-      "--disable servicelb"
-      "--disable metrics-server"
-      "--write-kubeconfig-mode 644"
-    ];
-  };
-
   # Don't build in /tmp ramdisk
   systemd.services.nix-daemon = {
     environment = {
@@ -483,6 +469,66 @@ in {
   };
 
   ###
+  # Automatic display switching (EDID-based, GPU-mode agnostic)
+  services.autorandr = {
+    enable = true;
+    matchEdid = true;
+    defaultTarget = "laptop";
+
+    profiles = {
+      laptop = {
+        fingerprint.eDP-1 = "00ffffffffffff0030e488070000000000210104a5221678030f95ae5243b0260f505400000001010101010101010101010101010101353c80a070b023403020360059d71000001a2a3080a070b023403020360059d71000001a000000fe004d34573535803136305755340a0000000000024131b2001000000a410a20200088";
+        config.eDP-1 = {
+          enable = true;
+          primary = true;
+          mode = "1920x1200";
+          position = "0x0";
+          rate = "60.00";
+        };
+      };
+      docked = {
+        fingerprint.HDMI-1 = "00ffffffffffff0010acf0a04c314430151c010380582578eeee95a3544c99260f5054a54b00714f81008180a940d1c00101010101014c9a00a0f0402e6030203a00706f3100001a000000ff00393746385038354c3044314c0a000000fc0044454c4c20553338313844570a000000fd001855197328000a202020202020016a02032af14d9005040302071601141f12135a230907078301000067030c001000384467d85dc401788003023a801871382d40582c4500706f3100001e565e00a0a0a0295030203500706f3100001acd4600a0a0381f4030203a00706f3100001a134c00a0f040176030203a00706f3100001a0000000000000000000000000074";
+        config.HDMI-1 = {
+          enable = true;
+          primary = true;
+          mode = "3840x1600";
+          position = "0x0";
+          rate = "59.99";
+        };
+      };
+      docked-open = {
+        fingerprint.eDP-1 = "00ffffffffffff0030e488070000000000210104a5221678030f95ae5243b0260f505400000001010101010101010101010101010101353c80a070b023403020360059d71000001a2a3080a070b023403020360059d71000001a000000fe004d34573535803136305755340a0000000000024131b2001000000a410a20200088";
+        fingerprint.HDMI-1 = "00ffffffffffff0010acf0a04c314430151c010380582578eeee95a3544c99260f5054a54b00714f81008180a940d1c00101010101014c9a00a0f0402e6030203a00706f3100001a000000ff00393746385038354c3044314c0a000000fc0044454c4c20553338313844570a000000fd001855197328000a202020202020016a02032af14d9005040302071601141f12135a230907078301000067030c001000384467d85dc401788003023a801871382d40582c4500706f3100001e565e00a0a0a0295030203500706f3100001acd4600a0a0381f4030203a00706f3100001a134c00a0f040176030203a00706f3100001a0000000000000000000000000074";
+        config.eDP-1.enable = false;
+        config.HDMI-1 = {
+          enable = true;
+          primary = true;
+          mode = "3840x1600";
+          position = "0x0";
+          rate = "59.99";
+        };
+      };
+      dual = {
+        fingerprint.eDP-1 = "00ffffffffffff0030e488070000000000210104a5221678030f95ae5243b0260f505400000001010101010101010101010101010101353c80a070b023403020360059d71000001a2a3080a070b023403020360059d71000001a000000fe004d34573535803136305755340a0000000000024131b2001000000a410a20200088";
+        fingerprint.HDMI-1 = "00ffffffffffff0010acf0a04c314430151c010380582578eeee95a3544c99260f5054a54b00714f81008180a940d1c00101010101014c9a00a0f0402e6030203a00706f3100001a000000ff00393746385038354c3044314c0a000000fc0044454c4c20553338313844570a000000fd001855197328000a202020202020016a02032af14d9005040302071601141f12135a230907078301000067030c001000384467d85dc401788003023a801871382d40582c4500706f3100001e565e00a0a0a0295030203500706f3100001acd4600a0a0381f4030203a00706f3100001a134c00a0f040176030203a00706f3100001a0000000000000000000000000074";
+        config.HDMI-1 = {
+          enable = true;
+          primary = true;
+          mode = "3840x1600";
+          position = "0x0";
+          rate = "59.99";
+        };
+        config.eDP-1 = {
+          enable = true;
+          mode = "1920x1200";
+          position = "3840x200";
+          rate = "60.00";
+        };
+      };
+    };
+  };
+
+  ###
   # X11 windowing system.
   services.xserver = {
     enable = true;
@@ -498,7 +544,7 @@ in {
 
     displayManager = {
       setupCommands = ''
-        ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --mode 1920x1200 --pos 0x0 --rotate normal --primary
+        ${pkgs.autorandr}/bin/autorandr --change --default laptop
       '';
     };
 
@@ -569,10 +615,6 @@ in {
           };
         };
       };
-
-      services.xserver.displayManager.setupCommands = lib.mkForce ''
-        ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1-1 --mode 1920x1200 --pos 0x0 --rotate normal --primary
-      '';
     };
   };
 

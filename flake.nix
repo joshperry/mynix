@@ -464,6 +464,8 @@
             ./users/josh/machines/signi
             nuketown.homeManagerModules.approvalDaemon
             { nuketown.approvalDaemon.enable = true; }
+            inputs.nix-snapshotter.homeModules.default
+            inputs.nix-snapshotter.homeModules.k3s-rootless
           ]; };
           # ada removed — nuketown manages ada's home-manager
         };

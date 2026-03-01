@@ -1,19 +1,27 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 {
   imports = [ ../.. ];
 
-  home.file.".screenlayout/screen-laptop.sh" = {
-    executable = true;
-    text = "xrandr --output DP-0 --off --output DP-1 --off --output eDP-1 --primary --mode 1920x1200 --pos 0x0 --rotate normal --output DP-1-0 --off --output DP-1-1 --off --output DP-1-2 --off --output HDMI-1-1 --off --output DP-1-3 --off";
+  # k3s rootless + nix-snapshotter (home-manager user services)
+  virtualisation.containerd.rootless = {
+    enable = true;
+    nixSnapshotterIntegration = true;
+  };
+  services.nix-snapshotter.rootless.enable = true;
+  services.k3s.rootless = {
+    enable = true;
+    snapshotter = "nix";
+    setKubeConfig = true;
+    setEmbeddedContainerd = true;
+    extraFlags = [
+      "--disable traefik"
+      "--disable servicelb"
+      "--disable metrics-server"
+      "--write-kubeconfig-mode 644"
+    ];
   };
 
-  home.file.".screenlayout/screen-home.sh" = {
-    executable = true;
-    # dell ultrawide, Displayport, right USB-C (not nvidia)
-    text = "xrandr --output DP-1-0 --primary --mode 3840x1600 --pos 0x0 --rotate normal --output DP-0 --off --output DP-1 --off --output eDP-1 --off --output DP-1-1 --off --output DP-1-2 --off --output HDMI-1-1 --off --output DP-1-3 --off";
-  };
-
-  # k3s rootless + nix-snapshotter re-integrated 2026-02-28
-  # Now uses nix-snapshotter flake's premade NixOS modules
-  # (services.k3s.rootless in machines/signi/configuration.nix)
+  # Workaround: upstream k3s-rootless sets EnvironmentFile=null which
+  # home-manager's systemd type rejects. Remove it when not set.
+  systemd.user.services.k3s.Service.EnvironmentFile = lib.mkForce [];
 }

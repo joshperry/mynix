@@ -220,11 +220,10 @@
         };
 
         display = {
-          "i" = ''exec "~/.screenlayout/screen-laptop.sh" mode "default"'';
-          "o" = ''exec "~/.screenlayout/screen-office.sh" mode "default"'';
-          "h" = ''exec "~/.screenlayout/screen-home.sh" mode "default"'';
-          "e" = ''exec "~/.screenlayout/screen-projector-extend.sh" mode "default"'';
-          "m" = ''exec "~/.screenlayout/screen-projector-mirror.sh" mode "default"'';
+          "i" = ''exec autorandr --load laptop, mode "default"'';
+          "h" = ''exec autorandr --load docked-open, mode "default"'';
+          "d" = ''exec autorandr --load dual, mode "default"'';
+          "a" = ''exec autorandr --change, mode "default"'';
           "Return" = ''mode "default"'';
           "Escape" = ''mode "default"'';
         };
