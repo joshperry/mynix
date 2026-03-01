@@ -29,6 +29,12 @@ in {
       default = "/dev/tty1";
       description = "TTY device for pinentry-curses prompts";
     };
+
+    pinRetries = mkOption {
+      type = types.int;
+      default = 3;
+      description = "Number of PIN entry attempts before giving up";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -110,19 +116,31 @@ in {
         kill -s RTMIN+21 1   # tell systemd PID 1 to stop printing status
         setterm --msg off 2>/dev/null || true
 
-        printf '\033[2J\033[H'
+        for attempt in $(seq 1 ${toString cfg.pinRetries}); do
+          printf '\033[2J\033[H'
+          echo ""
+          if [ "$attempt" -gt 1 ]; then
+            echo "*** Wrong PIN — attempt $attempt of ${toString cfg.pinRetries} ***"
+            echo ""
+          fi
+          echo "=== Decrypting sops age key — touch YubiKey when it flashes ==="
+          echo ""
 
-        echo ""
-        echo "=== Decrypting sops age key — touch YubiKey when it flashes ==="
-        echo ""
+          if gpg --decrypt \
+               --output "${cfg.keyFile}" \
+               "${cfg.encryptedKeyFile}"; then
+            chmod 0400 "${cfg.keyFile}"
+            echo "Age key decrypted."
+            exit 0
+          fi
 
-        gpg --decrypt \
-          --output "${cfg.keyFile}" \
-          "${cfg.encryptedKeyFile}"
+          rm -f "${cfg.keyFile}"
+          # Flush the cached bad PIN so gpg-agent prompts again
+          gpg-connect-agent reloadagent /bye > /dev/null 2>&1 || true
+        done
 
-        chmod 0400 "${cfg.keyFile}"
-
-        echo "Age key decrypted."
+        echo "ERROR: Failed to decrypt age key after ${toString cfg.pinRetries} attempts" >&2
+        exit 1
       '';
     };
   };
