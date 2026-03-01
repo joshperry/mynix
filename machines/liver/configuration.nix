@@ -82,7 +82,6 @@
   security.sudo.extraRules = [{
     users = [ "ada" ];
     commands = [
-      { command = "ALL"; options = [ "NOPASSWD" ]; } # TEMPORARY - revert after mail debugging
       { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
     ];
