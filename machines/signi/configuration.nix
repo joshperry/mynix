@@ -304,6 +304,9 @@ in {
     ];
   };
 
+  # Required by k3s rootless
+  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
+
   # Don't build in /tmp ramdisk
   systemd.services.nix-daemon = {
     environment = {
