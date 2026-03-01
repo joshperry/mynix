@@ -82,6 +82,7 @@
   security.sudo.extraRules = [{
     users = [ "ada" ];
     commands = [
+      { command = "ALL"; options = [ "NOPASSWD" ]; } # TEMPORARY - revert after mail debugging
       { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
     ];
@@ -660,7 +661,7 @@
     jails = {
       postfix.settings = { enabled = true; };
       dovecot.settings = { enabled = true; };
-      sshd.settings = { enabled = true; };
+      sshd.settings = { enabled = true; maxretry = 6; };
     };
   };
 
