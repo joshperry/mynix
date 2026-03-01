@@ -324,12 +324,12 @@
       RemainAfterExit = true;
     };
     script = ''
-      mkdir -p /var/lib/opendkim/keys/6bit.com
-      if [ ! -f /var/lib/opendkim/keys/6bit.com/dkim.private ] && [ -f /mnt/old/etc/opendkim/dkim.private ]; then
-        cp /mnt/old/etc/opendkim/dkim.private /var/lib/opendkim/keys/6bit.com/dkim.private
+      mkdir -p /var/lib/opendkim/keys
+      if [ ! -f /var/lib/opendkim/keys/dkim.private ] && [ -f /mnt/old/etc/opendkim/dkim.private ]; then
+        cp /mnt/old/etc/opendkim/dkim.private /var/lib/opendkim/keys/dkim.private
       fi
       chown -R opendkim:opendkim /var/lib/opendkim
-      chmod 600 /var/lib/opendkim/keys/6bit.com/dkim.private
+      chmod 600 /var/lib/opendkim/keys/dkim.private
     '';
   };
 
