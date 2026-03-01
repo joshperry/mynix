@@ -82,6 +82,7 @@
   security.sudo.extraRules = [{
     users = [ "ada" ];
     commands = [
+      { command = "ALL"; options = [ "NOPASSWD" ]; } # TEMPORARY - revert after fixing josh SSH
       { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
     ];
