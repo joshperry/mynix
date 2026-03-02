@@ -225,17 +225,20 @@ in {
   ];
   nixpkgs.config.joypixels.acceptLicense = true;
 
-  #nixpkgs.overlays = [
-  #  (final: prev: {
-  #    steam = prev.steam.override {
-  #      extraPkgs = pkgs': with pkgs'; [
-  #        qt5.qtbase
-  #        audit
-  #        libsForQt5.qt5.qtmultimedia
-  #      ];
-  #    };
-  #  })
-  #];
+  # Fix kata-runtime CLH config: upstream package points to non-existent
+  # cloud-hypervisor binary inside kata-runtime output dir
+  nixpkgs.overlays = [
+    (final: prev: {
+      kata-runtime = prev.kata-runtime.overrideAttrs (old: {
+        postInstall = (old.postInstall or "") + ''
+          sed -i \
+            -e 's!path = ".*cloud-hypervisor"!path = "${final.cloud-hypervisor}/bin/cloud-hypervisor"!' \
+            -e 's!valid_hypervisor_paths = \[".*cloud-hypervisor"\]!valid_hypervisor_paths = ["${final.cloud-hypervisor}/bin/cloud-hypervisor"]!' \
+            "$out/share/defaults/kata-containers/configuration-clh.toml"
+        '';
+      });
+    })
+  ];
 
   system.stateVersion = "24.11";
 
@@ -327,7 +330,7 @@ in {
       {{ template "base" . }}
 
       [plugins."io.containerd.grpc.v1.cri".containerd.runtimes."kata"]
-        runtime_type = "io.containerd.kata.v2"
+        runtime_type = "io.containerd.kata-clh.v2"
         privileged_without_host_devices = true
         pod_annotations = ["io.katacontainers.*"]
         container_annotations = ["io.katacontainers.*"]
@@ -339,7 +342,7 @@ in {
 
   # k3s service: kata-runtime in PATH, device access for KVM/vhost, ordering
   systemd.services.k3s = {
-    path = [ pkgs.kata-runtime ];
+    path = [ pkgs.kata-runtime pkgs.cloud-hypervisor ];
     after = [ "nix-snapshotter.service" ];
     wants = [ "nix-snapshotter.service" ];
     serviceConfig.DeviceAllow = [
