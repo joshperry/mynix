@@ -19,6 +19,9 @@
   # Serial console for Vultr KVM/IPMI
   boot.kernelParams = [ "console=ttyS0,115200n8" ];
 
+  # Allow ada to push closures for remote deploys
+  nix.settings.trusted-users = [ "root" "ada" ];
+
   # Seed: k3s + nix-snapshotter + Kata/CLH
   seed = {
     enable = true;
