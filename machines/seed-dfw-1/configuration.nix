@@ -1,0 +1,121 @@
+{ config, pkgs, ... }:
+
+{
+  imports = [
+    ./hardware-configuration.nix
+    ./disks.nix
+    ../../profiles/server.nix
+  ];
+
+  sops = {
+    defaultSopsFile = ../../secrets/signi.yaml;
+    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  };
+
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.timeout = 5;
+
+  # Serial console for Vultr KVM/IPMI
+  boot.kernelParams = [ "console=ttyS0,115200n8" ];
+
+  # Seed: k3s + nix-snapshotter + Kata/CLH
+  seed = {
+    enable = true;
+    persistence.enable = true;
+    persistence.path = "/persist";
+  };
+
+  # Impermanence mappings
+  environment.persistence."/persist" = {
+    hideMounts = true;
+    directories = [
+      "/root"
+      "/var/cache/nix"
+      "/var/log"
+      "/var/lib/nixos"
+      "/var/lib/systemd/coredump"
+    ];
+    files = [
+      "/etc/machine-id"
+      "/etc/ssh/ssh_host_ed25519_key.pub"
+      "/etc/ssh/ssh_host_ed25519_key"
+      "/etc/ssh/ssh_host_rsa_key.pub"
+      "/etc/ssh/ssh_host_rsa_key"
+    ];
+  };
+
+  # Don't build in /tmp ramdisk
+  systemd.services.nix-daemon = {
+    environment.TMPDIR = "/var/cache/nix";
+    serviceConfig.CacheDirectory = "nix";
+  };
+  environment.variables.NIX_REMOTE = "daemon";
+
+  system.autoUpgrade = {
+    enable = true;
+    dates = "04:00";
+    flake = "github:joshperry/mynix";
+    allowReboot = true;
+  };
+
+  networking = {
+    hostName = "seed-dfw-1";
+    firewall = {
+      enable = true;
+      allowedTCPPorts = [
+        22    # SSH
+        6443  # k3s API
+      ];
+    };
+  };
+
+  time.timeZone = "America/Chicago";
+  i18n.defaultLocale = "en_US.UTF-8";
+
+  environment.systemPackages = with pkgs; [
+    inetutils
+    mtr
+    sysstat
+  ];
+
+  services.openssh = {
+    enable = true;
+    settings.PermitRootLogin = "no";
+  };
+
+  users.mutableUsers = false;
+
+  users.users.josh = {
+    uid = 1000;
+    group = "josh";
+    initialHashedPassword = "$6$rounds=3000000$plps8mAYoxl.ngM7$UICj9iFn3SvWEBmD6Zsv0pWu8fru2jGNqvXazc7BjM9CJJxCna.du8yytejQeAL9yjQ.943AXyv8fjgSxOX.4.";
+    isNormalUser = true;
+    extraGroups = [ "wheel" ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsPaFplk95wdbZnGF9q1LnQUKy36Lh+4dSHyFJwMeUK josh@6bit.com"
+    ];
+  };
+  users.groups.josh = { gid = 1000; };
+
+  users.users.ada = {
+    uid = 1100;
+    group = "ada";
+    isNormalUser = true;
+    hashedPassword = "!";
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4wKwiX1fnwB/U4Mc7JT4ddMExopexk0DUSd7Du12Sp ada@signi"
+    ];
+  };
+  users.groups.ada = { gid = 1100; };
+
+  security.sudo.extraRules = [{
+    users = [ "ada" ];
+    commands = [
+      { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
+      { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
+    ];
+  }];
+
+  system.stateVersion = "25.11";
+}

@@ -12,6 +12,7 @@ in {
     defaultSopsFile = ../../secrets/signi.yaml;
     age.keyFile = "/run/sops-age/keys.txt";
     secrets."kago/credentials" = { };
+    secrets."ada/vultr-api-key" = { };
   };
 
   # ── Nuketown: AI agent framework ──────────────────────────────
@@ -65,12 +66,13 @@ in {
         passwordSecret = "ada/email-password";
       };
 
-      packages = [ pkgs.gh ];
+      packages = with pkgs; [ gh vultr-cli ];
 
       secrets.sshKey = "ada/ssh-key";
       secrets.gpgKey = "ada/gpg-key";
       secrets.extraSecrets.email-password = "ada/email-password";
       secrets.extraSecrets.gh-pat = "ada/gh-pat";
+      secrets.extraSecrets.vultr-api-key = "ada/vultr-api-key";
 
       devices = [
         {
@@ -138,6 +140,7 @@ in {
             gpg --batch --import ${config.sops.secrets."ada/gpg-key".path} 2>/dev/null || true
           fi
           export GH_TOKEN="$(cat ${config.sops.secrets."ada/gh-pat".path} 2>/dev/null || true)"
+          export VULTR_API_KEY="$(cat ${config.sops.secrets."ada/vultr-api-key".path} 2>/dev/null || true)"
         '';
         accounts.email.accounts.ada = {
           primary = true;

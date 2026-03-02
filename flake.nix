@@ -501,6 +501,20 @@
         ];
       };
 
+      seed-dfw-1 = nixosSystem {
+        name = "seed-dfw-1";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+        sysmodules = [
+          inputs.disko.nixosModules.disko
+          inputs.impermanence.nixosModules.impermanence
+          inputs.seed.nixosModules.default
+          inputs.seed.nixosModules.persistence
+        ];
+      };
+
       cloudtest = nixosSystem {
         name = "cloudtest";
         system = "x86_64-linux";
