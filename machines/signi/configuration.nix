@@ -225,20 +225,13 @@ in {
   ];
   nixpkgs.config.joypixels.acceptLicense = true;
 
-  # Fix kata-runtime CLH config: upstream package points to non-existent
-  # cloud-hypervisor binary inside kata-runtime output dir
-  nixpkgs.overlays = [
-    (final: prev: {
-      kata-runtime = prev.kata-runtime.overrideAttrs (old: {
-        postInstall = (old.postInstall or "") + ''
-          sed -i \
-            -e 's!path = ".*cloud-hypervisor"!path = "${final.cloud-hypervisor}/bin/cloud-hypervisor"!' \
-            -e 's!valid_hypervisor_paths = \[".*cloud-hypervisor"\]!valid_hypervisor_paths = ["${final.cloud-hypervisor}/bin/cloud-hypervisor"]!' \
-            "$out/share/defaults/kata-containers/configuration-clh.toml"
-        '';
-      });
-    })
-  ];
+  # Seed: k3s + nix-snapshotter + Kata/CLH (VM-isolated pods)
+  seed = {
+    enable = true;
+    k3s.port = 6444;
+    persistence.enable = true;
+    persistence.path = "/persist";
+  };
 
   system.stateVersion = "24.11";
 
@@ -296,7 +289,6 @@ in {
       "/var/lib/fprint"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
-      "/var/lib/rancher"
       "/etc/NetworkManager/system-connections"
     ];
     files = [
@@ -305,52 +297,6 @@ in {
       "/etc/ssh/ssh_host_ed25519_key"
       "/etc/ssh/ssh_host_rsa_key.pub"
       "/etc/ssh/ssh_host_rsa_key"
-    ];
-  };
-
-  # Required by k3s rootless
-  boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
-
-  # ── Kata Containers: VM-isolated pods via system k3s ─────────────
-  # System-level k3s with nix-snapshotter (image resolution) + Kata (VM isolation)
-  # Runs alongside rootless k3s on port 6444
-  services.nix-snapshotter.enable = true;
-
-  services.k3s = {
-    enable = true;
-    snapshotter = "nix";
-    extraFlags = [
-      "--disable traefik"
-      "--disable servicelb"
-      "--disable metrics-server"
-      "--write-kubeconfig-mode 644"
-      "--https-listen-port 6444"
-    ];
-    containerdConfigTemplate = ''
-      {{ template "base" . }}
-
-      [plugins."io.containerd.grpc.v1.cri".containerd.runtimes."kata"]
-        runtime_type = "io.containerd.kata-clh.v2"
-        privileged_without_host_devices = true
-        pod_annotations = ["io.katacontainers.*"]
-        container_annotations = ["io.katacontainers.*"]
-    '';
-  };
-
-  # Kernel modules for Kata VM isolation (kvm-intel already in hardware-configuration.nix)
-  boot.kernelModules = [ "vhost_net" "vhost_vsock" ];
-
-  # k3s service: kata-runtime in PATH, device access for KVM/vhost, ordering
-  systemd.services.k3s = {
-    path = [ pkgs.kata-runtime pkgs.cloud-hypervisor ];
-    after = [ "nix-snapshotter.service" ];
-    wants = [ "nix-snapshotter.service" ];
-    serviceConfig.DeviceAllow = [
-      "/dev/kvm rwm"
-      "/dev/vhost-vsock rwm"
-      "/dev/vhost-net rwm"
-      "/dev/net/tun rwm"
-      "/dev/kmsg r"
     ];
   };
 

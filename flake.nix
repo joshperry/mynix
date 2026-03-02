@@ -28,8 +28,8 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-snapshotter = {
-      url = "github:joshperry/nix-snapshotter/k3s-1.34-support";
+    seed = {
+      url = "github:loomtex/seed";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -464,12 +464,12 @@
             ./users/josh/machines/signi
             nuketown.homeManagerModules.approvalDaemon
             { nuketown.approvalDaemon.enable = true; }
-            inputs.nix-snapshotter.homeModules.default
-            inputs.nix-snapshotter.homeModules.k3s-rootless
+            inputs.seed.homeModules.default
+            inputs.seed.homeModules.k3s-rootless
           ]; };
           ada = { lib, ... }: { imports = [
-            inputs.nix-snapshotter.homeModules.default
-            inputs.nix-snapshotter.homeModules.k3s-rootless
+            inputs.seed.homeModules.default
+            inputs.seed.homeModules.k3s-rootless
           ];
             virtualisation.containerd.rootless = {
               enable = true;
@@ -496,8 +496,8 @@
         sysmodules = [ #ref.sysmodules
           inputs.impermanence.nixosModules.impermanence
           nuketown.nixosModules.default
-          inputs.nix-snapshotter.nixosModules.default
-          { nixpkgs.overlays = [ inputs.nix-snapshotter.overlays.default ]; }
+          inputs.seed.nixosModules.default
+          inputs.seed.nixosModules.persistence
         ];
       };
 

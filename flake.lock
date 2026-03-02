@@ -97,6 +97,7 @@
     "flake-parts_3": {
       "inputs": {
         "nixpkgs-lib": [
+          "seed",
           "nix-snapshotter",
           "nixpkgs"
         ]
@@ -118,6 +119,7 @@
     "globset": {
       "inputs": {
         "nixpkgs-lib": [
+          "seed",
           "nix-snapshotter",
           "nixpkgs"
         ]
@@ -203,6 +205,7 @@
         "flake-parts": "flake-parts_3",
         "globset": "globset",
         "nixpkgs": [
+          "seed",
           "nixpkgs"
         ]
       },
@@ -351,11 +354,32 @@
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
-        "nix-snapshotter": "nix-snapshotter",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nuketown": "nuketown",
+        "seed": "seed",
         "sops-nix": "sops-nix_2"
+      }
+    },
+    "seed": {
+      "inputs": {
+        "nix-snapshotter": "nix-snapshotter",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1772420290,
+        "narHash": "sha256-7EbGMnjSChhUDYGq5qw9P7kTx70W5Urs4M8Bh7c+Rd4=",
+        "owner": "loomtex",
+        "repo": "seed",
+        "rev": "b27934805ab72d9a16a2ed23436805b74404aa8d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "loomtex",
+        "repo": "seed",
+        "type": "github"
       }
     },
     "sops-nix": {
