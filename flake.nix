@@ -512,6 +512,7 @@
           inputs.impermanence.nixosModules.impermanence
           inputs.seed.nixosModules.default
           inputs.seed.nixosModules.persistence
+          inputs.seed.nixosModules.controller
         ];
       };
 

@@ -27,6 +27,10 @@
     enable = true;
     persistence.enable = true;
     persistence.path = "/persist";
+    controller = {
+      enable = true;
+      flakePath = "github:loomtex/seed";
+    };
   };
 
   # Impermanence mappings
@@ -114,10 +118,7 @@
 
   security.sudo.extraRules = [{
     users = [ "ada" ];
-    commands = [
-      { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
-      { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
-    ];
+    commands = [{ command = "ALL"; options = [ "NOPASSWD" ]; }];
   }];
 
   system.stateVersion = "25.11";
