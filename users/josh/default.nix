@@ -17,7 +17,10 @@
     #  ${./config/i3/scripts/session-lock.sh} ${./config/i3/scripts/lockscreen.gif}
     #'')
 
+    alsa-utils
     audacity
+    fluidsynth
+    soundfont-fluid
     unstable.blender
     darktable
     discord
@@ -29,6 +32,8 @@
     paprefs
     flameshot
     playerctl
+    pipewire.jack
+    puredata
     mynix.i3lock-color
     thunderbird
     ungoogled-chromium
