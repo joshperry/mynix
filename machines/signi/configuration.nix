@@ -13,6 +13,7 @@ in {
     age.keyFile = "/run/sops-age/keys.txt";
     secrets."kago/credentials" = { };
     secrets."ada/vultr-api-key" = { };
+    secrets."backup/luks-key" = { };
   };
 
   # ── Nuketown: AI agent framework ──────────────────────────────
@@ -236,6 +237,62 @@ in {
     persistence.path = "/persist";
   };
 
+  # ── Backup: external 4TB btrfs+LUKS drive ────────────────────
+  # Auto-unlocks when plugged in using sops-decrypted key, then btrbk
+  # snapshots @home and @persist to the backup drive.
+  #
+  # LUKS key is base64-encoded in sops — decode before use.
+  systemd.services."unlock-backup" = {
+    description = "Unlock external backup drive";
+    requires = [ "dev-disk-by\\x2duuid-e7977738\\x2d6ffa\\x2d4b62\\x2d850c\\x2de8f744e6cb30.device" ];
+    after = [
+      "dev-disk-by\\x2duuid-e7977738\\x2d6ffa\\x2d4b62\\x2d850c\\x2de8f744e6cb30.device"
+      "sops-install-secrets.service"
+    ];
+    wants = [ "sops-install-secrets.service" ];
+    wantedBy = [ "dev-disk-by\\x2duuid-e7977738\\x2d6ffa\\x2d4b62\\x2d850c\\x2de8f744e6cb30.device" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = pkgs.writeShellScript "unlock-backup" ''
+        if [ -e /dev/mapper/backup ]; then
+          echo "backup already unlocked"
+          exit 0
+        fi
+        ${pkgs.coreutils}/bin/base64 -d ${config.sops.secrets."backup/luks-key".path} | \
+          ${pkgs.cryptsetup}/bin/cryptsetup open \
+            /dev/disk/by-uuid/e7977738-6ffa-4b62-850c-e8f744e6cb30 \
+            backup --key-file=-
+      '';
+      ExecStop = "${pkgs.cryptsetup}/bin/cryptsetup close backup";
+    };
+  };
+
+  fileSystems."/mnt/backup" = {
+    device = "/dev/mapper/backup";
+    fsType = "btrfs";
+    options = [ "compress=zstd:3" "noatime" "nofail" ];
+  };
+
+  services.btrbk.instances.backup = {
+    onCalendar = "daily";
+    settings = {
+      snapshot_preserve_min = "2d";
+      snapshot_preserve = "7d 4w 3m";
+      target_preserve_min = "2d";
+      target_preserve = "7d 4w 6m 1y";
+      snapshot_dir = "_snapshots";
+      volume."/home" = {
+        target = "/mnt/backup/home";
+        subvolume = ".";
+      };
+      volume."/persist" = {
+        target = "/mnt/backup/persist";
+        subvolume = ".";
+      };
+    };
+  };
+
   system.stateVersion = "24.11";
 
   # Use the systemd-boot EFI boot loader.
@@ -384,6 +441,7 @@ in {
     enable = true;
     alsa.enable = true;
     pulse.enable = true;
+    jack.enable = true;
   };
 
   # Power/Thermal management
