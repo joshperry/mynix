@@ -86,6 +86,10 @@
         { address = "2001:19f0:6402:7eb::1"; prefixLength = 64; }
       ];
     };
+    defaultGateway6 = {
+      address = "fe80::920a:84ff:fe53:f9bc";
+      interface = "enp1s0f0";
+    };
     firewall = {
       enable = true;
       allowedTCPPorts = [
