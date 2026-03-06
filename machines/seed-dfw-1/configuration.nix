@@ -30,6 +30,7 @@
     controller = {
       enable = true;
       flakePath = "github:loomtex/seed";
+      ipv4Address = "216.128.141.222";
     };
   };
 
@@ -68,11 +69,22 @@
 
   networking = {
     hostName = "seed-dfw-1";
+    interfaces.enp1s0f0 = {
+      useDHCP = true;
+      ipv4.addresses = [{
+        address = "216.128.141.222";
+        prefixLength = 32;
+      }];
+    };
     firewall = {
       enable = true;
       allowedTCPPorts = [
         22    # SSH
+        53    # DNS (seed ipv4 route)
         6443  # k3s API
+      ];
+      allowedUDPPorts = [
+        53    # DNS (seed ipv4 route)
       ];
     };
   };
