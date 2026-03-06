@@ -27,11 +27,16 @@
     enable = true;
     persistence.enable = true;
     persistence.path = "/persist";
-    k3s.disableDefaults = [ "traefik" "metrics-server" ];  # keep servicelb for LoadBalancer IPs
+    # servicelb disabled — MetalLB handles LoadBalancer IPs (deployed by seed module)
+    k3s.dualStack = true;
+    k3s.extraFlags = [
+      "--node-ip=216.128.140.15,2001:19f0:6402:d0a:3eec:efff:feb9:c20a"
+    ];
     controller = {
       enable = true;
       flakePath = "github:loomtex/seed";
       ipv4Address = "216.128.141.222";
+      ipv6Block = "2001:19f0:6402:7eb::/64";
     };
   };
 
@@ -76,6 +81,10 @@
         address = "216.128.141.222";
         prefixLength = 32;
       }];
+      ipv6.addresses = [
+        { address = "2001:19f0:6402:d0a:3eec:efff:feb9:c20a"; prefixLength = 64; }
+        { address = "2001:19f0:6402:7eb::1"; prefixLength = 64; }
+      ];
     };
     firewall = {
       enable = true;
