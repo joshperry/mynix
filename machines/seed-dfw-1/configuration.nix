@@ -27,6 +27,7 @@
     enable = true;
     persistence.enable = true;
     persistence.path = "/persist";
+    k3s.disableDefaults = [ "traefik" "metrics-server" ];  # keep servicelb for LoadBalancer IPs
     controller = {
       enable = true;
       flakePath = "github:loomtex/seed";
