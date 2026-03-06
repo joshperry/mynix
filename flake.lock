@@ -366,14 +366,17 @@
         "nix-snapshotter": "nix-snapshotter",
         "nixpkgs": [
           "nixpkgs"
+        ],
+        "sops-nix": [
+          "sops-nix"
         ]
       },
       "locked": {
-        "lastModified": 1772822061,
-        "narHash": "sha256-LZ6f7WFi4Zf0X8ZUWmmTAX8cbPdRqcsxtpOpVTpyvGo=",
+        "lastModified": 1772831304,
+        "narHash": "sha256-j+TlpAuWsc5o0r6E/Ki64y3OugdAeyrmnoyNmd26C7Q=",
         "owner": "loomtex",
         "repo": "seed",
-        "rev": "287d39ee5ef7c2002be831b442f77bf3a48c49c9",
+        "rev": "52e6882603d0b88ec423c4bff648623cdf8203a8",
         "type": "github"
       },
       "original": {

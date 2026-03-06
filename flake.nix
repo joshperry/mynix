@@ -31,6 +31,7 @@
     seed = {
       url = "github:loomtex/seed";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.sops-nix.follows = "sops-nix";
     };
   };
 
