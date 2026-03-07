@@ -8,8 +8,9 @@
   ];
 
   sops = {
-    defaultSopsFile = ../../secrets/signi.yaml;
+    defaultSopsFile = ../../secrets/seed-dfw-1.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    secrets."seed/controller/gh-webhook-secret" = {};
   };
 
   boot.loader.systemd-boot.enable = true;
@@ -37,6 +38,10 @@
       flakePath = "github:loomtex/seed";
       ipv4Address = "216.128.141.222";
       ipv6Block = "2001:19f0:6402:7eb::/64";
+      webhook = {
+        enable = true;
+        secretFile = config.sops.secrets."seed/controller/gh-webhook-secret".path;
+      };
     };
   };
 
