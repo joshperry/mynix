@@ -514,6 +514,10 @@
           inputs.seed.nixosModules.default
           inputs.seed.nixosModules.persistence
           inputs.seed.nixosModules.controller
+          {
+            seed.controller.controllerImage = "${inputs.seed.packages.x86_64-linux.controllerImage}";
+            seed.controller.hostAgentImage = "${inputs.seed.packages.x86_64-linux.hostAgentImage}";
+          }
         ];
       };
 
