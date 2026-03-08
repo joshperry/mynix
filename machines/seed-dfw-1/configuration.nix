@@ -35,7 +35,7 @@
     ];
     controller = {
       enable = true;
-      flakePath = "github:loomtex/seed";
+      flakePaths = [ "github:loomtex/seed" ];
       ipv4Address = "216.128.141.222";
       ipv6Block = "2001:19f0:6402:7eb::/64";
       webhook = {
