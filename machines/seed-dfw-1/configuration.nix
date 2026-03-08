@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ./disks.nix
     ../../profiles/server.nix
+    ../../profiles/seed-cache.nix
   ];
 
   sops = {
