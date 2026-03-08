@@ -6,6 +6,7 @@
     ./disks.nix
     ../../profiles/server.nix
     ../../profiles/seed-cache.nix
+    ../../profiles/seed-controller.nix
   ];
 
   sops = {

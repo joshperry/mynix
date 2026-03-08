@@ -6,12 +6,12 @@
     ./disks.nix
     ../../profiles/server.nix
     ../../profiles/seed-cache.nix
+    ../../profiles/seed-controller.nix
   ];
 
   sops = {
     defaultSopsFile = ../../secrets/seed-dfw-1.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    secrets."seed/controller/gh-webhook-secret" = {};
   };
 
   boot.loader.systemd-boot.enable = true;
