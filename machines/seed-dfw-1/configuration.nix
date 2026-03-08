@@ -9,10 +9,7 @@
     ../../profiles/seed-controller.nix
   ];
 
-  sops = {
-    defaultSopsFile = ../../secrets/seed-dfw-1.yaml;
-    age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-  };
+  sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
 
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
