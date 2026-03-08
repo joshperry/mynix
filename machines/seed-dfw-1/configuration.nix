@@ -36,6 +36,7 @@
       flakePaths = [
         "github:loomtex/seed"
         "tarball+https://silo.loom.farm/seed-demo/archive/master.tar.gz"
+        "tarball+https://silo.loom.farm/shoot-demo/archive/master.tar.gz"
       ];
       ipv4Address = "216.128.141.222";
       ipv6Block = "2001:19f0:6402:7eb::/64";
