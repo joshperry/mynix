@@ -1,12 +1,13 @@
 { config, pkgs, ... }:
 let
+  cacheUrl = "s3://seed-nix-cache?endpoint=atl2.vultrobjects.com&region=us-east-1";
   postBuildHook = pkgs.writeShellScript "upload-to-cache" ''
     set -eu
     set -f
     export AWS_SHARED_CREDENTIALS_FILE=${config.sops.templates."seed-s3-credentials".path}
     if [ -f ${config.sops.secrets."seed/cache-signing-key".path} ]; then
       ${pkgs.nix}/bin/nix store sign --key-file ${config.sops.secrets."seed/cache-signing-key".path} $OUT_PATHS
-      ${pkgs.nix}/bin/nix copy --to 's3://seed-nix-cache?endpoint=atl2.vultrobjects.com&region=us-east-1' $OUT_PATHS
+      ${pkgs.nix}/bin/nix copy --no-recursive --to '${cacheUrl}' $OUT_PATHS
     fi
   '';
 in {
@@ -21,7 +22,7 @@ in {
   '';
 
   nix.settings = {
-    substituters = [ "s3://seed-nix-cache?endpoint=atl2.vultrobjects.com&region=us-east-1" ];
+    substituters = [ cacheUrl ];
     trusted-public-keys = [ "seed-cache-1:HmHh2GMeZTBXufX8RRs30bBNVB75+QfkgFllazC365E=" ];
     post-build-hook = postBuildHook;
   };
