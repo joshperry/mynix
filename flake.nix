@@ -517,6 +517,11 @@
           {
             seed.controller.controllerImage = "${inputs.seed.packages.x86_64-linux.controllerImage}";
             seed.controller.hostAgentImage = "${inputs.seed.packages.x86_64-linux.hostAgentImage}";
+            seed.controller.poolManager = {
+              enable = true;
+              image = "${inputs.seed.packages.x86_64-linux.poolManagerImage}";
+              initramfs = "${inputs.seed.packages.x86_64-linux.poolVmInitramfs}";
+            };
           }
         ];
       };
