@@ -11,9 +11,15 @@ let
     fi
   '';
 in {
-  sops.secrets."seed/cache-signing-key" = {};
-  sops.secrets."seed/s3-access-key" = {};
-  sops.secrets."seed/s3-secret-key" = {};
+  sops.secrets."seed/cache-signing-key" = {
+    sopsFile = ../secrets/seed-system.yaml;
+  };
+  sops.secrets."seed/s3-access-key" = {
+    sopsFile = ../secrets/seed-system.yaml;
+  };
+  sops.secrets."seed/s3-secret-key" = {
+    sopsFile = ../secrets/seed-system.yaml;
+  };
 
   sops.templates."seed-s3-credentials".content = ''
     [default]
