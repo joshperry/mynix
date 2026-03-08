@@ -21,7 +21,7 @@ in {
   '';
 
   nix.settings = {
-    substituters = [ "https://atl2.vultrobjects.com/seed-nix-cache" ];
+    substituters = [ "s3://seed-nix-cache?endpoint=atl2.vultrobjects.com&region=us-east-1" ];
     trusted-public-keys = [ "seed-cache-1:HmHh2GMeZTBXufX8RRs30bBNVB75+QfkgFllazC365E=" ];
     post-build-hook = postBuildHook;
   };
