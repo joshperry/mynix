@@ -372,11 +372,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1772940838,
-        "narHash": "sha256-zPmAhuM3cHSgyHxKkBZGdYRkJBUGrBHgf5eQkmS2btY=",
+        "lastModified": 1772943451,
+        "narHash": "sha256-cxiMvamiynK9OYjKF4cdu0lt16lTs12LAGzIjXUai3g=",
         "owner": "loomtex",
         "repo": "seed",
-        "rev": "b05beba9b5bc28c051da1920977947a84e31ee03",
+        "rev": "6aeb0667fa9b593483a31b61f21d3e1f2028a584",
         "type": "github"
       },
       "original": {
