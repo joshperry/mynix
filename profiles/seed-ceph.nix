@@ -15,8 +15,7 @@
   services.ceph = {
     enable = true;
     global = {
-      # TODO: generate with `uuidgen` during bootstrap, then hardcode
-      fsid = "GENERATE-UUID-DURING-BOOTSTRAP";
+      fsid = "c62ac465-94a6-496d-ba9f-fb1a62c6d2fb";
       monHost = "216.128.140.15,104.238.146.15,45.76.239.250";
       clusterNetwork = "10.42.0.0/16";
       publicNetwork = "216.128.140.0/23,104.238.146.0/23";
@@ -30,10 +29,10 @@
       daemons = [ config.networking.hostName ];
     };
     osd = {
-      enable = true;
       # OSD IDs are assigned by ceph-volume during bootstrap.
       # Each node gets one OSD on /dev/sdb with dmcrypt.
-      # After bootstrap, set to the assigned OSD ID (e.g. ["0"]).
+      # After bootstrap: set enable = true and daemons = [ "0" ] (or assigned ID).
+      enable = false;
       daemons = [];
     };
   };
