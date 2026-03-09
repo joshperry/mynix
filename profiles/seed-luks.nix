@@ -35,8 +35,12 @@
     hostKeys = [ "/persist/secrets/initrd/ssh_host_ed25519_key" ];
   };
 
-  # Shell for initrd SSH: systemd-tty-ask-password-agent unlocks LUKS
-  boot.initrd.systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
+  # Shell for initrd SSH: bash + auto-start password agent
+  boot.initrd.systemd.users.root.shell = "/bin/bash";
+  boot.initrd.systemd.storePaths = [ "/bin/bash" ];
+  boot.initrd.systemd.contents."/root/.profile".text = ''
+    systemd-tty-ask-password-agent
+  '';
 
   # Clevis/Tang auto-unlock (enabled per-node after binding)
   boot.initrd.clevis = {
