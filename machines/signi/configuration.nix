@@ -268,11 +268,15 @@ in {
     };
   };
 
-  fileSystems."/mnt/backup" = {
-    device = "/dev/mapper/backup";
-    fsType = "btrfs";
-    options = [ "compress=zstd:3" "noatime" "nofail" ];
-  };
+  systemd.mounts = [{
+    where = "/mnt/backup";
+    what = "/dev/mapper/backup";
+    type = "btrfs";
+    options = "compress=zstd:3,noatime,nofail";
+    bindsTo = [ "unlock-backup.service" ];
+    after = [ "unlock-backup.service" ];
+    wantedBy = [ "unlock-backup.service" ];
+  }];
 
   services.btrbk.instances.backup = {
     onCalendar = "daily";
