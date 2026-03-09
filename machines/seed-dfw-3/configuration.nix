@@ -21,7 +21,12 @@
   boot.loader.timeout = 5;
 
   # Console on both VGA (KVM) and serial — VGA needed for LUKS passphrase prompt
-  boot.kernelParams = [ "console=tty0" "console=ttyS0,115200n8" ];
+  boot.kernelParams = [
+    "console=tty0" "console=ttyS0,115200n8"
+    "earlyprintk=vga,keep"
+    "nomodeset"
+    "loglevel=7"
+  ];
 
   # Allow ada to push closures for remote deploys
   nix.settings.trusted-users = [ "root" "ada" ];
