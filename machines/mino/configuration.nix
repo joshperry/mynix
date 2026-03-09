@@ -202,6 +202,7 @@
         AdvSendAdvert on;
         MinRtrAdvInterval 3;
         MaxRtrAdvInterval 10;
+        AdvDefaultLifetime 1800;
         prefix ::/64 {
           AdvOnLink on;
           AdvAutonomous on;
@@ -214,6 +215,7 @@
         AdvSendAdvert on;
         MinRtrAdvInterval 3;
         MaxRtrAdvInterval 10;
+        AdvDefaultLifetime 1800;
         prefix ::/64 {
           AdvOnLink on;
           AdvAutonomous on;
@@ -226,6 +228,7 @@
         AdvSendAdvert on;
         MinRtrAdvInterval 3;
         MaxRtrAdvInterval 10;
+        AdvDefaultLifetime 1800;
         prefix ::/64 {
           AdvOnLink on;
           AdvAutonomous on;
