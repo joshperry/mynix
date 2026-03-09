@@ -11,8 +11,9 @@
   ];
 
   sops = {
-    defaultSopsFile = ../../secrets/seed-dfw-1.yaml;
+    defaultSopsFile = ../../secrets/seed-dfw-3.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    secrets."seed/k3s-token" = {};
   };
 
   boot.loader.systemd-boot.enable = true;
@@ -25,31 +26,19 @@
   # Allow ada to push closures for remote deploys
   nix.settings.trusted-users = [ "root" "ada" ];
 
-  # Seed: k3s + nix-snapshotter + Kata/CLH
+  # Seed: k3s server joining seed-dfw-1 HA cluster
   seed = {
     enable = true;
+    role = "server";
+    serverAddr = "https://216.128.140.15:6443";
+    tokenFile = config.sops.secrets."seed/k3s-token".path;
     persistence.enable = true;
     persistence.path = "/persist";
-    # servicelb disabled — MetalLB handles LoadBalancer IPs (deployed by seed module)
-    k3s.clusterInit = true;  # Bootstrap embedded etcd (first server only, disable after cluster is up)
     k3s.dualStack = true;
     k3s.extraFlags = [
-      "--node-ip=216.128.140.15,2001:19f0:6402:d0a:3eec:efff:feb9:c20a"
+      # TODO: replace with actual seed-dfw-3 IPs after provisioning
+      "--node-ip=SEED_DFW_3_IPV4,SEED_DFW_3_IPV6"
     ];
-    controller = {
-      enable = true;
-      flakePaths = [
-        "github:loomtex/seed"
-        "tarball+https://silo.loom.farm/seed-demo/archive/master.tar.gz"
-        "tarball+https://silo.loom.farm/shoot-demo/archive/master.tar.gz"
-      ];
-      ipv4Address = "216.128.141.222";
-      ipv6Block = "2001:19f0:6402:7eb::/64";
-      webhook = {
-        enable = true;
-        secretFile = config.sops.secrets."seed/controller/gh-webhook-secret".path;
-      };
-    };
   };
 
   # Impermanence mappings
@@ -86,31 +75,24 @@
   };
 
   networking = {
-    hostName = "seed-dfw-1";
+    hostName = "seed-dfw-3";
     interfaces.enp1s0f0 = {
       useDHCP = true;
-      ipv4.addresses = [{
-        address = "216.128.141.222";
-        prefixLength = 32;
-      }];
       ipv6.addresses = [
-        { address = "2001:19f0:6402:d0a:3eec:efff:feb9:c20a"; prefixLength = 64; }
-        { address = "2001:19f0:6402:7eb::1"; prefixLength = 64; }
+        # TODO: replace with actual seed-dfw-3 IPv6 after provisioning
+        # { address = "SEED_DFW_3_IPV6"; prefixLength = 64; }
       ];
     };
-    defaultGateway6 = {
-      address = "fe80::920a:84ff:fe53:f9bc";
-      interface = "enp1s0f0";
-    };
+    # TODO: set actual IPv6 gateway after provisioning
+    # defaultGateway6 = {
+    #   address = "fe80::XXXX";
+    #   interface = "enp1s0f0";
+    # };
     firewall = {
       enable = true;
       allowedTCPPorts = [
         22    # SSH
-        53    # DNS (seed ipv4 route)
         6443  # k3s API
-      ];
-      allowedUDPPorts = [
-        53    # DNS (seed ipv4 route)
       ];
     };
   };

@@ -6,6 +6,7 @@
     ./disks.nix
     ../../profiles/server.nix
     ../../profiles/seed-cache.nix
+    ../../profiles/seed-ceph.nix
     ../../profiles/seed-controller.nix
   ];
 
@@ -25,10 +26,10 @@
   # Allow ada to push closures for remote deploys
   nix.settings.trusted-users = [ "root" "ada" ];
 
-  # Seed: k3s agent joining seed-dfw-1
+  # Seed: k3s server joining seed-dfw-1 HA cluster
   seed = {
     enable = true;
-    role = "agent";
+    role = "server";
     serverAddr = "https://216.128.140.15:6443";
     tokenFile = config.sops.secrets."seed/k3s-token".path;
     persistence.enable = true;
@@ -88,6 +89,7 @@
       enable = true;
       allowedTCPPorts = [
         22    # SSH
+        6443  # k3s API
       ];
     };
   };

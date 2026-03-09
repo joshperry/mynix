@@ -5,6 +5,8 @@ keys:
   - &mino_age age1c4lf0ka5h87g98z047ljfzp2tuf6gx0csg8aw89xwsderem52fasnuc4td
   - &seed_dfw_1_age age10yx5tftxu9phrzhvvwjgyztvmuvqly5zmg0h2696g7dkr4a6ec7sa69ldu
   - &seed_dfw_2_age age155d63shppu7t9t2j04675l4xlcst8r6uh7mytx7s69dv58wykfrsclzeud
+  # TODO: replace with actual age key derived from seed-dfw-3 SSH host key after provisioning
+  - &seed_dfw_3_age age1PLACEHOLDER_GENERATE_DURING_PROVISIONING
 
 creation_rules:
   - path_regex: secrets/signi\.yaml$
@@ -42,6 +44,13 @@ creation_rules:
         age:
           - *seed_dfw_2_age
 
+  - path_regex: secrets/seed-dfw-3\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *seed_dfw_3_age
+
   - path_regex: secrets/seed-system\.yaml$
     key_groups:
       - pgp:
@@ -49,6 +58,7 @@ creation_rules:
         age:
           - *seed_dfw_1_age
           - *seed_dfw_2_age
+          - *seed_dfw_3_age
 
   # Fallback for any other secrets files
   - path_regex: secrets/.*\.yaml$
