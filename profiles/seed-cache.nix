@@ -45,4 +45,11 @@ in {
     AWS_SHARED_CREDENTIALS_FILE = config.sops.templates."seed-s3-credentials".path;
     AWS_EC2_METADATA_DISABLED = "true";
   };
+
+  # k3s spawns containerd which runs the nix image service plugin —
+  # PullImage calls nix-store --realise as root, inheriting k3s's env
+  systemd.services.k3s.environment = {
+    AWS_SHARED_CREDENTIALS_FILE = config.sops.templates."seed-s3-credentials".path;
+    AWS_EC2_METADATA_DISABLED = "true";
+  };
 }
