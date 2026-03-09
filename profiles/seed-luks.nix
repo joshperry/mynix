@@ -25,6 +25,9 @@
     networks."10-enp1s0f0" = {
       matchConfig.Name = "enp1s0f0";
       networkConfig.DHCP = "ipv4";
+      # Wait for DHCP to complete before declaring network "online"
+      # (clevis needs a routable address to reach Tang)
+      linkConfig.RequiredForOnline = "routable";
     };
   };
 
