@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 let
-  cacheUrl = "s3://seed-nix-cache?endpoint=atl2.vultrobjects.com&region=us-east-1";
+  cacheUrl = "s3://seed-nix-cache?endpoint=atl2.vultrobjects.com&region=us-east-1&profile=default";
   postBuildHook = pkgs.writeShellScript "upload-to-cache" ''
     set -eu
     set -f
