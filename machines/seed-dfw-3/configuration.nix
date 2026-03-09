@@ -8,6 +8,7 @@
     ../../profiles/seed-cache.nix
     ../../profiles/seed-ceph.nix
     ../../profiles/seed-controller.nix
+    ../../profiles/seed-luks.nix
   ];
 
   sops = {
@@ -20,12 +21,8 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 5;
 
-  # Console on both VGA (KVM) and serial — VGA needed for LUKS passphrase prompt
   boot.kernelParams = [
     "console=tty0" "console=ttyS0,115200n8"
-    "earlyprintk=vga,keep"
-    "nomodeset"
-    "loglevel=7"
   ];
 
   # Allow ada to push closures for remote deploys

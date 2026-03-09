@@ -18,7 +18,8 @@
     listenStream = [ "7654" ];
     ipAddressAllow = [
       "216.128.140.0/23"   # seed-dfw-1 subnet
-      "104.238.146.0/23"   # seed-dfw-2/dfw-3 subnet
+      "104.238.146.0/23"   # seed-dfw-2 subnet
+      "45.76.238.0/23"     # seed-dfw-3 subnet
     ];
   };
 

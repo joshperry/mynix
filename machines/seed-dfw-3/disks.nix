@@ -1,11 +1,9 @@
 {
-  # TEMPORARY: non-LUKS layout for boot diagnostic on dfw-3
-  # Revert to LUKS after confirming kernel boots on this hardware
   disko.devices = {
     disk = {
       sda = {
         type = "disk";
-        device = "/dev/sda";
+        device = "/dev/disk/by-path/pci-0000:00:17.0-ata-5";
         content = {
           type = "gpt";
           partitions = {
@@ -25,24 +23,30 @@
             root = {
               size = "100%";
               content = {
-                type = "btrfs";
-                extraArgs = [ "-L" "nixos" "-f" ];
-                subvolumes = {
-                  "/rootfs" = {
-                    mountpoint = "/";
-                    mountOptions = [ "subvol=rootfs" "compress=zstd" "noatime" ];
-                  };
-                  "/nix" = {
-                    mountpoint = "/nix";
-                    mountOptions = [ "subvol=nix" "compress=zstd" "noatime" ];
-                  };
-                  "/persist" = {
-                    mountpoint = "/persist";
-                    mountOptions = [ "subvol=persist" "compress=zstd" "noatime" ];
-                  };
-                  "/swap" = {
-                    mountpoint = "/swap";
-                    swap.swapfile.size = "8G";
+                type = "luks";
+                name = "cryptroot";
+                passwordFile = "/tmp/disk-password";
+                settings.allowDiscards = true;
+                content = {
+                  type = "btrfs";
+                  extraArgs = [ "-L" "nixos" "-f" ];
+                  subvolumes = {
+                    "/rootfs" = {
+                      mountpoint = "/";
+                      mountOptions = [ "subvol=rootfs" "compress=zstd" "noatime" ];
+                    };
+                    "/nix" = {
+                      mountpoint = "/nix";
+                      mountOptions = [ "subvol=nix" "compress=zstd" "noatime" ];
+                    };
+                    "/persist" = {
+                      mountpoint = "/persist";
+                      mountOptions = [ "subvol=persist" "compress=zstd" "noatime" ];
+                    };
+                    "/swap" = {
+                      mountpoint = "/swap";
+                      swap.swapfile.size = "8G";
+                    };
                   };
                 };
               };
@@ -52,6 +56,14 @@
       };
     };
   };
+
+  # Clevis/Tang auto-unlock for LUKS
+  # Enable after: clevis luks bind, copy JWE to /persist/secrets/, nixos-rebuild boot.
+  # boot.initrd.clevis = {
+  #   enable = true;
+  #   useTang = true;
+  #   devices.cryptroot.secretFile = "/persist/secrets/clevis-cryptroot.jwe";
+  # };
 
   fileSystems."/persist".neededForBoot = true;
 }

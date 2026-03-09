@@ -3,7 +3,7 @@
     disk = {
       sda = {
         type = "disk";
-        device = "/dev/sda";
+        device = "/dev/disk/by-path/pci-0000:00:17.0-ata-5";
         content = {
           type = "gpt";
           partitions = {
@@ -33,7 +33,7 @@
                   subvolumes = {
                     "/rootfs" = {
                       mountpoint = "/";
-                      mountOptions = [ "subvol=root" "compress=zstd" "noatime" ];
+                      mountOptions = [ "subvol=rootfs" "compress=zstd" "noatime" ];
                     };
                     "/nix" = {
                       mountpoint = "/nix";

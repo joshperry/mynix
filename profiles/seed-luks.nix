@@ -1,0 +1,47 @@
+# LUKS full-disk encryption profile for seed nodes
+# Provides: Clevis/Tang auto-unlock + initrd SSH fallback
+#
+# Post-install steps (per node):
+#   1. SSH into initrd (port 2222) for first boot
+#   2. clevis luks bind -d /dev/sda2 tang '{"url":"http://207.148.3.31:7654"}'
+#   3. clevis luks list -d /dev/sda2 -s 2 > /persist/secrets/clevis-cryptroot.jwe
+#   4. Set boot.initrd.clevis.devices.cryptroot.secretFile (uncomment in disks.nix)
+#   5. nixos-rebuild boot && reboot
+{ config, lib, ... }:
+
+{
+  # Systemd-based initrd (required for clevis, better SSH support)
+  boot.initrd.systemd.enable = true;
+
+  # NIC driver in initrd for network-based unlock
+  boot.initrd.availableKernelModules = [ "ixgbe" ];
+
+  # Network in initrd (DHCP for Tang + SSH)
+  boot.initrd.systemd.network = {
+    enable = true;
+    networks."10-enp1s0f0" = {
+      matchConfig.Name = "enp1s0f0";
+      networkConfig.DHCP = "ipv4";
+    };
+  };
+
+  # SSH in initrd — fallback for manual LUKS unlock when Tang is down
+  boot.initrd.network.ssh = {
+    enable = true;
+    port = 2222;
+    authorizedKeys =
+      config.users.users.josh.openssh.authorizedKeys.keys
+      ++ config.users.users.ada.openssh.authorizedKeys.keys;
+    hostKeys = [ "/persist/secrets/initrd/ssh_host_ed25519_key" ];
+  };
+
+  # Shell for initrd SSH: systemd-tty-ask-password-agent unlocks LUKS
+  boot.initrd.systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
+
+  # Clevis/Tang auto-unlock (enabled per-node after binding)
+  boot.initrd.clevis = {
+    enable = lib.mkDefault false;
+    useTang = true;
+  };
+
+}
