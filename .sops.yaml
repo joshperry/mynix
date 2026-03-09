@@ -1,11 +1,13 @@
 keys:
   - &admin_josh 2EE325D71601671696EBF687E45953D34C8829ED
   - &signi_age age100uztnkcqanyhq2v37lwq2jtg8563lz25w22u88qhppld526t9zsxy3n3h
+  - &ada_age age1ujjm7feyd3p2e0qtfa6zr2rzf593yd2z0xjn0ytvd8jcje68nansxy4zuu
   - &liver_age age1u85f62gvuk0fevmlxvsz74q8zlfdtasqrktfguxcn7q8fak5a3lq09ha7r
   - &mino_age age1c4lf0ka5h87g98z047ljfzp2tuf6gx0csg8aw89xwsderem52fasnuc4td
   - &seed_dfw_1_age age10yx5tftxu9phrzhvvwjgyztvmuvqly5zmg0h2696g7dkr4a6ec7sa69ldu
   - &seed_dfw_2_age age155d63shppu7t9t2j04675l4xlcst8r6uh7mytx7s69dv58wykfrsclzeud
   - &seed_dfw_3_age age1j503tg9f0gnc76u2g2j9luhc0cs5j8kj9xy0we64q5atxhwgqcaqjqv0k6
+  - &seed_atl_1_age age1y0eyhwsm6tqgll8v52j7tnwdyffxt8stx3t3pn456phujx49mefqfessfh
 
 creation_rules:
   - path_regex: secrets/signi\.yaml$
@@ -50,6 +52,12 @@ creation_rules:
         age:
           - *seed_dfw_3_age
 
+  - path_regex: secrets/seed-atl-1\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *seed_atl_1_age
   - path_regex: secrets/seed-system\.yaml$
     key_groups:
       - pgp:
@@ -58,6 +66,21 @@ creation_rules:
           - *seed_dfw_1_age
           - *seed_dfw_2_age
           - *seed_dfw_3_age
+          - *seed_atl_1_age
+
+  - path_regex: secrets/luks-recovery\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *ada_age
+
+  - path_regex: secrets/pulumi-passphrase\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *ada_age
 
   # Fallback for any other secrets files
   - path_regex: secrets/.*\.yaml$

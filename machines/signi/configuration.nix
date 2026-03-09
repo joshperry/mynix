@@ -67,7 +67,7 @@ in {
         passwordSecret = "ada/email-password";
       };
 
-      packages = with pkgs; [ gh vultr-cli ];
+      packages = with pkgs; [ gh vultr-cli ssh-to-age sops ];
 
       secrets.sshKey = "ada/ssh-key";
       secrets.gpgKey = "ada/gpg-key";
@@ -228,6 +228,29 @@ in {
     "claude-code"
   ];
   nixpkgs.config.joypixels.acceptLicense = true;
+
+  # Derive ada's age key from SSH private key for sops decryption.
+  # Runs after sops-nix decrypts the SSH key.
+  systemd.services.ada-age-key = {
+    description = "Derive ada's age key from SSH key";
+    after = [ "sops-install-secrets.service" ];
+    wants = [ "sops-install-secrets.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = pkgs.writeShellScript "ada-age-key" ''
+        if [ -f /agents/ada/.ssh/id_ed25519 ]; then
+          mkdir -p /agents/ada/.config/sops/age
+          ${pkgs.ssh-to-age}/bin/ssh-to-age -private-key \
+            -i /agents/ada/.ssh/id_ed25519 \
+            -o /agents/ada/.config/sops/age/keys.txt
+          chown ada:ada /agents/ada/.config/sops/age/keys.txt
+          chmod 600 /agents/ada/.config/sops/age/keys.txt
+        fi
+      '';
+    };
+  };
 
   # Seed: k3s + nix-snapshotter + Kata/CLH (VM-isolated pods)
   seed = {
