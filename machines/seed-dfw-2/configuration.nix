@@ -26,11 +26,11 @@
   # Allow ada to push closures for remote deploys
   nix.settings.trusted-users = [ "root" "ada" ];
 
-  # Seed: k3s server joining seed-dfw-1 HA cluster
+  # Seed: k3s server joining dfw-3 HA cluster
   seed = {
     enable = true;
     role = "server";
-    serverAddr = "https://216.128.140.15:6443";
+    serverAddr = "https://45.76.239.250:6443";
     tokenFile = config.sops.secrets."seed/k3s-token".path;
     persistence.enable = true;
     persistence.path = "/persist";

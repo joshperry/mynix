@@ -13,6 +13,7 @@
   sops = {
     defaultSopsFile = ../../secrets/seed-dfw-1.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    secrets."seed/k3s-token" = {};
   };
 
   boot.loader.systemd-boot.enable = true;
@@ -25,13 +26,14 @@
   # Allow ada to push closures for remote deploys
   nix.settings.trusted-users = [ "root" "ada" ];
 
-  # Seed: k3s + nix-snapshotter + Kata/CLH
+  # Seed: k3s server joining dfw-3 HA cluster
   seed = {
     enable = true;
+    role = "server";
+    serverAddr = "https://45.76.239.250:6443";
+    tokenFile = config.sops.secrets."seed/k3s-token".path;
     persistence.enable = true;
     persistence.path = "/persist";
-    # servicelb disabled — MetalLB handles LoadBalancer IPs (deployed by seed module)
-    k3s.clusterInit = true;  # Bootstrap embedded etcd (first server only, disable after cluster is up)
     k3s.dualStack = true;
     k3s.extraFlags = [
       "--node-ip=216.128.140.15,2001:19f0:6402:d0a:3eec:efff:feb9:c20a"
