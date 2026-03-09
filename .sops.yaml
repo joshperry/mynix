@@ -5,7 +5,7 @@ keys:
   - &mino_age age1c4lf0ka5h87g98z047ljfzp2tuf6gx0csg8aw89xwsderem52fasnuc4td
   - &seed_dfw_1_age age10yx5tftxu9phrzhvvwjgyztvmuvqly5zmg0h2696g7dkr4a6ec7sa69ldu
   - &seed_dfw_2_age age155d63shppu7t9t2j04675l4xlcst8r6uh7mytx7s69dv58wykfrsclzeud
-  - &seed_dfw_3_age age1q7lqlk68ddy65kfxrc9g3g3dll4z0aart99sum207ydqvmcytqeqsyr2c5
+  - &seed_dfw_3_age age1j503tg9f0gnc76u2g2j9luhc0cs5j8kj9xy0we64q5atxhwgqcaqjqv0k6
 
 creation_rules:
   - path_regex: secrets/signi\.yaml$
