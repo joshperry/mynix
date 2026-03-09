@@ -2,16 +2,19 @@
 # Provides: Clevis/Tang auto-unlock + initrd SSH fallback
 #
 # Post-install steps (per node):
-#   1. SSH into initrd (port 2222) for first boot
-#   2. clevis luks bind -d /dev/sda2 tang '{"url":"http://207.148.3.31:7654"}'
-#   3. clevis luks list -d /dev/sda2 -s 2 > /persist/secrets/clevis-cryptroot.jwe
-#   4. Set boot.initrd.clevis.devices.cryptroot.secretFile (uncomment in disks.nix)
-#   5. nixos-rebuild boot && reboot
+#   1. Generate initrd SSH host key into extra-files dir (as current user, 600 perms)
+#   2. Run nixos-anywhere with --extra-files and --disk-encryption-keys
+#   3. SSH into initrd (port 2222) for first boot to enter LUKS passphrase
+#   4. Create JWE: echo -n <passphrase> | clevis encrypt tang '{"url":"..."}' > /persist/secrets/clevis-cryptroot.jwe
+#   5. Enable boot.initrd.clevis in disks.nix, nixos-rebuild boot && reboot
 { config, lib, pkgs, ... }:
 
 {
   # Systemd-based initrd (required for clevis, better SSH support)
   boot.initrd.systemd.enable = true;
+
+  # Clevis + jose available on system for binding/debugging
+  environment.systemPackages = [ pkgs.clevis pkgs.jose ];
 
   # NIC driver in initrd for network-based unlock
   boot.initrd.availableKernelModules = [ "ixgbe" ];

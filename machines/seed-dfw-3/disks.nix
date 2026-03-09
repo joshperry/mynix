@@ -58,12 +58,11 @@
   };
 
   # Clevis/Tang auto-unlock for LUKS
-  # Enable after: clevis luks bind, copy JWE to /persist/secrets/, nixos-rebuild boot.
-  # boot.initrd.clevis = {
-  #   enable = true;
-  #   useTang = true;
-  #   devices.cryptroot.secretFile = "/persist/secrets/clevis-cryptroot.jwe";
-  # };
+  boot.initrd.clevis = {
+    enable = true;
+    useTang = true;
+    devices.cryptroot.secretFile = "/persist/secrets/clevis-cryptroot.jwe";
+  };
 
   fileSystems."/persist".neededForBoot = true;
 }
