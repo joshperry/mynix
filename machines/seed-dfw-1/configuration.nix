@@ -20,8 +20,8 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 5;
 
-  # Serial console for Vultr KVM/IPMI
-  boot.kernelParams = [ "console=ttyS0,115200n8" ];
+  # Console on both VGA (KVM) and serial — VGA needed for LUKS passphrase prompt
+  boot.kernelParams = [ "console=tty0" "console=ttyS0,115200n8" ];
 
   # Allow ada to push closures for remote deploys
   nix.settings.trusted-users = [ "root" "ada" ];
