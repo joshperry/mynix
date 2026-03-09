@@ -17,8 +17,7 @@
     global = {
       # TODO: generate with `uuidgen` during bootstrap, then hardcode
       fsid = "GENERATE-UUID-DURING-BOOTSTRAP";
-      # TODO: update with actual seed-dfw-3 IP after provisioning
-      monHost = "216.128.140.15,104.238.146.15,SEED_DFW_3_IPV4";
+      monHost = "216.128.140.15,104.238.146.15,45.76.239.250";
       clusterNetwork = "10.42.0.0/16";
       publicNetwork = "216.128.140.0/23,104.238.146.0/23";
     };

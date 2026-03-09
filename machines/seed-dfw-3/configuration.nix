@@ -36,8 +36,7 @@
     persistence.path = "/persist";
     k3s.dualStack = true;
     k3s.extraFlags = [
-      # TODO: replace with actual seed-dfw-3 IPs after provisioning
-      "--node-ip=SEED_DFW_3_IPV4,SEED_DFW_3_IPV6"
+      "--node-ip=45.76.239.250,2001:19f0:6401:a11:3eec:efff:feb9:84bc"
     ];
   };
 
@@ -79,15 +78,13 @@
     interfaces.enp1s0f0 = {
       useDHCP = true;
       ipv6.addresses = [
-        # TODO: replace with actual seed-dfw-3 IPv6 after provisioning
-        # { address = "SEED_DFW_3_IPV6"; prefixLength = 64; }
+        { address = "2001:19f0:6401:a11:3eec:efff:feb9:84bc"; prefixLength = 64; }
       ];
     };
-    # TODO: set actual IPv6 gateway after provisioning
-    # defaultGateway6 = {
-    #   address = "fe80::XXXX";
-    #   interface = "enp1s0f0";
-    # };
+    defaultGateway6 = {
+      address = "fe80::63f:72ff:fe74:47bc";
+      interface = "enp1s0f0";
+    };
     firewall = {
       enable = true;
       allowedTCPPorts = [
