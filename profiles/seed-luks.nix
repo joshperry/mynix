@@ -7,7 +7,7 @@
 #   3. clevis luks list -d /dev/sda2 -s 2 > /persist/secrets/clevis-cryptroot.jwe
 #   4. Set boot.initrd.clevis.devices.cryptroot.secretFile (uncomment in disks.nix)
 #   5. nixos-rebuild boot && reboot
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 {
   # Systemd-based initrd (required for clevis, better SSH support)
@@ -37,7 +37,7 @@
 
   # Shell for initrd SSH: bash + auto-start password agent
   boot.initrd.systemd.users.root.shell = "/bin/bash";
-  boot.initrd.systemd.storePaths = [ "/bin/bash" ];
+  boot.initrd.systemd.extraBin.bash = "${pkgs.bashInteractive}/bin/bash";
   boot.initrd.systemd.contents."/root/.profile".text = ''
     systemd-tty-ask-password-agent
   '';
