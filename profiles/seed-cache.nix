@@ -36,4 +36,9 @@ in {
   # nix-daemon needs AWS credentials for S3 access (substituter downloads + post-build-hook uploads)
   systemd.services.nix-daemon.environment.AWS_SHARED_CREDENTIALS_FILE =
     config.sops.templates."seed-s3-credentials".path;
+
+  # nix-snapshotter runs as root and calls nix directly (bypassing daemon),
+  # so it also needs S3 credentials for fetching image store paths
+  systemd.services.nix-snapshotter.environment.AWS_SHARED_CREDENTIALS_FILE =
+    config.sops.templates."seed-s3-credentials".path;
 }
