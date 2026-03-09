@@ -58,11 +58,12 @@
   };
 
   # Clevis/Tang auto-unlock for LUKS
-  boot.initrd.clevis = {
-    enable = true;
-    useTang = true;
-    devices.cryptroot.secretFile = "/persist/secrets/clevis-cryptroot.jwe";
-  };
+  # Disabled until Tang is running and clevis bind is done.
+  # boot.initrd.clevis = {
+  #   enable = true;
+  #   useTang = true;
+  #   devices.cryptroot.secretFile = "/persist/secrets/clevis-cryptroot.jwe";
+  # };
 
   fileSystems."/persist".neededForBoot = true;
 }
