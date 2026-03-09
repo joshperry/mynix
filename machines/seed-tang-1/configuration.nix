@@ -24,6 +24,7 @@
 
   networking = {
     hostName = "seed-tang-1";
+    useDHCP = true;
     firewall = {
       enable = true;
       allowedTCPPorts = [
