@@ -6,4 +6,5 @@
   "104.238.146.0/23"   # seed-dfw-2
   "45.76.238.0/23"     # seed-dfw-3
   "45.76.254.0/23"     # seed-atl-1 (+ seed-atl-2, seed-atl-3 — same DC)
+  "45.76.60.0/23"   # seed-atl-2
 ]

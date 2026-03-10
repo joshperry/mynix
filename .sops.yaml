@@ -9,6 +9,7 @@ keys:
   - &seed_dfw_3_age age1j503tg9f0gnc76u2g2j9luhc0cs5j8kj9xy0we64q5atxhwgqcaqjqv0k6
   - &seed_atl_1_age age1y0eyhwsm6tqgll8v52j7tnwdyffxt8stx3t3pn456phujx49mefqfessfh
   - &seed_tang_1_age age1guywc0u7qla6d8t4zrg55h054nqg42d0m92g280xastu4m55qgzq5g3xlw
+  - &seed_atl_2_age age1zdgmuk3ehkvf84xnka28zpjj4p8wc6nt0q0ee8hmltqhzfytyutqhhw6re
 
 creation_rules:
   - path_regex: secrets/signi\.yaml$
@@ -59,6 +60,12 @@ creation_rules:
           - *admin_josh
         age:
           - *seed_atl_1_age
+  - path_regex: secrets/seed-atl-2\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *seed_atl_2_age
   - path_regex: secrets/seed-system\.yaml$
     key_groups:
       - pgp:
