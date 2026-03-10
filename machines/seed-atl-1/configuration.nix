@@ -44,7 +44,7 @@
     k3s.clusterInit = true;
     k3s.dualStack = true;
     k3s.extraFlags = [
-      "--node-ip=45.76.254.129,2001:19f0:5400:26d6:3eec:efff:feb9:f310"
+      "--node-ip=155.138.198.207,2001:19f0:5400:1c2a:3eec:efff:feb9:f2a8"
     ];
     controller = {
       enable = true;
@@ -102,7 +102,7 @@
         prefixLength = 32;
       }];
       ipv6.addresses = [
-        { address = "2001:19f0:5400:26d6:3eec:efff:feb9:f310"; prefixLength = 64; }
+        { address = "2001:19f0:5400:1c2a:3eec:efff:feb9:f2a8"; prefixLength = 64; }
         { address = "2001:19f0:5401:1c16::1"; prefixLength = 64; }
       ];
     };
