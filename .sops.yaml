@@ -8,7 +8,7 @@ keys:
   - &seed_dfw_2_age age155d63shppu7t9t2j04675l4xlcst8r6uh7mytx7s69dv58wykfrsclzeud
   - &seed_dfw_3_age age1j503tg9f0gnc76u2g2j9luhc0cs5j8kj9xy0we64q5atxhwgqcaqjqv0k6
   - &seed_atl_1_age age1gcnvkfuptygecafugm5m54cfh2krnh95x023w9pjyj4uz2pu697qwv7knd
-  - &seed_tang_1_age age1guywc0u7qla6d8t4zrg55h054nqg42d0m92g280xastu4m55qgzq5g3xlw
+  - &seed_tang_1_age age10t89sgx04mahkas495tkv6zxuylmhyefzrp0yd9ufsuwur44wstsv3tpxg
   - &seed_atl_2_age age19xq48wjmej07g6sl8kg86a64jsxe5gc47y2f6ghefjxeqhhcad7q4sm0vx
   - &seed_atl_3_age age1dql0yg48r4m6xsycwxf2dn3wrvdld6rrszgm2yaxud4jwamx7vgq59gxy9
 
@@ -73,6 +73,12 @@ creation_rules:
           - *admin_josh
         age:
           - *seed_atl_3_age
+  - path_regex: secrets/seed-tang-1\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *seed_tang_1_age
   - path_regex: secrets/seed-system\.yaml$
     key_groups:
       - pgp:
