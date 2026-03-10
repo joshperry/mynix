@@ -521,7 +521,6 @@
               enable = true;
               poolSize = 4;
               image = "${inputs.seed.packages.x86_64-linux.poolManagerImage}";
-              initramfs = "${inputs.seed.packages.x86_64-linux.poolVmInitramfs}";
             };
           }
         ];
@@ -574,7 +573,6 @@
               enable = true;
               poolSize = 4;
               image = "${inputs.seed.packages.x86_64-linux.poolManagerImage}";
-              initramfs = "${inputs.seed.packages.x86_64-linux.poolVmInitramfs}";
             };
           }
         ];
