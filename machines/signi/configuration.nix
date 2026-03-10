@@ -135,11 +135,15 @@ in {
         };
         programs.gpg.enable = true;
         programs.git.signing.key = "6CD1AEABA566EC82";
-        # Import GPG key from sops secret on login
+        # ssh-agent for SSH (GPG agent handles signing only, not SSH)
+        services.ssh-agent.enable = true;
+        # Import keys and set env on login
         programs.bash.profileExtra = ''
+          export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
           if [ -f ${config.sops.secrets."ada/gpg-key".path} ]; then
             gpg --batch --import ${config.sops.secrets."ada/gpg-key".path} 2>/dev/null || true
           fi
+          ssh-add -l &>/dev/null || ssh-add ~/.ssh/id_ed25519 2>/dev/null || true
           export GH_TOKEN="$(cat ${config.sops.secrets."ada/gh-pat".path} 2>/dev/null || true)"
           export VULTR_API_KEY="$(cat ${config.sops.secrets."ada/vultr-api-key".path} 2>/dev/null || true)"
         '';
@@ -439,7 +443,7 @@ in {
 
   programs.gnupg.agent = {
     enable = true;
-    enableSSHSupport = true;
+    # SSH support handled per-user in home-manager (josh: gpg-agent, ada: ssh-agent)
   };
 
   programs.light = {
