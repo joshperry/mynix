@@ -5,6 +5,7 @@
     ./hardware-configuration.nix
     ./disks.nix
     ../../profiles/server.nix
+    ../../profiles/seed-cache.nix
   ];
 
   options.seed.netbootPath = lib.mkOption {
@@ -14,6 +15,7 @@
   };
 
   config = {
+    sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
 
