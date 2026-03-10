@@ -33,15 +33,16 @@
   # Allow ada to push closures for remote deploys
   nix.settings.trusted-users = [ "root" "ada" ];
 
-  # Seed: k3s server joining existing cluster via seed-atl-1
+  # Seed: k3s server joining existing cluster
   seed = {
     enable = true;
     role = "server";
-    serverAddr = "https://45.76.254.129:6443";
+    # serverAddr read at boot from /persist/seed/server-addr (written by provisioner)
     tokenFile = config.sops.secrets."seed/k3s-token".path;
     persistence.enable = true;
     persistence.path = "/persist";
     k3s.dualStack = true;
+    k3s.autoNodeIp = "vultr";
   };
 
   # Impermanence mappings

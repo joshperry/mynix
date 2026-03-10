@@ -43,16 +43,13 @@
     persistence.path = "/persist";
     k3s.clusterInit = true;
     k3s.dualStack = true;
-    k3s.extraFlags = [
-      "--node-ip=155.138.198.207,2001:19f0:5400:1c2a:3eec:efff:feb9:f2a8"
-    ];
+    k3s.autoNodeIp = "vultr";
     controller = {
       enable = true;
       flakePaths = [
         "github:loomtex/seed"
       ];
-      ipv4Address = "155.138.175.181";
-      ipv6Block = "2001:19f0:5401:1c16::/64";
+      # Reserved IPs come from seed-cluster-config ConfigMap (set by provisioner)
       webhook = {
         enable = true;
         secretFile = config.sops.secrets."seed/controller/gh-webhook-secret".path;
@@ -95,21 +92,9 @@
 
   networking = {
     hostName = "seed-atl-1";
-    interfaces.enp1s0f0 = {
-      useDHCP = true;
-      ipv4.addresses = [{
-        address = "155.138.175.181";
-        prefixLength = 32;
-      }];
-      ipv6.addresses = [
-        { address = "2001:19f0:5400:1c2a:3eec:efff:feb9:f2a8"; prefixLength = 64; }
-        { address = "2001:19f0:5401:1c16::1"; prefixLength = 64; }
-      ];
-    };
-    defaultGateway6 = {
-      address = "fe80::63f:72ff:fe69:8b3c";
-      interface = "enp1s0f0";
-    };
+    interfaces.enp1s0f0.useDHCP = true;
+    # IPv6: SLAAC handles address + gateway (accept_ra=2 set by seed module)
+    # Reserved IPs: MetalLB L2 speaker manages them on the interface
     firewall = {
       enable = true;
       allowedTCPPorts = [
