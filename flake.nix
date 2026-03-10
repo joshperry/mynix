@@ -583,6 +583,20 @@
         ];
       };
 
+      seed-atl-3 = nixosSystem {
+        name = "seed-atl-3";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+        sysmodules = [
+          inputs.disko.nixosModules.disko
+          inputs.impermanence.nixosModules.impermanence
+          inputs.seed.nixosModules.default
+          inputs.seed.nixosModules.persistence
+        ];
+      };
+
       seed-tang-1 = nixosSystem {
         name = "seed-tang-1";
         system = "x86_64-linux";
