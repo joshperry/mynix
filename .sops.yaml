@@ -69,6 +69,7 @@ creation_rules:
           - *seed_dfw_3_age
           - *seed_atl_1_age
           - *seed_tang_1_age
+          - *ada_age
 
   - path_regex: secrets/luks-recovery\.yaml$
     key_groups:
