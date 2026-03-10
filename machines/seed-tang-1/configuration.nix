@@ -16,6 +16,13 @@
 
   config = {
     sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+    sops.secrets.vultr-api-key = {
+      sopsFile = ../../secrets/seed-tang-1.yaml;
+    };
+    sops.secrets.pdns-api-key = {
+      sopsFile = ../../secrets/seed-tang-1.yaml;
+    };
+
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
 
@@ -43,6 +50,102 @@
       };
     };
 
+    # --- DNS: unbound (recursive resolver) + pdns (authoritative for combine.loom.farm) ---
+
+    # PowerDNS: authoritative for combine.loom.farm, localhost-only.
+    # Records are managed by the combine-dns-sync timer via HTTP API.
+    services.powerdns = {
+      enable = true;
+      extraConfig = ''
+        launch=gsqlite3
+        gsqlite3-database=/var/lib/pdns/combine.sqlite
+        local-address=127.0.0.1
+        local-port=5300
+        socket-dir=/run/pdns
+        api=yes
+        webserver=yes
+        webserver-address=127.0.0.1
+        webserver-port=8081
+        webserver-allow-from=127.0.0.0/8
+        include-dir=/run/pdns/conf.d
+      '';
+    };
+
+    # pdns needs /run/pdns for its control socket
+    systemd.services.pdns.serviceConfig.RuntimeDirectory = "pdns";
+
+    # Write API key into pdns conf.d before pdns starts
+    systemd.services.pdns.serviceConfig.ExecStartPre = let
+      script = pkgs.writeShellScript "pdns-write-api-key" ''
+        mkdir -p /run/pdns/conf.d
+        echo "api-key=$(cat ${config.sops.secrets.pdns-api-key.path})" > /run/pdns/conf.d/api-key.conf
+      '';
+    in "+${script}"; # + prefix runs as root
+
+    # Ensure pdns SQLite DB directory exists with correct ownership
+    systemd.tmpfiles.rules = [
+      "d /var/lib/pdns 0750 pdns pdns -"
+    ];
+
+    # Unbound: recursive resolver, serves as sole nameserver for seed nodes.
+    # Forwards combine.loom.farm to local pdns, everything else to public resolvers.
+    services.unbound = {
+      enable = true;
+      settings = {
+        server = {
+          interface = [ "0.0.0.0" "::" ];
+          access-control = [
+            "10.0.0.0/24 allow"
+            "127.0.0.0/8 allow"
+            "::1/128 allow"
+          ];
+          # Disable DNSSEC for combine.loom.farm (internal zone, no signing)
+          domain-insecure = [ "combine.loom.farm" ];
+        };
+        forward-zone = [
+          {
+            name = "combine.loom.farm.";
+            forward-addr = [ "127.0.0.1@5300" ];
+          }
+          {
+            name = ".";
+            forward-addr = [ "1.1.1.1" "1.0.0.1" ];
+          }
+        ];
+      };
+    };
+
+    # --- combine-dns-sync: Vultr API poller → pdns record updates ---
+
+    systemd.services.combine-dns-sync = {
+      description = "Sync Vultr hosts to combine.loom.farm DNS";
+      after = [ "pdns.service" "network-online.target" ];
+      wants = [ "network-online.target" ];
+      path = with pkgs; [ curl jq ];
+      environment = {
+        VULTR_API_KEY_FILE = config.sops.secrets.vultr-api-key.path;
+        PDNS_API_KEY_FILE = config.sops.secrets.pdns-api-key.path;
+        ALIASES_FILE = "${./combine-dns/aliases.json}";
+        ZONE = "combine.loom.farm.";
+      };
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${pkgs.bash}/bin/bash ${./combine-dns/sync.sh}";
+        # Run as root to read sops secrets
+        User = "root";
+      };
+    };
+
+    systemd.timers.combine-dns-sync = {
+      description = "Poll Vultr API and update DNS every 60s";
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "30s";
+        OnUnitActiveSec = "60s";
+        RandomizedDelaySec = "5s";
+      };
+    };
+
     networking = {
       hostName = "seed-tang-1";
       useDHCP = true;
@@ -50,8 +153,12 @@
         enable = true;
         allowedTCPPorts = [
           22    # SSH
+          53    # DNS (unbound)
           7654  # Tang
           8080  # Netboot HTTP (iPXE)
+        ];
+        allowedUDPPorts = [
+          53    # DNS (unbound)
         ];
       };
     };
@@ -61,6 +168,7 @@
 
     environment.systemPackages = with pkgs; [
       inetutils
+      dig
     ];
 
     services.openssh = {
