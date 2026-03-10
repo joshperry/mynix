@@ -19,9 +19,7 @@
     sops.secrets.vultr-api-key = {
       sopsFile = ../../secrets/seed-tang-1.yaml;
     };
-    sops.secrets.pdns-api-key = {
-      sopsFile = ../../secrets/seed-tang-1.yaml;
-    };
+    # pdns API key is generated at boot — only used locally (pdns ↔ sync script)
 
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
@@ -74,11 +72,16 @@
     # pdns needs /run/pdns for its control socket
     systemd.services.pdns.serviceConfig.RuntimeDirectory = "pdns";
 
-    # Write API key into pdns conf.d before pdns starts
+    # Generate pdns API key at boot and write to conf.d
     systemd.services.pdns.serviceConfig.ExecStartPre = let
       script = pkgs.writeShellScript "pdns-write-api-key" ''
         mkdir -p /run/pdns/conf.d
-        echo "api-key=$(cat ${config.sops.secrets.pdns-api-key.path})" > /run/pdns/conf.d/api-key.conf
+        # Generate API key if not already present (persists across pdns restarts within same boot)
+        if [ ! -f /run/pdns/api-key ]; then
+          ${pkgs.openssl}/bin/openssl rand -hex 16 > /run/pdns/api-key
+          chmod 600 /run/pdns/api-key
+        fi
+        echo "api-key=$(cat /run/pdns/api-key)" > /run/pdns/conf.d/api-key.conf
       '';
     in "+${script}"; # + prefix runs as root
 
@@ -124,7 +127,7 @@
       path = with pkgs; [ curl jq ];
       environment = {
         VULTR_API_KEY_FILE = config.sops.secrets.vultr-api-key.path;
-        PDNS_API_KEY_FILE = config.sops.secrets.pdns-api-key.path;
+        PDNS_API_KEY_FILE = "/run/pdns/api-key";
         ALIASES_FILE = "${./combine-dns/aliases.json}";
         ZONE = "combine.loom.farm.";
       };
