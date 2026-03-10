@@ -15,8 +15,15 @@
     secrets."seed/k3s-token" = {};
   };
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  # GRUB: works from both BIOS and EFI installs (iPXE netboot is BIOS-only
+  # on Vultr bare metal, so systemd-boot's bootctl install gets skipped).
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    efiInstallAsRemovable = true;  # writes \EFI\BOOT\BOOTX64.EFI — no NVRAM needed
+    device = "/dev/disk/by-path/pci-0000:00:17.0-ata-5";
+  };
+  boot.loader.efi.canTouchEfiVariables = false;
   boot.loader.timeout = 5;
 
   boot.kernelParams = [
