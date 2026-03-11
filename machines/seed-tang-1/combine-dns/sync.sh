@@ -44,6 +44,9 @@ records=$(echo "$bm_json" "$vm_json" | jq -s '
     (.[] | .bare_metals // [] | .[] | to_record),
     (.[] | .instances // [] | .[] | to_record)
   ] | map(select(.ip != null and .ip != ""))
+  # Deduplicate by FQDN: prefer VPC/internal IPs (10.x) over public
+  | group_by(.fqdn)
+  | map(sort_by(if .ip | test("^10\\.") then 0 else 1 end) | first)
 ' --arg ZONE "$ZONE")
 
 # Ensure zone exists (create if missing)
