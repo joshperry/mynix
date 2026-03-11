@@ -25,11 +25,23 @@
 
     # Tang: Network-Bound Disk Encryption server
     # Nodes auto-unlock LUKS by contacting this server at boot.
-    # Keys auto-generated on first start — back up /var/db/tang/
     services.tang = {
       enable = true;
       listenStream = [ "7654" ];
       ipAddressAllow = config.seed.vpcSubnets;
+    };
+
+    # Generate tang keys on first boot (DynamicUser tangd can't create them itself)
+    systemd.services.tangd-keygen = {
+      description = "Generate Tang keys if missing";
+      wantedBy = [ "tangd.socket" ];
+      before = [ "tangd.socket" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecCondition = "${pkgs.bash}/bin/bash -c '[ ! -d /var/lib/private/tang ] || [ -z \"$(ls -A /var/lib/private/tang 2>/dev/null)\" ]'";
+        ExecStart = "${pkgs.bash}/bin/bash -c 'mkdir -p /var/lib/private/tang && ${pkgs.tang}/libexec/tangd-keygen /var/lib/private/tang'";
+      };
     };
 
     # --- DNS: unbound (recursive resolver) + pdns (authoritative for combine.loom.farm) ---
