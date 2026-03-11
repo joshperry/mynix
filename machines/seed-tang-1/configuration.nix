@@ -72,10 +72,22 @@
     # pdns needs /run/pdns for its control socket
     systemd.services.pdns.serviceConfig.RuntimeDirectory = "pdns";
 
-    # Generate pdns API key at boot and write to conf.d
+    # Initialize pdns SQLite DB + API key before pdns starts
     systemd.services.pdns.serviceConfig.ExecStartPre = let
-      script = pkgs.writeShellScript "pdns-write-api-key" ''
+      script = pkgs.writeShellScript "pdns-init" ''
         mkdir -p /run/pdns/conf.d
+
+        # Initialize SQLite DB with pdns schema if it doesn't exist
+        DB=/var/lib/pdns/combine.sqlite
+        if [ ! -f "$DB" ]; then
+          ${pkgs.sqlite}/bin/sqlite3 "$DB" < ${pkgs.pdns}/share/doc/pdns/schema.sqlite3.sql
+          chown pdns:pdns "$DB"
+        fi
+
+        # Clean up stale pdns metadata (prevents startup warnings on 4.9.x)
+        ${pkgs.sqlite}/bin/sqlite3 "$DB" "DELETE FROM domainmetadata WHERE kind='SOA-EDIT-DNSUPDATE';" 2>/dev/null || true
+        ${pkgs.sqlite}/bin/sqlite3 "$DB" "DELETE FROM domainmetadata WHERE kind='INCEPTION-INCREMENT';" 2>/dev/null || true
+
         # Generate API key if not already present (persists across pdns restarts within same boot)
         if [ ! -f /run/pdns/api-key ]; then
           ${pkgs.openssl}/bin/openssl rand -hex 16 > /run/pdns/api-key

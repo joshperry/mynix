@@ -618,6 +618,17 @@
         ];
       };
 
+      seed-provisioner = nixosSystem {
+        name = "seed-provisioner";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+        sysmodules = [
+          inputs.disko.nixosModules.disko
+        ];
+      };
+
       cloudtest = nixosSystem {
         name = "cloudtest";
         system = "x86_64-linux";
