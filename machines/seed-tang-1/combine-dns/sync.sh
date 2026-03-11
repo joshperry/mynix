@@ -40,10 +40,10 @@ records=$(echo "$bm_json" "$vm_json" | jq -s '
       ip: $ip,
       label: $label
     };
-  # Only include hosts with status "active"
+  # Exclude hosts being destroyed or suspended
   [
-    (.[] | .bare_metals // [] | .[] | select(.status == "active") | to_record),
-    (.[] | .instances // [] | .[] | select(.status == "active") | to_record)
+    (.[] | .bare_metals // [] | .[] | select(.status != "destroying" and .status != "suspended") | to_record),
+    (.[] | .instances // [] | .[] | select(.status != "destroying" and .status != "suspended") | to_record)
   ] | map(select(.ip != null and .ip != ""))
   # Deduplicate by FQDN: prefer VPC/internal IPs (10.x) over public
   | group_by(.fqdn)
