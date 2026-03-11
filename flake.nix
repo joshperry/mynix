@@ -618,6 +618,18 @@
         ];
       };
 
+      seed-puncher-1 = nixosSystem {
+        name = "seed-puncher-1";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+        sysmodules = [
+          inputs.disko.nixosModules.disko
+          { seed.vpcSubnets = [ "10.0.0.0/24" ]; }
+        ];
+      };
+
       seed-provisioner = nixosSystem {
         name = "seed-provisioner";
         system = "x86_64-linux";
@@ -626,6 +638,18 @@
         };
         sysmodules = [
           inputs.disko.nixosModules.disko
+        ];
+      };
+
+      seed-stake = nixosSystem {
+        name = "seed-stake";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+        sysmodules = [
+          inputs.disko.nixosModules.disko
+          { seed.netbootPath = inputs.seed.packages.x86_64-linux.netboot; }
         ];
       };
 
