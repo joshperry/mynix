@@ -114,6 +114,8 @@
             "127.0.0.0/8 allow"
             "::1/128 allow"
           ];
+          # Allow forwarding to localhost (pdns on 127.0.0.1:5300)
+          do-not-query-localhost = false;
           # Disable DNSSEC for combine.loom.farm (internal zone, no signing)
           domain-insecure = [ "combine.loom.farm" ];
         };
