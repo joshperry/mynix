@@ -14,29 +14,19 @@
     boot.loader.systemd-boot.enable = true;
     boot.loader.efi.canTouchEfiVariables = true;
 
-    # --- SSH substituter proxy ---
-    # Serves the local nix store over SSH. The local store is backed by
-    # the S3 binary cache (via seed-cache.nix), so clients transparently
-    # get paths from S3 without needing credentials themselves.
-    #
-    # Usage from clients:
-    #   nix build --substituters "ssh-ng://nix-ssh@<provisioner-ip>" ...
-    nix.sshServe = {
-      enable = true;
-      keys = [
-        # ada@signi — for running nixos-anywhere from signi
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4wKwiX1fnwB/U4Mc7JT4ddMExopexk0DUSd7Du12Sp ada@signi"
-        # josh@6bit.com — for manual provisioning
-        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsPaFplk95wdbZnGF9q1LnQUKy36Lh+4dSHyFJwMeUK josh@6bit.com"
-      ];
-      # Allow write access so the post-build-hook can upload to S3 cache
-      # after building on the provisioner
-      write = true;
-    };
-
-    # S3 credentials for nix-daemon are provided by seed-cache.nix.
-    # nix-store --serve (ForceCommand for nix-ssh user) communicates with
-    # nix-daemon which handles substituter fetches — no extra config needed.
+    # Provisioner runs Pulumi + nixos-anywhere locally to provision cluster nodes.
+    # Builds closures locally (with S3 binary cache from seed-cache.nix) and
+    # transfers them to targets in-datacenter via nixos-anywhere --build-on local.
+    environment.systemPackages = with pkgs; [
+      nodejs_22       # Pulumi runtime
+      pulumi-bin      # Pulumi CLI
+      nixos-anywhere  # Remote NixOS installation
+      sops            # Secret decryption
+      age             # age encryption (sops backend)
+      ssh-to-age      # SSH key → age key conversion
+      jq              # JSON processing
+      git             # Clone repos
+    ];
 
     networking = {
       hostName = "seed-provisioner";
@@ -44,7 +34,7 @@
       firewall = {
         enable = true;
         allowedTCPPorts = [
-          22 # SSH (admin + nix-ssh substituter)
+          22 # SSH
         ];
       };
     };
