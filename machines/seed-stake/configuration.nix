@@ -1,5 +1,31 @@
 { config, pkgs, lib, ... }:
 
+let
+  # Slim Pulumi: just CLI + Node.js language host + Vultr provider.
+  # pkgs.pulumi-bin bundles 48 providers (3.9 GiB closure) — we only need Vultr.
+  pulumi-resource-vultr = pkgs.stdenv.mkDerivation rec {
+    pname = "pulumi-resource-vultr";
+    version = "2.27.1";
+    src = pkgs.fetchurl {
+      url = "https://github.com/dirien/pulumi-vultr/releases/download/v${version}/${pname}-v${version}-linux-amd64.tar.gz";
+      hash = "sha256-m3B2z1kQaEqYkXqLLCqfcb/+oLMBc5lDkfz6lM3sXME=";
+    };
+    sourceRoot = ".";
+    installPhase = ''
+      install -Dm755 pulumi-resource-vultr $out/bin/pulumi-resource-vultr
+    '';
+  };
+
+  # Compose pulumi with only the tools we need on PATH together
+  pulumiEnv = pkgs.buildEnv {
+    name = "pulumi-env";
+    paths = [
+      pkgs.pulumi
+      pkgs.pulumiPackages.pulumi-language-nodejs
+      pulumi-resource-vultr
+    ];
+  };
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -25,7 +51,7 @@
     # transfers them to targets in-datacenter via nixos-anywhere --build-on local.
     environment.systemPackages = with pkgs; [
       nodejs_22       # Pulumi runtime + provision-cluster.ts
-      pulumi-bin      # Pulumi CLI
+      pulumiEnv       # Pulumi CLI + Node.js host + Vultr provider (~150 MiB vs 3.9 GiB)
       nixos-anywhere  # Remote NixOS installation
       sops            # Secret decryption
       age             # age encryption (sops backend)
