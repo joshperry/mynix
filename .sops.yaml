@@ -11,6 +11,7 @@ keys:
   - &seed_tang_1_age age1s3qkxjd29dd6mvttvruf6mpzue2lun3qmyfnycgk8t6c7ftz7vpqa87flk
   - &seed_atl_2_age age19xq48wjmej07g6sl8kg86a64jsxe5gc47y2f6ghefjxeqhhcad7q4sm0vx
   - &seed_atl_3_age age1dql0yg48r4m6xsycwxf2dn3wrvdld6rrszgm2yaxud4jwamx7vgq59gxy9
+  - &seed_puncher_1_age age10d5w5vpvhht3z4xvfu9zcayd92k36fcz2m0xsxzkjgj09e7w7e8qkre5eu
 
 creation_rules:
   - path_regex: secrets/signi\.yaml$
@@ -79,6 +80,12 @@ creation_rules:
           - *admin_josh
         age:
           - *seed_tang_1_age
+  - path_regex: secrets/seed-puncher-1\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *seed_puncher_1_age
   - path_regex: secrets/seed-system\.yaml$
     key_groups:
       - pgp:
@@ -91,6 +98,7 @@ creation_rules:
           - *seed_tang_1_age
           - *seed_atl_2_age
           - *seed_atl_3_age
+          - *seed_puncher_1_age
           - *ada_age
 
   - path_regex: secrets/luks-recovery\.yaml$
