@@ -3,7 +3,6 @@
 , writeTextFile
 , curl
 , jq
-, pipewire
 , procps
 , coreutils
 , kokoro-tts
@@ -15,44 +14,70 @@ let
   narratorPrompt = writeTextFile {
     name = "narrator-prompt.txt";
     text = ''
-      You are a witty narrator commentating a live coding session. Your audience
-      is listening, not reading — they can't see the terminal. Describe what just
-      happened in 1-2 short sentences. Be concise, casual, occasionally sassy.
+      You are a witty narrator commentating a live coding session. Your output
+      goes directly to a text-to-speech engine and will be spoken aloud — write
+      exactly what should be said, nothing else.
 
-      If there's a diff or code change, describe what changed and why in plain
-      English. If there's a plan or bullet list, summarize the gist. If there's
-      an error, react naturally. If it's a direct text response, don't read it
-      back verbatim — add your own color and character.
+      Describe what just happened in 1-2 short sentences. Be concise, casual,
+      occasionally sassy. The audience is listening, not reading.
 
-      Never quote code literally. Never use markdown. Never use backticks or
-      special characters. Just speak naturally, like you're the play-by-play
-      announcer for a pair programming stream.
+      If there's a diff or code change, describe what changed in plain English.
+      If there's a plan or bullet list, summarize the gist. If there's an error,
+      react naturally. Don't read anything back verbatim — add your own color.
 
-      Keep it to 1-2 sentences max. Be entertaining but informative.
+      CRITICAL: Your output is fed directly to TTS. Never use markdown, asterisks,
+      backticks, bullet points, numbered lists, or any formatting. No special
+      characters. Just plain speakable sentences.
     '';
   };
 
   narrator = writeShellApplication {
     name = "ada-narrator";
 
-    runtimeInputs = [ curl jq coreutils kokoro-tts pipewire ];
+    runtimeInputs = [ curl jq coreutils kokoro-tts ];
 
     text = ''
       # ada-narrator: Claude Code Stop hook
-      # Reads hook JSON from stdin, calls Haiku for commentary, speaks via TTS
+      # Reads hook JSON from stdin, uses lastAssistantMessage or falls back
+      # to transcript parsing, calls Haiku for commentary, speaks via TTS
+
+      # Route audio to josh's PipeWire via PulseAudio TCP (unless already set)
+      export PULSE_SERVER="''${PULSE_SERVER:-tcp:127.0.0.1:4713}"
 
       INPUT=$(cat)
 
+      # Debug: dump stdin for troubleshooting
+      LOGDIR="''${XDG_STATE_HOME:-$HOME/.local/state}/ada-narrator"
+      mkdir -p "$LOGDIR"
+      echo "[$(date -Iseconds)] stdin: $INPUT" >> "$LOGDIR/debug.log"
+
       # Don't narrate if stop hook is already active (prevents loops)
-      STOP_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false')
+      # Handle both snake_case and camelCase field names
+      STOP_ACTIVE=$(echo "$INPUT" | jq -r '(.stop_hook_active // .stopHookActive // false) | tostring')
       if [[ "$STOP_ACTIVE" == "true" ]]; then
         exit 0
       fi
 
-      MESSAGE=$(echo "$INPUT" | jq -r '.last_assistant_message // empty')
+      # Try lastAssistantMessage first (direct from Claude Code), then
+      # last_assistant_message, then fall back to transcript parsing
+      MESSAGE=$(echo "$INPUT" | jq -r '.last_assistant_message // .lastAssistantMessage // empty')
+
+      if [[ -z "$MESSAGE" ]]; then
+        # Fall back to transcript JSONL parsing
+        # Each assistant turn is split across multiple JSONL lines (text, tool_use, thinking).
+        # We need the last line that actually has text content, not just tool calls.
+        TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript_path // .transcriptPath // empty')
+        if [[ -n "$TRANSCRIPT" && -f "$TRANSCRIPT" ]]; then
+          MESSAGE=$(grep '"role":"assistant"' "$TRANSCRIPT" | jq -sr '
+            [.[] | select(.type == "assistant") | select(.message.content | any(.type == "text"))] | last |
+            .message.content | map(select(.type == "text")) | map(.text) | join("\n")
+          ' 2>/dev/null || true)
+        fi
+      fi
 
       # Skip if no message
       if [[ -z "$MESSAGE" ]]; then
+        echo "[$(date -Iseconds)] no message found, exiting" >> "$LOGDIR/debug.log"
         exit 0
       fi
 
@@ -115,9 +140,11 @@ let
       # Kills any running TTS playback so the narrator doesn't talk over the user
 
       # Kill narrator pipeline: wrapper, python TTS, and audio playback
-      pkill -u "$(id -u)" -f "ada-narrator" 2>/dev/null || true
+      # Use pkill with negation to avoid killing ourselves (ada-narrator-interrupt
+      # matches the "ada-narrator" pattern)
       pkill -u "$(id -u)" -f "kokoro-tts" 2>/dev/null || true
-      pkill -u "$(id -u)" -f "pw-play" 2>/dev/null || true
+      pkill -u "$(id -u)" -f "paplay" 2>/dev/null || true
+      pkill -u "$(id -u)" -f "bin/ada-narrator$" 2>/dev/null || true
     '';
 
     meta = {

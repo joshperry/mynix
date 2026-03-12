@@ -7,6 +7,7 @@ let
     '');
   inherit (pkgs.vimUtils.override { inherit (pkgs) vim; }) buildVimPlugin;
   inherit (pkgs.neovimUtils) buildNeovimPlugin;
+  kokoro-tts = pkgs.callPackage ./kokoro-tts {};
 in
 {
   mynix = { #def.mynix
@@ -23,6 +24,8 @@ in
     cc-prism = pkgs.callPackage ./tools/cc-prism.nix {};
     itunes-backup-explorer = pkgs.callPackage ./tools/itunes-backup-explorer.nix {};
     prosody-filer-s3 = pkgs.callPackage ./tools/prosody-filer-s3.nix {};
+    inherit kokoro-tts;
+    ada-narrator = pkgs.callPackage ./ada-narrator { inherit kokoro-tts; };
 
     dev = {
       direnv-nvim = pkgs.callPackage ./dev/direnv-nvim.nix {inherit buildVimPlugin;};

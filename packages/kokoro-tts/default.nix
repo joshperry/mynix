@@ -4,7 +4,7 @@
 , fetchurl
 , espeak-ng
 , writeShellApplication
-, pipewire
+, pulseaudio
 }:
 
 let
@@ -13,22 +13,25 @@ let
   dlinfo = python.buildPythonPackage rec {
     pname = "dlinfo";
     version = "2.0.0";
+    pyproject = true;
     src = fetchPypi {
       inherit pname version;
-      hash = "sha256-iKK8H0E/UL0xRhfhO4ODYTQY3lw0+Y+jt+cYcImpgRc=";
+      hash = "sha256-iKK8BPUdAbxgTNyescPMC96JBXUyymo+caQfYjVDPhc=";
     };
+    build-system = [ python.setuptools python.setuptools-scm ];
     doCheck = false;
   };
 
   phonemizer-fork = python.buildPythonPackage rec {
     pname = "phonemizer-fork";
     version = "3.3.2";
+    pyproject = true;
     src = fetchPypi {
       pname = "phonemizer_fork";
       inherit version;
-      hash = "sha256-EOFp6JSS+fEhCUnbDaANpgbWBikvfQcf6EzMpr4Mzwk=";
+      hash = "sha256-EOFugn0EQ7CHBi4htV6AXACYnPE0Oy6B5zTK5fbAz2k=";
     };
-    build-system = [ python.setuptools ];
+    build-system = [ python.hatchling ];
     dependencies = [
       python.attrs
       dlinfo
@@ -37,14 +40,6 @@ let
       python.typing-extensions
     ];
     doCheck = false;
-    # Hard-code path to system espeak-ng shared library
-    postPatch = ''
-      substituteInPlace phonemizer/backend/espeak/wrapper.py \
-        --replace-fail \
-          "def _espeak_library():" \
-          "def _espeak_library():
-          return '${espeak-ng}/lib/libespeak-ng.so'"
-    '';
   };
 
   kokoro-onnx = python.buildPythonPackage rec {
@@ -54,7 +49,7 @@ let
     src = fetchPypi {
       pname = "kokoro_onnx";
       inherit version;
-      hash = "sha256-W+sV8IXigo7Y1JOffywJ+rhRA6styuoREsF2BYV6wpE=";
+      hash = "sha256-W+sV8IXigo7Y1JP3ksB5r4VxA6stzqoeESsXYFh6yWo=";
     };
     build-system = [ python.hatchling ];
     dependencies = [
@@ -63,10 +58,17 @@ let
       python.colorlog
       phonemizer-fork
     ];
-    # Drop bundled espeak-ng loader — we use system espeak-ng
+    # Drop bundled espeak-ng loader — use system espeak-ng via env vars
     postPatch = ''
       substituteInPlace pyproject.toml \
         --replace-fail '"espeakng-loader>=0.2.4",' ""
+
+      substituteInPlace src/kokoro_onnx/tokenizer.py \
+        --replace-fail "import espeakng_loader" "" \
+        --replace-fail "espeak_config.data_path = espeakng_loader.get_data_path()" \
+          "espeak_config.data_path = os.environ.get('ESPEAK_DATA_PATH', '${espeak-ng}/share/espeak-ng-data')" \
+        --replace-fail "espeak_config.lib_path = espeakng_loader.get_library_path()" \
+          "espeak_config.lib_path = os.environ.get('PHONEMIZER_ESPEAK_LIBRARY', '${espeak-ng}/lib/libespeak-ng.so')"
     '';
     doCheck = false;
     pythonImportsCheck = [ "kokoro_onnx" ];
@@ -90,7 +92,7 @@ let
 in writeShellApplication {
   name = "kokoro-tts";
 
-  runtimeInputs = [ pythonEnv pipewire ];
+  runtimeInputs = [ pythonEnv pulseaudio ];
 
   runtimeEnv = {
     PHONEMIZER_ESPEAK_LIBRARY = "${espeak-ng}/lib/libespeak-ng.so";
@@ -132,17 +134,17 @@ in writeShellApplication {
 import sys, os, io, soundfile as sf
 from kokoro_onnx import Kokoro
 kokoro = Kokoro(os.environ['KOKORO_MODEL'], os.environ['KOKORO_VOICES'])
-samples, sr = kokoro.create(sys.argv[1], text=sys.argv[2], speed=float(sys.argv[3]))
+samples, sr = kokoro.create(text=sys.argv[2], voice=sys.argv[1], speed=float(sys.argv[3]))
 buf = io.BytesIO()
 sf.write(buf, samples, sr, format='WAV', subtype='PCM_16')
 sys.stdout.buffer.write(buf.getvalue())
-" "$VOICE" "$TEXT" "$SPEED" | pw-play -
+" "$VOICE" "$TEXT" "$SPEED" | paplay
     else
       python3 -c "
 import sys, os, io, soundfile as sf
 from kokoro_onnx import Kokoro
 kokoro = Kokoro(os.environ['KOKORO_MODEL'], os.environ['KOKORO_VOICES'])
-samples, sr = kokoro.create(sys.argv[1], text=sys.argv[2], speed=float(sys.argv[3]))
+samples, sr = kokoro.create(text=sys.argv[2], voice=sys.argv[1], speed=float(sys.argv[3]))
 buf = io.BytesIO()
 sf.write(buf, samples, sr, format='WAV', subtype='PCM_16')
 sys.stdout.buffer.write(buf.getvalue())
