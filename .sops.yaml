@@ -11,7 +11,7 @@ keys:
   - &seed_tang_1_age age1s3qkxjd29dd6mvttvruf6mpzue2lun3qmyfnycgk8t6c7ftz7vpqa87flk
   - &seed_atl_2_age age19xq48wjmej07g6sl8kg86a64jsxe5gc47y2f6ghefjxeqhhcad7q4sm0vx
   - &seed_atl_3_age age1dql0yg48r4m6xsycwxf2dn3wrvdld6rrszgm2yaxud4jwamx7vgq59gxy9
-  - &seed_puncher_1_age age107efl0e3lcu0czn5tdpcjdkxmh2292rzf6n82n4a0j7nsmdh4ylq986sk2
+  - &seed_puncher_1_age age1a43kwt4tm08va7xu7e0ux3twaddd49hz6lp4ygdcjta6uh0rpazs6rjn2a
 
 creation_rules:
   - path_regex: secrets/signi\.yaml$
