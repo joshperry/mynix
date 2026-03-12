@@ -649,7 +649,31 @@
         };
         sysmodules = [
           inputs.disko.nixosModules.disko
+          ./machines/seed-stake/disks.nix
           { seed.netbootPath = inputs.seed.packages.x86_64-linux.netboot; }
+        ];
+      };
+
+      # Ephemeral kexec variant — same config but no disko/bootloader.
+      # Used by provision.sh for disk-backed overlay + switch-to-configuration.
+      seed-stake-kexec = nixosSystem {
+        name = "seed-stake";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+        sysmodules = [
+          { seed.netbootPath = inputs.seed.packages.x86_64-linux.netboot; }
+          ({ lib, ... }: {
+            # No bootloader in kexec mode
+            boot.loader.systemd-boot.enable = lib.mkForce false;
+            boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
+            # Mount /mnt/disk to match provision.sh's disk-backed overlay setup
+            fileSystems."/mnt/disk" = {
+              device = "/dev/vda";
+              fsType = "ext4";
+            };
+          })
         ];
       };
 
