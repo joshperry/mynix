@@ -650,11 +650,15 @@
         sysmodules = [
           inputs.disko.nixosModules.disko
           ./machines/seed-stake/disks.nix
-          { seed.netbootPath = inputs.seed.packages.x86_64-linux.netboot; }
+          ./profiles/seed-cache.nix
+          {
+            seed.netbootPath = inputs.seed.packages.x86_64-linux.netboot;
+            sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+          }
         ];
       };
 
-      # Ephemeral kexec variant — same config but no disko/bootloader.
+      # Ephemeral kexec variant — same config but no disko/bootloader/sops.
       # Used by provision.sh for disk-backed overlay + switch-to-configuration.
       seed-stake-kexec = nixosSystem {
         name = "seed-stake";
