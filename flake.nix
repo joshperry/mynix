@@ -665,10 +665,18 @@
         sysmodules = [
           { seed.netbootPath = inputs.seed.packages.x86_64-linux.netboot; }
           ({ lib, ... }: {
-            # No bootloader in kexec mode
+            # No bootloader — kexec doesn't need one
             boot.loader.systemd-boot.enable = lib.mkForce false;
             boot.loader.efi.canTouchEfiVariables = lib.mkForce false;
-            # Mount /mnt/disk to match provision.sh's disk-backed overlay setup
+            boot.loader.grub.enable = lib.mkForce false;
+
+            # Dummy root FS — kexec overlay provides the real one
+            fileSystems."/" = {
+              device = "none";
+              fsType = "tmpfs";
+            };
+
+            # Match provision.sh's disk-backed overlay setup
             fileSystems."/mnt/disk" = {
               device = "/dev/vda";
               fsType = "ext4";
