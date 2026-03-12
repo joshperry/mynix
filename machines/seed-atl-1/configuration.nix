@@ -7,6 +7,7 @@
     ../../profiles/server.nix
     ../../profiles/seed-cache.nix
     ../../profiles/seed-luks.nix
+    ../../profiles/seed-vpc.nix
     ../../profiles/seed-controller.nix
   ];
 

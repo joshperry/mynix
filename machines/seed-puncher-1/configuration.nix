@@ -6,6 +6,7 @@
     ./disks.nix
     ../../profiles/server.nix
     ../../profiles/seed-cache.nix
+    ../../profiles/seed-vpc.nix
   ];
 
   options.seed.vpcSubnets = lib.mkOption {
@@ -14,6 +15,12 @@
   };
 
   config = {
+    # Tang and DNS must wait for VPC interface (BMs reach them over VPC)
+    systemd.sockets.tangd.wants = [ "seed-vpc.service" ];
+    systemd.sockets.tangd.after = [ "seed-vpc.service" ];
+    systemd.services.unbound.wants = [ "seed-vpc.service" ];
+    systemd.services.unbound.after = [ "seed-vpc.service" ];
+
     sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     sops.secrets.vultr-api-key = {
       sopsFile = ../../secrets/seed-puncher-1.yaml;
