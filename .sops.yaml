@@ -7,11 +7,6 @@ keys:
   - &seed_dfw_1_age age10yx5tftxu9phrzhvvwjgyztvmuvqly5zmg0h2696g7dkr4a6ec7sa69ldu
   - &seed_dfw_2_age age155d63shppu7t9t2j04675l4xlcst8r6uh7mytx7s69dv58wykfrsclzeud
   - &seed_dfw_3_age age1j503tg9f0gnc76u2g2j9luhc0cs5j8kj9xy0we64q5atxhwgqcaqjqv0k6
-  - &seed_atl_1_age age1gcnvkfuptygecafugm5m54cfh2krnh95x023w9pjyj4uz2pu697qwv7knd
-  - &seed_tang_1_age age1s3qkxjd29dd6mvttvruf6mpzue2lun3qmyfnycgk8t6c7ftz7vpqa87flk
-  - &seed_atl_2_age age19xq48wjmej07g6sl8kg86a64jsxe5gc47y2f6ghefjxeqhhcad7q4sm0vx
-  - &seed_atl_3_age age1dql0yg48r4m6xsycwxf2dn3wrvdld6rrszgm2yaxud4jwamx7vgq59gxy9
-  - &seed_puncher_1_age age1wykhn5lj4dl23mccpq0txwz2rna9xn9uf8n2pj982fjmj7ftt3vqjhufg9
 
 creation_rules:
   - path_regex: secrets/signi\.yaml$
@@ -56,36 +51,6 @@ creation_rules:
         age:
           - *seed_dfw_3_age
 
-  - path_regex: secrets/seed-atl-1\.yaml$
-    key_groups:
-      - pgp:
-          - *admin_josh
-        age:
-          - *seed_atl_1_age
-  - path_regex: secrets/seed-atl-2\.yaml$
-    key_groups:
-      - pgp:
-          - *admin_josh
-        age:
-          - *seed_atl_2_age
-  - path_regex: secrets/seed-atl-3\.yaml$
-    key_groups:
-      - pgp:
-          - *admin_josh
-        age:
-          - *seed_atl_3_age
-  - path_regex: secrets/seed-tang-1\.yaml$
-    key_groups:
-      - pgp:
-          - *admin_josh
-        age:
-          - *seed_tang_1_age
-  - path_regex: secrets/seed-puncher-1\.yaml$
-    key_groups:
-      - pgp:
-          - *admin_josh
-        age:
-          - *seed_puncher_1_age
   - path_regex: secrets/seed-system\.yaml$
     key_groups:
       - pgp:
@@ -94,25 +59,6 @@ creation_rules:
           - *seed_dfw_1_age
           - *seed_dfw_2_age
           - *seed_dfw_3_age
-          - *seed_atl_1_age
-          - *seed_tang_1_age
-          - *seed_atl_2_age
-          - *seed_atl_3_age
-          - *seed_puncher_1_age
-          - *ada_age
-
-  - path_regex: secrets/luks-recovery\.yaml$
-    key_groups:
-      - pgp:
-          - *admin_josh
-        age:
-          - *ada_age
-
-  - path_regex: secrets/pulumi-passphrase\.yaml$
-    key_groups:
-      - pgp:
-          - *admin_josh
-        age:
           - *ada_age
 
   # Fallback for any other secrets files
