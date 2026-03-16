@@ -6,6 +6,7 @@
   # Ensure ada's home-manager profile bin is early in PATH so sudo wrapper takes precedence
   home.sessionVariables = {
     PATH = "/etc/profiles/per-user/ada/bin:$PATH";
+    PULSE_SERVER = "tcp:127.0.0.1";
   };
 
   home.packages = with pkgs; [
