@@ -67,7 +67,10 @@ in {
         passwordSecret = "ada/email-password";
       };
 
-      packages = with pkgs; [ gh vultr-cli ssh-to-age sops mynix.ada-narrator ];
+      packages = with pkgs; [
+        gh vultr-cli ssh-to-age sops mynix.ada-narrator sox
+        python3 openssl file dig iproute2 xxd binutils
+      ];
 
       secrets.sshKey = "ada/ssh-key";
       secrets.gpgKey = "ada/gpg-key";
@@ -108,22 +111,22 @@ in {
               "/home/josh/dev"
             ];
           };
-          hooks = {
-            Stop = [{
-              hooks = [{
-                type = "command";
-                command = "/etc/profiles/per-user/ada/bin/ada-narrator";
-                timeout = 30000;
-              }];
-            }];
-            UserPromptSubmit = [{
-              hooks = [{
-                type = "command";
-                command = "/etc/profiles/per-user/ada/bin/ada-narrator-interrupt";
-                timeout = 5000;
-              }];
-            }];
-          };
+          # hooks = {
+          #   Stop = [{
+          #     hooks = [{
+          #       type = "command";
+          #       command = "/etc/profiles/per-user/ada/bin/ada-narrator";
+          #       timeout = 30000;
+          #     }];
+          #   }];
+          #   UserPromptSubmit = [{
+          #     hooks = [{
+          #       type = "command";
+          #       command = "/etc/profiles/per-user/ada/bin/ada-narrator-interrupt";
+          #       timeout = 5000;
+          #     }];
+          #   }];
+          # };
         };
       };
 
@@ -152,8 +155,16 @@ in {
         programs.git.signing.key = "6CD1AEABA566EC82";
         # ssh-agent for SSH (GPG agent handles signing only, not SSH)
         services.ssh-agent.enable = true;
+        # command-not-found handler: suggest nix run instead of failing silently
+        home.file.".local/share/bash/command-not-found.sh".text = ''
+          command_not_found_handle() {
+            echo "$1: command not found — try: nix run nixpkgs#$1 -- ''${@:2}" >&2
+            return 127
+          }
+        '';
         # Import keys and set env on login
         programs.bash.profileExtra = ''
+          export BASH_ENV="$HOME/.local/share/bash/command-not-found.sh"
           export SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent"
           if [ -f ${config.sops.secrets."ada/gpg-key".path} ]; then
             gpg --batch --import ${config.sops.secrets."ada/gpg-key".path} 2>/dev/null || true
