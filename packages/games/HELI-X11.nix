@@ -188,7 +188,7 @@ stdenv.mkDerivation {
 
   src = fetchurl {
     url = "https://www.heli-x.info/2675/HELI-X11.tar.gz";
-    hash = "sha256-O9vDYDAVnp5Jicm7e+Nn9z5oWWrQNuKqhrOpvYl2MMc=";
+    hash = "sha256-iPSnfKhxXOGZYkm0pdUgHVrO7IPWd/G+52yVuSxvNnU=";
   };
 
   nativeBuildInputs = [
