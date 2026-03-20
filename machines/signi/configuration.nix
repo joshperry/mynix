@@ -101,6 +101,7 @@ in {
       claudeCode = {
         enable = true;
         settings = {
+          voiceEnabled = true;
           env = {
             CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
             PULSE_SERVER = "tcp:127.0.0.1:4713";
@@ -111,22 +112,22 @@ in {
               "/home/josh/dev"
             ];
           };
-          # hooks = {
-          #   Stop = [{
-          #     hooks = [{
-          #       type = "command";
-          #       command = "/etc/profiles/per-user/ada/bin/ada-narrator";
-          #       timeout = 30000;
-          #     }];
-          #   }];
-          #   UserPromptSubmit = [{
-          #     hooks = [{
-          #       type = "command";
-          #       command = "/etc/profiles/per-user/ada/bin/ada-narrator-interrupt";
-          #       timeout = 5000;
-          #     }];
-          #   }];
-          # };
+          hooks = {
+            Stop = [{
+              hooks = [{
+                type = "command";
+                command = "/etc/profiles/per-user/ada/bin/ada-worklog";
+                timeout = 5000;
+              }];
+            }];
+            PostToolUse = [{
+              hooks = [{
+                type = "command";
+                command = "/etc/profiles/per-user/ada/bin/ada-worklog";
+                timeout = 5000;
+              }];
+            }];
+          };
         };
       };
 
@@ -205,6 +206,26 @@ in {
         };
         programs.bash.shellAliases = {
           ll = "ls --color=auto";
+        };
+        # Periodic TTS narrator — summarizes work log every 3 minutes
+        systemd.user.services.ada-narrator = {
+          Unit.Description = "Ada TTS narrator — periodic work log summary";
+          Service = {
+            Type = "oneshot";
+            ExecStart = "/etc/profiles/per-user/ada/bin/ada-narrator";
+            Environment = [
+              "PULSE_SERVER=tcp:127.0.0.1:4713"
+              "PATH=/etc/profiles/per-user/ada/bin:/run/current-system/sw/bin:/usr/bin:/bin"
+            ];
+          };
+        };
+        systemd.user.timers.ada-narrator = {
+          Unit.Description = "Ada TTS narrator timer";
+          Timer = {
+            OnBootSec = "3min";
+            OnUnitActiveSec = "3min";
+          };
+          Install.WantedBy = [ "timers.target" ];
         };
       };
     };
