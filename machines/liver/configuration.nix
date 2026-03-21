@@ -32,7 +32,7 @@
     '';
   };
   boot.loader.timeout = 10;
-  boot.kernelParams = [ "console=ttyS0,19200n8" "fsck.repair=yes" ];
+  boot.kernelParams = [ "console=ttyS0,19200n8" "fsck.repair=yes" "reboot=t" ];
 
   # ── System ────────────────────────────────────────────────────
   system.stateVersion = "23.05";
