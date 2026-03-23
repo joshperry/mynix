@@ -13,6 +13,7 @@ in {
     age.keyFile = "/run/sops-age/keys.txt";
     secrets."kago/credentials" = { };
     secrets."ada/vultr-api-key" = { };
+    secrets."ada/openrouter-api-key" = { };
     secrets."backup/luks-key" = { };
   };
 
@@ -77,6 +78,7 @@ in {
       secrets.extraSecrets.email-password = "ada/email-password";
       secrets.extraSecrets.gh-pat = "ada/gh-pat";
       secrets.extraSecrets.vultr-api-key = "ada/vultr-api-key";
+      secrets.extraSecrets.openrouter-api-key = "ada/openrouter-api-key";
 
       devices = [
         {
@@ -402,7 +404,7 @@ in {
   networking.firewall.enable = true;
 
   # Set your time zone.
-  time.timeZone = "MST7MDT";
+  time.timeZone = "America/Los_Angeles";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
