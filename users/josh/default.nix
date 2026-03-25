@@ -22,7 +22,7 @@
     fluidsynth
     soundfont-fluid
     unstable.blender
-    darktable
+    unstable.darktable
     discord
     gimp-with-plugins
     libcanberra-gtk3
