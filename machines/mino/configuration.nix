@@ -336,9 +336,9 @@
     commands = [
       { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
-      { command = "${pkgs.iw}/bin/iw"; options = [ "NOPASSWD" ]; }
-      { command = "${pkgs.wpa_supplicant}/bin/wpa_cli"; options = [ "NOPASSWD" ]; }
-      { command = "${pkgs.iproute2}/bin/ip"; options = [ "NOPASSWD" ]; }
+      { command = "/run/current-system/sw/bin/iw"; options = [ "NOPASSWD" ]; }
+      { command = "/run/current-system/sw/bin/wpa_cli"; options = [ "NOPASSWD" ]; }
+      { command = "/run/current-system/sw/bin/ip"; options = [ "NOPASSWD" ]; }
     ];
   }];
 
