@@ -60,15 +60,23 @@
         if check_wifi; then
           if [ "$prev_state" != "wifi" ]; then
             echo "wifi WAN active, taking down starlink"
+            systemctl stop radvd || true
             ip link set enp4s0 down || true
-            systemctl restart radvd || true
+            # Flush stale v6 prefixes from VLAN interfaces
+            ip -6 addr flush dev mgmt scope global || true
+            ip -6 addr flush dev loc scope global || true
+            ip -6 addr flush dev guest scope global || true
+            systemctl start radvd || true
             prev_state=wifi
           fi
         else
           if [ "$prev_state" != "starlink" ]; then
             echo "wifi WAN inactive, bringing up starlink"
+            systemctl stop radvd || true
             ip link set enp4s0 up || true
-            systemctl restart radvd || true
+            # Give dhcpcd time to get PD from starlink
+            sleep 5
+            systemctl start radvd || true
             prev_state=starlink
           fi
         fi
