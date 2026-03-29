@@ -62,8 +62,7 @@
             echo "wifi WAN active, taking down starlink"
             systemctl stop radvd || true
             ip link set enp4s0 down || true
-            systemctl restart dhcpcd || true
-            sleep 5
+            sleep 2
             systemctl start radvd || true
             prev_state=wifi
           fi
