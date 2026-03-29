@@ -29,6 +29,7 @@ creation_rules:
           - *admin_josh
         age:
           - *mino_age
+          - *ada_age
 
   - path_regex: secrets/seed-dfw-1\.yaml$
     key_groups:
