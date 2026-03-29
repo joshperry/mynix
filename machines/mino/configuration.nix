@@ -38,14 +38,6 @@
     ];
   };
 
-  # When wifi WAN is active, stop radvd to deprecate IPv6 prefixes
-  # so clients fall back to v4 (campground wifi is v4-only).
-  # dhcpcd hook toggles wifi-wan.target on wlo1 lease events.
-  systemd.targets.wifi-wan = {
-    description = "WiFi WAN Active";
-    conflicts = [ "radvd.service" ];
-  };
-
   # Don't build in /tmp ramdisk
   systemd.services.nix-daemon = {
     environment = {
@@ -165,10 +157,13 @@
         if [ "$interface" = "wlo1" ]; then
           case "$reason" in
             BOUND|REBIND|REBOOT)
-              /run/current-system/sw/bin/systemctl start wifi-wan.target
+              # WiFi is primary — stop radvd to deprecate IPv6 prefixes
+              # (radvd sends router lifetime 0 on exit, clients fall back to v4)
+              /run/current-system/sw/bin/systemctl stop radvd
               ;;
             STOP|NOCARRIER|EXPIRE)
-              /run/current-system/sw/bin/systemctl stop wifi-wan.target
+              # WiFi down — restore IPv6 advertisements for starlink
+              /run/current-system/sw/bin/systemctl start radvd
               ;;
           esac
         fi
