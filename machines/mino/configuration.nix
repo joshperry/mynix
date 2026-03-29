@@ -61,12 +61,14 @@
           if [ "$prev_state" != "wifi" ]; then
             echo "wifi WAN active, taking down starlink"
             ip link set enp4s0 down || true
+            systemctl restart radvd || true
             prev_state=wifi
           fi
         else
           if [ "$prev_state" != "starlink" ]; then
             echo "wifi WAN inactive, bringing up starlink"
             ip link set enp4s0 up || true
+            systemctl restart radvd || true
             prev_state=starlink
           fi
         fi
