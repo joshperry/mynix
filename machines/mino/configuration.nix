@@ -66,9 +66,11 @@
             ip -6 addr flush dev mgmt scope global || true
             ip -6 addr flush dev loc scope global || true
             ip -6 addr flush dev guest scope global || true
-            # Don't restart radvd — prefix ::/64 with only link-local
-            # addrs causes it to advertise fe80 as a SLAAC prefix.
-            # radvd will be started when switching back to starlink.
+            # Restart dhcpcd to clear cached PD from starlink
+            systemctl restart dhcpcd || true
+            # Wait for dhcpcd to settle, then start radvd fresh
+            sleep 5
+            systemctl start radvd || true
             prev_state=wifi
           fi
         else
