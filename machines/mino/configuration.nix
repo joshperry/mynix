@@ -56,32 +56,28 @@
       check_wifi() {
         ip route show default dev wlo1 2>/dev/null | grep -q .
       }
+      vlans_have_v6() {
+        ip -6 addr show dev mgmt scope global 2>/dev/null | grep -q inet6 \
+        || ip -6 addr show dev loc scope global 2>/dev/null | grep -q inet6 \
+        || ip -6 addr show dev guest scope global 2>/dev/null | grep -q inet6
+      }
       update() {
         if check_wifi; then
           if [ "$prev_state" != "wifi" ]; then
-            echo "wifi WAN active, taking down starlink"
-            # Stop radvd FIRST while PD is still on VLANs — this
-            # ensures the deprecating RA includes the prefix with
-            # lifetime 0, so clients drop their SLAAC addresses.
-            # If we take enp4s0 down first, dhcpcd removes PD and
-            # radvd's final RA has no prefix to deprecate.
+            echo "wifi WAN active, switching from starlink"
+            # Stop radvd while starlink PD is still on VLANs so the
+            # final RA deprecates the prefix (lifetime 0)
             systemctl stop radvd || true
             ip link set enp4s0 down || true
-            # Wait for dhcpcd to drop PD from VLANs
-            for i in $(seq 1 15); do
-              if ! ip -6 addr show dev mgmt scope global 2>/dev/null | grep -q inet6 \
-              && ! ip -6 addr show dev loc scope global 2>/dev/null | grep -q inet6 \
-              && ! ip -6 addr show dev guest scope global 2>/dev/null | grep -q inet6; then
-                break
-              fi
-              sleep 1
-            done
-            # If wifi provides v6 prefixes, start radvd
-            if ip -6 addr show dev mgmt scope global 2>/dev/null | grep -q inet6 \
-            || ip -6 addr show dev loc scope global 2>/dev/null | grep -q inet6 \
-            || ip -6 addr show dev guest scope global 2>/dev/null | grep -q inet6; then
-              echo "v6 prefixes available, starting radvd"
+            # Wait for starlink PD to clear, then give wifi time
+            # to negotiate its own PD
+            sleep 5
+            if vlans_have_v6; then
+              # Wifi got PD — start radvd to advertise new prefixes
+              echo "wifi v6 PD available, starting radvd"
               systemctl start radvd || true
+            else
+              echo "wifi is v4-only, radvd stays off"
             fi
             prev_state=wifi
           fi
@@ -220,6 +216,10 @@
         # Campground/park wifi — preferred WAN when connected
         interface wlo1
           metric 100
+          ipv6rs
+          iaid 3
+          ia_na 3             # Request an address for mino
+          ia_pd 4 mgmt/0 loc/1 guest/2       # request PDs for VLAN interfaces
       '';
     };
 
