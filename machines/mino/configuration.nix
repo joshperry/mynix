@@ -120,6 +120,9 @@
         "Perry7" = {
           pskRaw = "ext:wifi_psk";
         };
+        "Village Camp" = {
+          pskRaw = "ext:village_camp_psk";
+        };
       };
     };
 
