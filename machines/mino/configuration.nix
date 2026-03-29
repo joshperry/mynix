@@ -38,11 +38,11 @@
     ];
   };
 
-  # Stop radvd when wifi has a default route (deprecates v6 prefixes,
-  # clients fall back to v4 through campground wifi). Restore radvd
-  # when wifi drops so clients get v6 through starlink.
-  systemd.services.wifi-wan-radvd = {
-    description = "Toggle radvd based on wifi WAN state";
+  # Wifi and starlink are mutually exclusive WANs. When wifi connects,
+  # take down ethernet so all traffic (v4 and v6) goes through wifi.
+  # When wifi drops, bring ethernet back for starlink.
+  systemd.services.wifi-wan-switch = {
+    description = "Switch between wifi and starlink WAN";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     path = [ pkgs.iproute2 ];
@@ -58,22 +58,20 @@
       }
       update() {
         if check_wifi; then
-          if [ "$prev_state" != "up" ]; then
-            echo "wifi WAN active, stopping radvd"
-            systemctl stop radvd || true
-            prev_state=up
+          if [ "$prev_state" != "wifi" ]; then
+            echo "wifi WAN active, taking down starlink"
+            ip link set enp4s0 down || true
+            prev_state=wifi
           fi
         else
-          if [ "$prev_state" != "down" ]; then
-            echo "wifi WAN inactive, starting radvd"
-            systemctl start radvd || true
-            prev_state=down
+          if [ "$prev_state" != "starlink" ]; then
+            echo "wifi WAN inactive, bringing up starlink"
+            ip link set enp4s0 up || true
+            prev_state=starlink
           fi
         fi
       }
-      # Initial check
       update
-      # Watch for route changes
       ip monitor route | while read -r line; do
         case "$line" in
           *wlo1*|*"default"*) update ;;
