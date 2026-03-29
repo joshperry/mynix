@@ -159,11 +159,11 @@
             BOUND|REBIND|REBOOT)
               # WiFi is primary — stop radvd to deprecate IPv6 prefixes
               # (radvd sends router lifetime 0 on exit, clients fall back to v4)
-              /run/current-system/sw/bin/systemctl stop radvd
+              /run/current-system/sw/bin/systemctl stop radvd || true
               ;;
             STOP|NOCARRIER|EXPIRE)
               # WiFi down — restore IPv6 advertisements for starlink
-              /run/current-system/sw/bin/systemctl start radvd
+              /run/current-system/sw/bin/systemctl start radvd || true
               ;;
           esac
         fi
