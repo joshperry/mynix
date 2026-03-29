@@ -62,7 +62,14 @@
             echo "wifi WAN active, taking down starlink"
             ip link set enp4s0 down || true
             # Wait for dhcpcd to drop PD from VLANs
-            sleep 3
+            for i in $(seq 1 15); do
+              if ! ip -6 addr show dev mgmt scope global 2>/dev/null | grep -q inet6 \
+              && ! ip -6 addr show dev loc scope global 2>/dev/null | grep -q inet6 \
+              && ! ip -6 addr show dev guest scope global 2>/dev/null | grep -q inet6; then
+                break
+              fi
+              sleep 1
+            done
             # Stop radvd — sends deprecating RA, clients drop stale v6
             systemctl stop radvd || true
             # If wifi provides v6 prefixes, start radvd
