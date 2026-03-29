@@ -141,15 +141,21 @@
         # Default to no ipv6
         noipv6rs
 
-        # settings for the interface
+        # Starlink ethernet — fallback WAN
         interface enp4s0
+          metric 200
           ipv6rs              # router advertisement solicitaion
           iaid 1              # interface association ID
           ia_na 1             # Request an address
           ia_pd 2 mgmt/0 loc/1 guest/2       # request PDs for interfaces
+
+        # Campground/park wifi — preferred WAN when connected
+        interface wlo1
+          metric 100
       '';
     };
 
+    # NAT for starlink WAN
     nat = {
       enable = true;
       internalInterfaces = [
@@ -162,6 +168,16 @@
 
     nftables = {
       enable = true;
+      # NAT for wifi WAN (supplements networking.nat which only handles enp4s0)
+      tables.wifi-nat = {
+        family = "ip";
+        content = ''
+          chain postrouting {
+            type nat hook postrouting priority srcnat + 1; policy accept;
+            iifname { "mgmt", "loc", "guest" } oifname "wlo1" masquerade
+          }
+        '';
+      };
     };
 
     firewall = {
@@ -173,6 +189,12 @@
         53 #DNS
         67 #DHCP
       ];
+      # Allow forwarding from internal VLANs to wifi WAN
+      # (networking.nat handles enp4s0 forwarding)
+      extraForwardRules = ''
+        iifname { "mgmt", "loc", "guest" } oifname "wlo1" accept
+        iifname "wlo1" oifname { "mgmt", "loc", "guest" } ct state established,related accept
+      '';
     };
   };
 
