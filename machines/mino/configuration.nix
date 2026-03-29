@@ -38,10 +38,48 @@
     ];
   };
 
-  # Allow dhcpcd exit hook to control radvd via sudo
-  systemd.services.dhcpcd.serviceConfig = {
-    NoNewPrivileges = lib.mkForce false;
-    ReadWritePaths = [ "/tmp" ];
+  # Stop radvd when wifi has a default route (deprecates v6 prefixes,
+  # clients fall back to v4 through campground wifi). Restore radvd
+  # when wifi drops so clients get v6 through starlink.
+  systemd.services.wifi-wan-radvd = {
+    description = "Toggle radvd based on wifi WAN state";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    path = [ pkgs.iproute2 ];
+    serviceConfig = {
+      Type = "simple";
+      Restart = "always";
+      RestartSec = 5;
+    };
+    script = ''
+      prev_state=""
+      check_wifi() {
+        ip route show default dev wlo1 2>/dev/null | grep -q .
+      }
+      update() {
+        if check_wifi; then
+          if [ "$prev_state" != "up" ]; then
+            echo "wifi WAN active, stopping radvd"
+            systemctl stop radvd || true
+            prev_state=up
+          fi
+        else
+          if [ "$prev_state" != "down" ]; then
+            echo "wifi WAN inactive, starting radvd"
+            systemctl start radvd || true
+            prev_state=down
+          fi
+        fi
+      }
+      # Initial check
+      update
+      # Watch for route changes
+      ip monitor route | while read -r line; do
+        case "$line" in
+          *wlo1*|*"default"*) update ;;
+        esac
+      done
+    '';
   };
 
   # Don't build in /tmp ramdisk
@@ -158,21 +196,6 @@
         # Campground/park wifi — preferred WAN when connected
         interface wlo1
           metric 100
-      '';
-      runHook = ''
-        echo "dhcpcd hook: interface=$interface reason=$reason" >> /tmp/dhcpcd-hook.log
-        if [ "$interface" = "wlo1" ]; then
-          case "$reason" in
-            BOUND|REBIND|REBOOT)
-              echo "dhcpcd hook: stopping radvd" >> /tmp/dhcpcd-hook.log
-              /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop radvd >> /tmp/dhcpcd-hook.log 2>&1 || true
-              ;;
-            STOP|NOCARRIER|EXPIRE|DEPARTED)
-              echo "dhcpcd hook: starting radvd" >> /tmp/dhcpcd-hook.log
-              /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start radvd >> /tmp/dhcpcd-hook.log 2>&1 || true
-              ;;
-          esac
-        fi
       '';
     };
 
@@ -337,15 +360,7 @@
   };
   users.groups.ada = { gid = 1100; };
 
-  security.sudo.extraRules = [
-    {
-      users = [ "dhcpcd" ];
-      commands = [
-        { command = "/run/current-system/sw/bin/systemctl stop radvd"; options = [ "NOPASSWD" ]; }
-        { command = "/run/current-system/sw/bin/systemctl start radvd"; options = [ "NOPASSWD" ]; }
-      ];
-    }
-    {
+  security.sudo.extraRules = [{
     users = [ "ada" ];
     commands = [
       { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
