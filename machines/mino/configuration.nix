@@ -62,8 +62,16 @@
             echo "wifi WAN active, taking down starlink"
             systemctl stop radvd || true
             ip link set enp4s0 down || true
-            sleep 2
-            systemctl start radvd || true
+            # Only start radvd if wifi provides v6 prefixes to advertise
+            sleep 5
+            if ip -6 addr show dev mgmt scope global 2>/dev/null | grep -q inet6 \
+            || ip -6 addr show dev loc scope global 2>/dev/null | grep -q inet6 \
+            || ip -6 addr show dev guest scope global 2>/dev/null | grep -q inet6; then
+              echo "v6 prefixes available, starting radvd"
+              systemctl start radvd || true
+            else
+              echo "no v6 prefixes, leaving radvd stopped"
+            fi
             prev_state=wifi
           fi
         else
