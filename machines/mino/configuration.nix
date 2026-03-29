@@ -153,6 +153,21 @@
         interface wlo1
           metric 100
       '';
+      runHook = ''
+        if [ "$interface" = "wlo1" ]; then
+          case "$reason" in
+            BOUND|REBIND|REBOOT)
+              # WiFi is primary — stop radvd to deprecate IPv6 prefixes
+              # (radvd sends router lifetime 0 on exit, clients fall back to v4)
+              /run/current-system/sw/bin/systemctl stop radvd
+              ;;
+            STOP|NOCARRIER|EXPIRE)
+              # WiFi down — restore IPv6 advertisements for starlink
+              /run/current-system/sw/bin/systemctl start radvd
+              ;;
+          esac
+        fi
+      '';
     };
 
     # NAT for starlink WAN
