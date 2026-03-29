@@ -154,16 +154,16 @@
           metric 100
       '';
       runHook = ''
+        echo "dhcpcd hook: interface=$interface reason=$reason" >> /tmp/dhcpcd-hook.log
         if [ "$interface" = "wlo1" ]; then
           case "$reason" in
             BOUND|REBIND|REBOOT)
-              # WiFi is primary — stop radvd to deprecate IPv6 prefixes
-              # (radvd sends router lifetime 0 on exit, clients fall back to v4)
-              /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop radvd || true
+              echo "dhcpcd hook: stopping radvd" >> /tmp/dhcpcd-hook.log
+              /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl stop radvd >> /tmp/dhcpcd-hook.log 2>&1 || true
               ;;
-            STOP|NOCARRIER|EXPIRE)
-              # WiFi down — restore IPv6 advertisements for starlink
-              /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start radvd || true
+            STOP|NOCARRIER|EXPIRE|DEPARTED)
+              echo "dhcpcd hook: starting radvd" >> /tmp/dhcpcd-hook.log
+              /run/wrappers/bin/sudo /run/current-system/sw/bin/systemctl start radvd >> /tmp/dhcpcd-hook.log 2>&1 || true
               ;;
           esac
         fi
