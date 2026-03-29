@@ -392,6 +392,7 @@
       { command = "/run/current-system/sw/bin/iw"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/wpa_cli"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/ip"; options = [ "NOPASSWD" ]; }
+      { command = "/run/current-system/sw/bin/journalctl"; options = [ "NOPASSWD" ]; }
     ];
   }];
 
