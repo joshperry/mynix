@@ -38,9 +38,6 @@
     ];
   };
 
-  # Don't auto-start radvd — wifi-wan-switch manages it
-  systemd.services.radvd.wantedBy = lib.mkForce [];
-
   # Wifi and starlink are mutually exclusive WANs. When wifi connects,
   # take down ethernet so all traffic (v4 and v6) goes through wifi.
   # When wifi drops, bring ethernet back for starlink.
