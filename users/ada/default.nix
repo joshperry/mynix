@@ -69,13 +69,10 @@
       };
       permissions = {
         # Ada uses an approval-gated sudo wrapper, so privileged operations
-        # go through josh's GUI approval. Default mode is still ask-based
-        # for safety.
+        # go through josh's GUI approval.
         defaultMode = "bypassPermissions";
-        additionalDirectories = [
-          "/home/josh/dev"
-        ];
       };
+      includeCoAuthoredBy = false;
     };
 
     agents = {
