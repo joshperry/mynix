@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   imports = [
@@ -36,6 +36,12 @@
       "/etc/ssh/ssh_host_rsa_key.pub"
       "/etc/ssh/ssh_host_rsa_key"
     ];
+  };
+
+  # Allow dhcpcd exit hook to control radvd via sudo
+  systemd.services.dhcpcd.serviceConfig = {
+    NoNewPrivileges = lib.mkForce false;
+    ReadWritePaths = [ "/tmp" ];
   };
 
   # Don't build in /tmp ramdisk
