@@ -66,7 +66,8 @@
             ip -6 addr flush dev mgmt scope global || true
             ip -6 addr flush dev loc scope global || true
             ip -6 addr flush dev guest scope global || true
-            # Restart dhcpcd to clear cached PD from starlink
+            # Delete starlink lease files (contain cached PD) and restart dhcpcd
+            rm -f /var/lib/dhcpcd/enp4s0.lease* || true
             systemctl restart dhcpcd || true
             # Wait for dhcpcd to settle, then start radvd fresh
             sleep 5
