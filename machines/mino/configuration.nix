@@ -62,14 +62,7 @@
             echo "wifi WAN active, taking down starlink"
             systemctl stop radvd || true
             ip link set enp4s0 down || true
-            # Flush stale v6 prefixes from VLAN interfaces
-            ip -6 addr flush dev mgmt scope global || true
-            ip -6 addr flush dev loc scope global || true
-            ip -6 addr flush dev guest scope global || true
-            # Delete starlink lease files (contain cached PD) and restart dhcpcd
-            rm -f /var/lib/dhcpcd/enp4s0.lease* || true
             systemctl restart dhcpcd || true
-            # Wait for dhcpcd to settle, then start radvd fresh
             sleep 5
             systemctl start radvd || true
             prev_state=wifi
@@ -185,7 +178,7 @@
 
     dhcpcd = {
       enable = true;
-      persistent = true; # keep interface configuration on daemon shutdown.
+      persistent = false;
       allowInterfaces = [ "enp4s0" "wlo1" ];
       extraConfig = ''
         # generate a RFC 4361 complient DHCP ID
