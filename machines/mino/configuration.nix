@@ -70,7 +70,10 @@
               fi
               sleep 1
             done
-            # Stop radvd — sends deprecating RA, clients drop stale v6
+            # Ensure radvd is running then stop it — the stop sends
+            # deprecating RA (lifetime 0), clients drop stale v6
+            systemctl start radvd || true
+            sleep 1
             systemctl stop radvd || true
             # If wifi provides v6 prefixes, start radvd
             if ip -6 addr show dev mgmt scope global 2>/dev/null | grep -q inet6 \
