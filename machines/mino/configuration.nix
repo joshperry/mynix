@@ -60,10 +60,14 @@
         if check_wifi; then
           if [ "$prev_state" != "wifi" ]; then
             echo "wifi WAN active, taking down starlink"
-            systemctl stop radvd || true
             ip link set enp4s0 down || true
-            # Only start radvd if wifi provides v6 prefixes to advertise
-            sleep 5
+            # Wait for dhcpcd to drop PD from VLANs
+            sleep 3
+            # Start then stop radvd so it sends deprecating RA with no prefixes
+            systemctl restart radvd || true
+            sleep 2
+            systemctl stop radvd || true
+            # If wifi provides v6 prefixes, start radvd for real
             if ip -6 addr show dev mgmt scope global 2>/dev/null | grep -q inet6 \
             || ip -6 addr show dev loc scope global 2>/dev/null | grep -q inet6 \
             || ip -6 addr show dev guest scope global 2>/dev/null | grep -q inet6; then
