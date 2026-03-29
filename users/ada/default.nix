@@ -72,7 +72,10 @@
         # go through josh's GUI approval.
         defaultMode = "bypassPermissions";
       };
-      includeCoAuthoredBy = false;
+      attribution = {
+        commit = "";
+        pr = "";
+      };
     };
 
     agents = {
