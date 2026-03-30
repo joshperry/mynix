@@ -35,7 +35,13 @@
   fileSystems."/" =
     { device = "none";
       fsType = "tmpfs";
-      options = [ "noatime" "size=25%" "mode=755" ];
+      options = [ "noatime" "size=2G" "mode=755" ];
+    };
+
+  fileSystems."/tmp" =
+    { device = "none";
+      fsType = "tmpfs";
+      options = [ "noatime" "size=8G" "mode=1777" ];
     };
     
   fileSystems."/boot" =
@@ -71,16 +77,21 @@
   fileSystems."/mnt/kago" =
     { device = "//kago.local/media";
       fsType = "cifs";
-      options = [ "credentials=${config.sops.secrets."kago/credentials".path}" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
+      options = [ "credentials=${config.sops.secrets."kago/credentials".path}" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" "x-systemd.automount" "x-systemd.idle-timeout=60" ];
     };
 
   fileSystems."/mnt/kagobu" =
     { device = "//kago.local/bu";
       fsType = "cifs";
-      options = [ "credentials=${config.sops.secrets."kago/credentials".path}" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" ];
+      options = [ "credentials=${config.sops.secrets."kago/credentials".path}" "uid=1000" "gid=1000" "file_mode=0664" "dir_mode=0775" "nofail" "x-systemd.automount" "x-systemd.idle-timeout=60" ];
     };
 
   swapDevices = [ ];
+
+  zramSwap = {
+    enable = true;
+    memoryPercent = 10;
+  };
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
