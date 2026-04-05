@@ -372,11 +372,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775425976,
-        "narHash": "sha256-hYMmk5vo3KTCBWK549jyQeJoDFlKF3ZI2cdCo6q0Sw8=",
+        "lastModified": 1775427121,
+        "narHash": "sha256-A6jgNkXgHvAJikHm3f/hUJIu+ObfZigzaOXQboC1UZk=",
         "ref": "refs/heads/master",
-        "rev": "03be83a714ac21fd8f5d606513b6d216bba27e85",
-        "revCount": 686,
+        "rev": "e4a105aa92e6e8cbfc7c26a6edb379ab6396ffb9",
+        "revCount": 688,
         "type": "git",
         "url": "ssh://silo.loom.farm/seed.git"
       },
