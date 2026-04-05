@@ -210,11 +210,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1773369099,
-        "narHash": "sha256-5LiBIZ1kk9Q2ln+PgqZrcdguvIDCGXCNAxh++5HIRqk=",
+        "lastModified": 1774913541,
+        "narHash": "sha256-dJQ46q4ce7FAbzCNI0fXfn7EcUAYJJWHiMX2ZUm3lZ4=",
         "owner": "joshperry",
         "repo": "nix-snapshotter",
-        "rev": "87d099d7f22cb2bdd676ca2efab3f274eed642a5",
+        "rev": "eb3a87074f26ef2c4be372807ccdb6f366641993",
         "type": "github"
       },
       "original": {
@@ -372,17 +372,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1773626535,
-        "narHash": "sha256-bx6v03VjZnGB1z6P1yYW3BhxN2aWKd8jY4d0YhPoivM=",
-        "owner": "loomtex",
-        "repo": "seed",
-        "rev": "4de9a47ad60065ebf38babdedcf76b948f3ad33c",
-        "type": "github"
+        "lastModified": 1775425976,
+        "narHash": "sha256-hYMmk5vo3KTCBWK549jyQeJoDFlKF3ZI2cdCo6q0Sw8=",
+        "ref": "refs/heads/master",
+        "rev": "03be83a714ac21fd8f5d606513b6d216bba27e85",
+        "revCount": 686,
+        "type": "git",
+        "url": "ssh://silo.loom.farm/seed.git"
       },
       "original": {
-        "owner": "loomtex",
-        "repo": "seed",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://silo.loom.farm/seed.git"
       }
     },
     "sops-nix": {
