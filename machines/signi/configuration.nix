@@ -679,6 +679,26 @@ in {
     profiles =
       (mkProfiles "eDP-1" "DP-1") //
       (mkProfiles "eDP-1-1" "DP-1-1");
+
+    # Switch profile on lid open/close (not just display hotplug)
+    hooks.postswitch = {
+      "notify" = "echo 'autorandr: switched to $AUTORANDR_CURRENT_PROFILE'";
+    };
+  };
+
+  # Lid listener — autorandr's udev hook only fires on display hotplug,
+  # not lid events. This watches libinput for SWITCH_TOGGLE (lid) and
+  # triggers autorandr --change.
+  systemd.services.autorandr-lid-listener = {
+    description = "Autorandr lid listener";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "display-manager.service" ];
+    serviceConfig = {
+      Type = "simple";
+      Restart = "always";
+      RestartSec = 30;
+      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.coreutils}/bin/stdbuf -oL ${pkgs.libinput}/bin/libinput debug-events | ${pkgs.gnugrep}/bin/grep -E --line-buffered \"^[[:space:]-]+event[0-9]+[[:space:]]+SWITCH_TOGGLE[[:space:]]\" | while read line; do ${pkgs.autorandr}/bin/autorandr --batch --change --default laptop; done'";
+    };
   };
 
   ###
