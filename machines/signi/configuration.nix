@@ -617,10 +617,10 @@ in {
   # Automatic display switching (EDID-based, GPU-mode agnostic)
   services.autorandr = let
     edid-laptop = "00ffffffffffff0030e488070000000000210104a5221678030f95ae5243b0260f505400000001010101010101010101010101010101353c80a070b023403020360059d71000001a2a3080a070b023403020360059d71000001a000000fe004d34573535803136305755340a0000000000024131b2001000000a410a20200088";
-    edid-dell = "00ffffffffffff0010acf0a04c314430151c010380582578eeee95a3544c99260f5054a54b00714f81008180a940d1c00101010101014c9a00a0f0402e6030203a00706f3100001a000000ff00393746385038354c3044314c0a000000fc0044454c4c20553338313844570a000000fd001855197328000a202020202020016a02032af14d9005040302071601141f12135a230907078301000067030c001000384467d85dc401788003023a801871382d40582c4500706f3100001e565e00a0a0a0295030203500706f3100001acd4600a0a0381f4030203a00706f3100001a134c00a0f040176030203a00706f3100001a0000000000000000000000000074";
+    edid-dell = "00ffffffffffff0010ac08434c37393202240104b55d27783bd9a5b04f3db1240e5054a54b00714f81008180a940b300d1c0d100e1c0d44600a0a0381f4030203a00a1883100001a000000ff0042374c4d3838340a2020202020000000fc0044454c4c20553430323551570a000000fd0c3078191996010a202020202020024502031ff152c17e7b6661605f5e5d101f04131211030201230907078301000050d000a0f0703e8030203500a1883100001a565e00a0a0a0295030203500a1883100001a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000094701279030001000c4d24500f001470081078899903013cf8120186ff139f002f801f006f083d000200090013440206ff137b01a38057006f0859000780090091870006ff139f002f801f006f081e0002000900000000000000000000000000000000000000000000000000000000000000000000000000000000000000004c90";
 
-    # Build profiles for both Intel (eDP-1/HDMI-1) and NVIDIA sync (eDP-1-1/HDMI-1-1) output names
-    mkProfiles = edp: hdmi: {
+    # Build profiles for both Intel (eDP-1/DP-1) and NVIDIA sync (eDP-1-1/DP-1-1) output names
+    mkProfiles = edp: dp: {
       "laptop${lib.optionalString (edp != "eDP-1") "-nv"}" = {
         fingerprint.${edp} = edid-laptop;
         config.${edp} = {
@@ -632,41 +632,41 @@ in {
         };
       };
       "docked${lib.optionalString (edp != "eDP-1") "-nv"}" = {
-        fingerprint.${hdmi} = edid-dell;
-        config.${hdmi} = {
+        fingerprint.${dp} = edid-dell;
+        config.${dp} = {
           enable = true;
           primary = true;
-          mode = "3840x1600";
+          mode = "5120x2160";
           position = "0x0";
-          rate = "59.99";
+          rate = "60.00";
         };
       };
       "docked-open${lib.optionalString (edp != "eDP-1") "-nv"}" = {
         fingerprint.${edp} = edid-laptop;
-        fingerprint.${hdmi} = edid-dell;
+        fingerprint.${dp} = edid-dell;
         config.${edp}.enable = false;
-        config.${hdmi} = {
+        config.${dp} = {
           enable = true;
           primary = true;
-          mode = "3840x1600";
+          mode = "5120x2160";
           position = "0x0";
-          rate = "59.99";
+          rate = "60.00";
         };
       };
       "dual${lib.optionalString (edp != "eDP-1") "-nv"}" = {
         fingerprint.${edp} = edid-laptop;
-        fingerprint.${hdmi} = edid-dell;
-        config.${hdmi} = {
+        fingerprint.${dp} = edid-dell;
+        config.${dp} = {
           enable = true;
           primary = true;
-          mode = "3840x1600";
+          mode = "5120x2160";
           position = "0x0";
-          rate = "59.99";
+          rate = "60.00";
         };
         config.${edp} = {
           enable = true;
           mode = "1920x1200";
-          position = "3840x200";
+          position = "5120x480";
           rate = "60.00";
         };
       };
@@ -677,8 +677,8 @@ in {
     defaultTarget = "laptop";
 
     profiles =
-      (mkProfiles "eDP-1" "HDMI-1") //
-      (mkProfiles "eDP-1-1" "HDMI-1-1");
+      (mkProfiles "eDP-1" "DP-1") //
+      (mkProfiles "eDP-1-1" "DP-1-1");
   };
 
   ###
