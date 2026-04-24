@@ -405,7 +405,7 @@ in {
   networking.firewall.enable = true;
 
   # Set your time zone.
-  time.timeZone = "America/Los_Angeles";
+  time.timeZone = "America/Denver";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
