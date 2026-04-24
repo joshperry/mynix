@@ -17,6 +17,7 @@
     curl
     tree
 
+
     # Wrapper script that overrides sudo to use approval system
     # Handles sudo flags like -u, -g, etc. by passing them to sudo, not sudo-with-approval
     (pkgs.writeShellScriptBin "sudo" ''

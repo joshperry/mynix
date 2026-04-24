@@ -29,7 +29,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     seed = {
-      url = "github:loomtex/seed";
+      url = "git+ssh://silo.loom.farm/seed.git";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.sops-nix.follows = "sops-nix";
     };
@@ -49,6 +49,17 @@
         (final: prev:
           import ./packages { pkgs = prev; }
         )
+
+        # Seed flake packages
+        (final: prev: {
+          mynix = (prev.mynix or {}) // {
+            silo = prev.writeShellApplication {
+              name = "silo";
+              runtimeInputs = with prev; [ git jq coreutils ];
+              text = builtins.readFile "${inputs.seed}/instances/silo/cli/silo";
+            };
+          };
+        })
       ]; 
     };
 
@@ -414,7 +425,29 @@
       };
     };
 
+    flake.combine = {
+      domains = {
+        "6bit.com" = {
+          register = false;
+        };
+      };
+    };
+
     flake.nixosSystem = nixosSystem;
+
+    flake.seeds = let
+      mkSeed = inputs.seed.lib.mkSeed;
+      seedEntries = builtins.readDir ./seeds;
+      seedNames = builtins.filter
+        (name: seedEntries.${name} == "directory" || nixpkgs.lib.hasSuffix ".nix" name)
+        (builtins.attrNames seedEntries);
+      importSeed = name: let
+        clean = nixpkgs.lib.removeSuffix ".nix" name;
+      in {
+        name = clean;
+        value = (import ./seeds/${name}) { inherit mkSeed; name = clean; };
+      };
+    in builtins.listToAttrs (map importSeed seedNames);
 
     flake.nixosConfigurations = { #def.nixosConfigurations
 
