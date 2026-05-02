@@ -308,7 +308,7 @@ in {
 
   # Seed: k3s + nix-snapshotter + Kata/CLH (VM-isolated pods)
   seed = {
-    enable = true;
+    enable = false;
     k3s.port = 6444;
     persistence.enable = true;
     persistence.path = "/persist";
@@ -564,6 +564,77 @@ in {
     SUBSYSTEM=="usb", ATTR{idVendor}=="1d50", ATTR{idProduct}=="6108", SYMLINK+="stream-%k", MODE="666"
     SUBSYSTEM=="xillybus", MODE="666"
     SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="0666"
+
+    # Dell U4025QW Monitor Firmware Update Utility (M3T105 .deb)
+    # Source: 99-monitorfirmwareupdateutility-U4025QW.rules
+    # USB Hub HID — firmware update interfaces on the monitor's MCU/scaler
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="1101", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="1100", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="2530", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="2740", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="2840", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="4940", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="7040", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="7240", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="7260", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="274e", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="274f", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="274c", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="284b", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="284c", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="284e", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="724a", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="724b", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="724c", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="724e", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="724f", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0451", ATTRS{idProduct}=="3410", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0451", ATTRS{idProduct}=="82ff", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="187c", ATTRS{idProduct}=="1015", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="187c", ATTRS{idProduct}=="100d", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="1b20", ATTRS{idProduct}=="0300", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="1da0", ATTRS{idProduct}=="551e", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="1da0", ATTRS{idProduct}=="551f", MODE:="0666"
+    # USB Hub
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="5409", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="5483", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="2109", ATTRS{idProduct}=="a822", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="4206", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="4216", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="7206", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="0424", ATTRS{idProduct}=="7216", MODE:="0666"
+    # USB Camera (Dell C-series webcam attachment)
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c00a", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c00c", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c024", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c03d", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d003", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d004", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d005", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d006", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d007", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d008", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d009", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d00a", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="d00b", MODE:="0666"
+    # USB Audio (Dell webcam attachment)
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c00b", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c00d", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c00f", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c032", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c034", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c036", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c03b", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c01b", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c01c", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c068", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c06a", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c06b", MODE:="0666"
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="413c", ATTRS{idProduct}=="c06c", MODE:="0666"
+    # USB Ethernet (built into U4025QW)
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="1de1", ATTRS{idProduct}=="f2f0", MODE:="0666"
+    # USB Touch
+    SUBSYSTEMS=="usb", ATTRS{idVendor}=="25b5", ATTRS{idProduct}=="0165", MODE:="0666"
 
   '';
 

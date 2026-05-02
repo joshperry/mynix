@@ -506,12 +506,12 @@
             inputs.seed.homeModules.k3s-rootless
           ];
             virtualisation.containerd.rootless = {
-              enable = true;
+              enable = false;
               nixSnapshotterIntegration = true;
             };
-            services.nix-snapshotter.rootless.enable = true;
+            services.nix-snapshotter.rootless.enable = false;
             services.k3s.rootless = {
-              enable = true;
+              enable = false;
               snapshotter = "nix";
               setKubeConfig = true;
               setEmbeddedContainerd = true;
