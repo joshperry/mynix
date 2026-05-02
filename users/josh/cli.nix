@@ -60,7 +60,7 @@
             args = [ "--stdio" ];
             filetypes = [ "beancount" ];
             rootPatterns = [ ".git" ];
-            settings = {
+            initializationOptions = {
               journal_file = "main.beancount";
               formatting = {
                 prefix_width = 30;
