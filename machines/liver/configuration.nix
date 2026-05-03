@@ -44,6 +44,13 @@
     allowReboot = true;
   };
 
+  # GC old system generations (keep last 2) to prevent /nix filling the disk
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-generations +2";
+  };
+
   networking.hostName = "liver";
   time.timeZone = "MST7MDT";
   i18n.defaultLocale = "en_US.UTF-8";
