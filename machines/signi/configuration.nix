@@ -104,6 +104,7 @@ in {
       claudeCode = {
         enable = true;
         settings = {
+          includeCoAuthoredBy = false;
           voiceEnabled = true;
           env = {
             CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";

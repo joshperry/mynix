@@ -73,10 +73,6 @@
         # go through josh's GUI approval.
         defaultMode = "bypassPermissions";
       };
-      attribution = {
-        commit = "";
-        pr = "";
-      };
     };
 
     agents = {
