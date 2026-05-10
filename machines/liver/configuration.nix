@@ -70,7 +70,7 @@
     isNormalUser = true;
     extraGroups = [ "wheel" ];
     openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsPaFplk95wdbZnGF9q1LnQUKy36Lh+4dSHyFJwMeUK josh@6bit.com"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDb0+aftJY+E+fkZJKq7rAptzhp65YzQlc7+En0/RTYx openpgp:0x920307AB"
     ];
   };
   users.groups.josh = { gid = 1000; };
