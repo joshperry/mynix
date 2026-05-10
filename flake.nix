@@ -129,8 +129,8 @@
           closureInfo = pkgs.closureInfo { rootPaths = dependencies; };
 
           installerSystem = nixpkgs.lib.nixosSystem {
-            inherit system;
             modules = [
+              { nixpkgs.hostPlatform = system; }
               "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
               registry
               ({ pkgs, lib, config, ... }: {
