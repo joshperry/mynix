@@ -675,11 +675,21 @@ in {
       nvidiaBusId = "PCI:1:0:0";
       intelBusId = "PCI:0:2:0";
     };
+    # To update: get the latest production version from
+    # https://www.nvidia.com/en-us/drivers/unix/, set `version` below,
+    # blank out openSha256/settingsSha256/sha256_64bit, then run
+    # `nixos-rebuild build` repeatedly — each build prints one hash
+    # mismatch; paste the `got:` value into the matching field and
+    # rebuild until it succeeds. Build order varies, so match by the
+    # derivation name in the error (settings → settingsSha256,
+    # NVIDIA-Linux-x86_64-*.run → sha256_64bit, source.drv (open kernel
+    # modules) → openSha256). A reboot is required to load the new
+    # kernel module.
     package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-      version = "580.126.09";
-      openSha256 = "sha256-ychsaurbQ2KNFr/SAprKI2tlvAigoKoFU1H7+SaxSrY=";
-      settingsSha256 = "sha256-4SfCWp3swUp+x+4cuIZ7SA5H7/NoizqgPJ6S9fm90fA=";
-      sha256_64bit = "sha256-TKxT5I+K3/Zh1HyHiO0kBZokjJ/YCYzq/QiKSYmG7CY=";
+      version = "595.71.05";
+      openSha256 = "sha256-Lfz71QWKM6x/jD2B22SWpUi7/og30HRlXg1kL3EWzEw=";
+      settingsSha256 = "sha256-mXnf3jyvznfB3OfKd657rxv0rYHQb/dX/Riw/+N9EKU=";
+      sha256_64bit = "sha256-NiA7iWC35JyKQva6H1hjzeNKBek9KyS3mK8G3YRva4I=";
       sha256_aarch64 = "";
       persistencedSha256 = "";
     };
