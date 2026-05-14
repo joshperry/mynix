@@ -104,7 +104,7 @@ in {
       claudeCode = {
         enable = true;
         settings = {
-          includeCoAuthoredBy = false;
+          attribution = { commit = ""; pr = ""; };
           voiceEnabled = true;
           env = {
             CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
