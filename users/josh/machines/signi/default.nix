@@ -2,6 +2,10 @@
 {
   imports = [ ../.. ];
 
+  home.packages = with pkgs; [
+    (pidgin.override { plugins = [ mynix.purple-gowhatsapp ]; })
+  ];
+
   # k3s rootless + nix-snapshotter (home-manager user services)
   virtualisation.containerd.rootless = {
     enable = false;
