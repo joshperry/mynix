@@ -46,6 +46,12 @@ let
       </alias>
     </fontconfig>
   '';
+
+  browserConfig = writeText "user.js" ''
+    user_pref("network.proxy.socks", "localhost");
+    user_pref("network.proxy.socks_port", 9050);
+    user_pref("network.proxy.type", 1);
+  '';
 in
 writeShellApplication {
   name = "tor-librewolf";
@@ -53,15 +59,6 @@ writeShellApplication {
   runtimeInputs = [ bubblewrap ];
 
   text = ''
-    profile=$(mktemp -d)
-    trap 'rm -rf "$profile"' EXIT
-
-    cat > "$profile/user.js" <<'EOF'
-    user_pref("network.proxy.socks", "localhost");
-    user_pref("network.proxy.socks_port", 9050);
-    user_pref("network.proxy.type", 1);
-    EOF
-
     bwrap \
       --ro-bind /nix/store /nix/store \
       --ro-bind ${cacert.p11kit}/etc/ssl/trust-source /etc/ssl/trust-source \
@@ -72,7 +69,8 @@ writeShellApplication {
       --ro-bind "$HOME/.Xauthority" /tmp/.Xauthority \
       --ro-bind /tmp/.X11-unix /tmp/.X11-unix \
       --tmpfs /home/user \
-      --bind "$profile" /home/user/.librewolf-profile \
+      --tmpfs /home/user/.librewolf-profile \
+      --ro-bind ${browserConfig} /home/user/.librewolf-profile/user.js \
       --unshare-all --share-net \
       --die-with-parent --new-session \
       --setenv HOME /home/user \
