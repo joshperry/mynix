@@ -25,6 +25,7 @@ in
     itunes-backup-explorer = pkgs.callPackage ./tools/itunes-backup-explorer.nix {};
     prosody-filer-s3 = pkgs.callPackage ./tools/prosody-filer-s3.nix {};
     purple-gowhatsapp = pkgs.callPackage ./applications/messaging/purple-gowhatsapp.nix {};
+    tor-librewolf = pkgs.callPackage ./applications/misc/tor-librewolf.nix {};
     inherit kokoro-tts;
     ada-narrator = pkgs.callPackage ./ada-narrator { inherit kokoro-tts; };
 

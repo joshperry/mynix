@@ -35,6 +35,7 @@
     pipewire.jack
     puredata
     mynix.i3lock-color
+    mynix.tor-librewolf
     thunderbird
     ungoogled-chromium
     vlc
