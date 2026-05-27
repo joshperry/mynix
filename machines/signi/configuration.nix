@@ -696,16 +696,22 @@ in {
   };
 
   ###
-  # Automatic display switching (EDID-based, GPU-mode agnostic)
+  # Automatic display switching. Profiles match by EDID (matchEdid); the
+  # port names below are canonical placeholders that autorandr renames
+  # at apply time to whatever port the EDID is actually on (e.g. DP-1 →
+  # DP-2 on base iGPU boot, DP-1 → DP-1-1 on the nvidia-primary spec).
   services.autorandr = let
     edid-laptop = "00ffffffffffff0030e488070000000000210104a5221678030f95ae5243b0260f505400000001010101010101010101010101010101353c80a070b023403020360059d71000001a2a3080a070b023403020360059d71000001a000000fe004d34573535803136305755340a0000000000024131b2001000000a410a20200088";
     edid-dell = "00ffffffffffff0010ac08434c37393202240104b55d27783bd9a5b04f3db1240e5054a54b00714f81008180a940b300d1c0d100e1c0d44600a0a0381f4030203a00a1883100001a000000ff0042374c4d3838340a2020202020000000fc0044454c4c20553430323551570a000000fd0c3078191996010a202020202020024502031ff152c17e7b6661605f5e5d101f04131211030201230907078301000050d000a0f0703e8030203500a1883100001a565e00a0a0a0295030203500a1883100001a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000094701279030001000c4d24500f001470081078899903013cf8120186ff139f002f801f006f083d000200090013440206ff137b01a38057006f0859000780090091870006ff139f002f801f006f081e0002000900000000000000000000000000000000000000000000000000000000000000000000000000000000000000004c90";
+  in {
+    enable = true;
+    matchEdid = true;
+    defaultTarget = "laptop";
 
-    # Build profiles for both Intel (eDP-1/DP-1) and NVIDIA sync (eDP-1-1/DP-1-1) output names
-    mkProfiles = edp: dp: {
-      "laptop${lib.optionalString (edp != "eDP-1") "-nv"}" = {
-        fingerprint.${edp} = edid-laptop;
-        config.${edp} = {
+    profiles = {
+      laptop = {
+        fingerprint.eDP-1 = edid-laptop;
+        config.eDP-1 = {
           enable = true;
           primary = true;
           mode = "1920x1200";
@@ -713,9 +719,9 @@ in {
           rate = "60.00";
         };
       };
-      "docked${lib.optionalString (edp != "eDP-1") "-nv"}" = {
-        fingerprint.${dp} = edid-dell;
-        config.${dp} = {
+      docked = {
+        fingerprint.DP-1 = edid-dell;
+        config.DP-1 = {
           enable = true;
           primary = true;
           mode = "5120x2160";
@@ -723,11 +729,11 @@ in {
           rate = "60.00";
         };
       };
-      "docked-open${lib.optionalString (edp != "eDP-1") "-nv"}" = {
-        fingerprint.${edp} = edid-laptop;
-        fingerprint.${dp} = edid-dell;
-        config.${edp}.enable = false;
-        config.${dp} = {
+      docked-open = {
+        fingerprint.eDP-1 = edid-laptop;
+        fingerprint.DP-1 = edid-dell;
+        config.eDP-1.enable = false;
+        config.DP-1 = {
           enable = true;
           primary = true;
           mode = "5120x2160";
@@ -735,17 +741,17 @@ in {
           rate = "60.00";
         };
       };
-      "dual${lib.optionalString (edp != "eDP-1") "-nv"}" = {
-        fingerprint.${edp} = edid-laptop;
-        fingerprint.${dp} = edid-dell;
-        config.${dp} = {
+      dual = {
+        fingerprint.eDP-1 = edid-laptop;
+        fingerprint.DP-1 = edid-dell;
+        config.DP-1 = {
           enable = true;
           primary = true;
           mode = "5120x2160";
           position = "0x0";
           rate = "60.00";
         };
-        config.${edp} = {
+        config.eDP-1 = {
           enable = true;
           mode = "1920x1200";
           position = "5120x480";
@@ -753,14 +759,6 @@ in {
         };
       };
     };
-  in {
-    enable = true;
-    matchEdid = true;
-    defaultTarget = "laptop";
-
-    profiles =
-      (mkProfiles "eDP-1" "DP-1") //
-      (mkProfiles "eDP-1-1" "DP-1-1");
 
     # Switch profile on lid open/close (not just display hotplug)
     hooks.postswitch = {
@@ -770,7 +768,9 @@ in {
 
   # Lid listener — autorandr's udev hook only fires on display hotplug,
   # not lid events. This watches libinput for SWITCH_TOGGLE (lid) and
-  # triggers autorandr --change.
+  # triggers autorandr --change. --match-edid is required so the
+  # listener picks the docked profile via EDID rather than falling back
+  # to the laptop default and turning off the external display.
   systemd.services.autorandr-lid-listener = {
     description = "Autorandr lid listener";
     wantedBy = [ "multi-user.target" ];
@@ -779,7 +779,7 @@ in {
       Type = "simple";
       Restart = "always";
       RestartSec = 30;
-      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.coreutils}/bin/stdbuf -oL ${pkgs.libinput}/bin/libinput debug-events | ${pkgs.gnugrep}/bin/grep -E --line-buffered \"^[[:space:]-]+event[0-9]+[[:space:]]+SWITCH_TOGGLE[[:space:]]\" | while read line; do ${pkgs.autorandr}/bin/autorandr --batch --change --default laptop; done'";
+      ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.coreutils}/bin/stdbuf -oL ${pkgs.libinput}/bin/libinput debug-events | ${pkgs.gnugrep}/bin/grep -E --line-buffered \"^[[:space:]-]+event[0-9]+[[:space:]]+SWITCH_TOGGLE[[:space:]]\" | while read line; do ${pkgs.autorandr}/bin/autorandr --batch --change --match-edid --default laptop; done'";
     };
   };
 
@@ -799,7 +799,7 @@ in {
 
     displayManager = {
       setupCommands = ''
-        ${pkgs.autorandr}/bin/autorandr --change --default laptop
+        ${pkgs.autorandr}/bin/autorandr --change --match-edid --default laptop
       '';
     };
 
@@ -870,9 +870,6 @@ in {
           };
         };
       };
-
-      # defaultTarget needs to match the nvidia profile name
-      services.autorandr.defaultTarget = lib.mkForce "laptop-nv";
     };
   };
 

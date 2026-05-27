@@ -226,10 +226,10 @@
         };
 
         display = {
-          "i" = ''exec autorandr --load laptop, mode "default"'';
-          "h" = ''exec autorandr --load docked-open, mode "default"'';
-          "d" = ''exec autorandr --load dual, mode "default"'';
-          "a" = ''exec autorandr --change, mode "default"'';
+          "i" = ''exec autorandr --load laptop --match-edid, mode "default"'';
+          "h" = ''exec autorandr --load docked-open --match-edid, mode "default"'';
+          "d" = ''exec autorandr --load dual --match-edid, mode "default"'';
+          "a" = ''exec autorandr --change --match-edid, mode "default"'';
           "Return" = ''mode "default"'';
           "Escape" = ''mode "default"'';
         };
