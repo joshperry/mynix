@@ -28,6 +28,7 @@ in
     tor-librewolf = pkgs.callPackage ./applications/misc/tor-librewolf.nix {};
     inherit kokoro-tts;
     ada-narrator = pkgs.callPackage ./ada-narrator { inherit kokoro-tts; };
+    mychromium = pkgs.callPackage ./applications/networking/mychromium.nix {};
 
     dev = {
       direnv-nvim = pkgs.callPackage ./dev/direnv-nvim.nix {inherit buildVimPlugin;};

@@ -37,7 +37,7 @@
     mynix.i3lock-color
     mynix.tor-librewolf
     thunderbird
-    ungoogled-chromium
+    mynix.mychromium
     vlc
     xfce.thunar
     unstable.godot
