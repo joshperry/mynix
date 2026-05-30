@@ -113,9 +113,6 @@ in {
           };
           permissions = {
             defaultMode = "bypassPermissions";
-            additionalDirectories = [
-              "/home/josh/dev"
-            ];
           };
           hooks = {
             Stop = [{
@@ -219,10 +216,9 @@ in {
           Unit.Description = "Ada TTS narrator — periodic work log summary";
           Service = {
             Type = "oneshot";
-            ExecStart = "/etc/profiles/per-user/ada/bin/ada-narrator";
+            ExecStart = lib.getExe pkgs.mynix.ada-narrator;
             Environment = [
               "PULSE_SERVER=tcp:127.0.0.1:4713"
-              "PATH=/etc/profiles/per-user/ada/bin:/run/current-system/sw/bin:/usr/bin:/bin"
             ];
           };
         };
@@ -505,8 +501,8 @@ in {
   services.actkbd = {
     enable = true;
     bindings = [
-      { keys = [ 224 ]; events = [ "key" ]; command = "/run/current-system/sw/bin/xbacklight -dec 10"; }
-      { keys = [ 225 ]; events = [ "key" ]; command = "/run/current-system/sw/bin/xbacklight -inc 10"; }
+      { keys = [ 224 ]; events = [ "key" ]; command = "${lib.getExe pkgs.acpilight} -dec 10"; }
+      { keys = [ 225 ]; events = [ "key" ]; command = "${lib.getExe pkgs.acpilight} -inc 10"; }
     ];
   };
 

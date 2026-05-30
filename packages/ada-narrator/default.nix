@@ -326,5 +326,6 @@ in symlinkJoin {
     description = "Ada narrator: work log hook + periodic TTS summarizer";
     license = lib.licenses.mit;
     platforms = lib.platforms.linux;
+    mainProgram = "ada-narrator";
   };
 }
