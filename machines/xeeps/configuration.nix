@@ -93,7 +93,7 @@
     enableSSHSupport = true;
   };
 
-  programs.thunar.plugins = with pkgs.xfce; [
+  programs.thunar.plugins = with pkgs; [
     thunar-archive-plugin
     thunar-volman
   ];
@@ -157,7 +157,7 @@
     displayManager = {
       defaultSession = "none+i3";
       setupCommands = ''
-        ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --mode 1920x1200
+        ${pkgs.xrandr}/bin/xrandr --output eDP-1 --mode 1920x1200
       '';
       # Configure the greeter to use the primary monitor
       # xrandr `primary` isn't respected, and old tech like DVI tends to get priority

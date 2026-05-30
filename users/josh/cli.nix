@@ -38,9 +38,12 @@
   programs.neovim = { # the power of lua beckons
     enable = true;
     extraConfig = lib.fileContents ./config/vim/vimrc;
-    extraLuaConfig = lib.fileContents ./config/vim/init.lua;
+    initLua = lib.fileContents ./config/vim/init.lua;
     vimAlias = true;
     vimdiffAlias = true;
+
+    withRuby = false;
+    withPython3 = false;
 
     # Language servers on PATH so vim.lsp.enable can launch them
     extraPackages = with pkgs; [

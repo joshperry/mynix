@@ -83,7 +83,7 @@
     enableSSHSupport = true;
   };
 
-  programs.thunar.plugins = with pkgs.xfce; [
+  programs.thunar.plugins = with pkgs; [
     thunar-archive-plugin
     thunar-volman
   ];
@@ -142,7 +142,7 @@
 
     displayManager = {
       setupCommands = ''
-        ${pkgs.xorg.xrandr}/bin/xrandr --output eDP-1 --mode 1920x1080 --pos 0x0 --rotate normal --primary
+        ${pkgs.xrandr}/bin/xrandr --output eDP-1 --mode 1920x1080 --pos 0x0 --rotate normal --primary
       '';
     };
 

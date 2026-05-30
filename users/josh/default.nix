@@ -39,7 +39,7 @@
     thunderbird
     mynix.mychromium
     vlc
-    xfce.thunar
+    thunar
     unstable.godot
   ];
 

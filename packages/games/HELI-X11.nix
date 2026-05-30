@@ -176,11 +176,11 @@ let
 
     ## glfw
     pkgs.libGL
-    pkgs.xorg.libX11
-    pkgs.xorg.libXcursor
-    pkgs.xorg.libXinerama
-    pkgs.xorg.libXrandr
-    pkgs.xorg.libXi
+    pkgs.libX11
+    pkgs.libXcursor
+    pkgs.libXinerama
+    pkgs.libXrandr
+    pkgs.libXi
   ];
 in
 stdenv.mkDerivation {

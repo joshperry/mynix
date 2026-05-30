@@ -134,20 +134,20 @@ let
       HELIX
   '';
 
-  runtimeLibs = [
+  runtimeLibs = with pkgs; [
     ## openal
-    pkgs.alsa-lib
-    pkgs.libjack2
-    pkgs.libpulseaudio
-    pkgs.pipewire
+    alsa-lib
+    libjack2
+    libpulseaudio
+    pipewire
 
     ## glfw
-    pkgs.libGL
-    pkgs.xorg.libX11
-    pkgs.xorg.libXcursor
-    pkgs.xorg.libXinerama
-    pkgs.xorg.libXrandr
-    pkgs.xorg.libXi
+    libGL
+    libX11
+    libXcursor
+    libXinerama
+    libXrandr
+    libXi
   ];
 in
 stdenv.mkDerivation {

@@ -207,6 +207,8 @@ in {
           enable = true;
           vimAlias = true;
           defaultEditor = true;
+          withPython3 = false;
+          withRuby = false;
         };
         programs.bash.shellAliases = {
           ll = "ls --color=auto";
@@ -507,7 +509,7 @@ in {
     ];
   };
 
-  programs.thunar.plugins = with pkgs.xfce; [
+  programs.thunar.plugins = with pkgs; [
     thunar-archive-plugin
     thunar-volman
   ];

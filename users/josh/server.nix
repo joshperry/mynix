@@ -32,63 +32,134 @@
 
   programs.neovim = { # the power of lua beckons
     enable = true;
-    extraConfig = lib.fileContents config/vim/vimrc;
+    extraConfig = lib.fileContents ./config/vim/vimrc;
+    initLua = lib.fileContents ./config/vim/init.lua;
     vimAlias = true;
-    coc ={ # universal lsp client
-      enable = true;
-      settings = {
-        "suggest.noselect" = true;
-        "suggest.enablePreview" = true;
-        "suggest.enablePreselect" = false;
-        "suggest.disableKind" = true;
-        languageserver.nix = { # nix language server
-          command = "${pkgs.nil}/bin/nil";
-          filetypes = ["nix"];
-          rootPatterns = ["flake.nix"];
-        };
-      };
-    };
+    vimdiffAlias = true;
+
+    withRuby = false;
+    withPython3 = false;
+
+    # Language servers on PATH so vim.lsp.enable can launch them
+    extraPackages = with pkgs; [
+      nil                          # nix
+      beancount-language-server
+      svelte-language-server
+      vscode-langservers-extracted # html, css, json, eslint
+      cmake-language-server
+      gopls
+      typescript-language-server
+      yaml-language-server
+      rust-analyzer
+      clang-tools                  # clangd
+    ];
+
     plugins = with pkgs.vimPlugins; [
       nvim-web-devicons
       gruvbox      # theme
-      coc-eslint   # CoC lsps
-      coc-go
-      coc-tsserver
-      coc-yaml
-      coc-rust-analyzer
-      vim-tmux-navigator # allow ctrl-hjkl across panes
-      vim-polyglot       # syntax highlight all the things
+      { # completion engine — replaces CoC's popup menu, talks to native LSP
+        plugin = blink-cmp;
+        type = "lua";
+        config = #lua
+        ''
+          require('blink.cmp').setup({
+            keymap = { preset = 'enter' },
+            completion = {
+              list = { selection = { preselect = false, auto_insert = true } },
+              documentation = { auto_show = true },
+            },
+            signature = { enabled = true },
+          })
+        '';
+      }
+      vim-tmux-navigator # allow ctrl-hjkl across vim and tmux internal panes
       mini-nvim          #TODO: Still unsure how to use mini.file from this, supercede oil?
-      vim-fugitive       # Git interaction
+      vim-fugitive       # A dash of tpope Git interaction goodness cref vintage:
+                         # http://vimcasts.org/episodes/fugitive-vim---a-complement-to-command-line-git/
       vimwiki            # Wiki notes in vim
       fzf-vim            # file path/contents fuzzyfind
-      trouble-nvim
-      pkgs.unstable.vimPlugins.openingh-nvim
-      {
+      trouble-nvim       # LSP UI
+      pkgs.unstable.vimPlugins.openingh-nvim  # UI exposing "navigate to the current cursor location in
+                                              # the {github|gitlab|bitbucket}.com web code editor" functionality
+      { # Treesitter grammar parser and plugins (should find a way to pull plugins in at the project-level as well)
+        plugin = (nvim-treesitter.withPlugins (p: [
+          # Organized by OSI-ish layer order; user this end
+          p.svelte
+          p.css
+          p.scss
+          p.html
+          p.beancount
+          p.typescript
+          p.javascript
+          p.nix
+          p.bash
+        ]));
+        type = "lua";
+        config = #lua
+        ''
+          require('nvim-treesitter.configs').setup({
+            highlight = { enable = true }, incremental_selection = { enable = true },
+            indent = { enable = true },
+          })
+          -- Use treesitter for folding
+          vim.wo.foldmethod = 'expr'
+          vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+          -- default folds to open
+          vim.opt.foldenable = false 
+        '';
+      }
+      { # Left side file/project browser, originally targeted at cref: `scripts/dev.sh`
         plugin = neo-tree-nvim;
         type = "lua";
-        config = ''
+        config = #lua
+        ''
           require('neo-tree').setup({
+            close_if_last_window = true,
+            buffers = {
+              follow_current_file = {
+                enabled = true,
+              },
+            },
             filesystem = {
+              follow_current_file = {
+                enabled = true,
+              },
               use_libuv_file_watcher = true,
+              window = {
+                mappings = {
+                  ["o"] = "system_open",
+                },
+              },
+            },
+            commands = {
+              system_open = function(state)
+                local node = state.tree:get_node()
+                local path = node:get_id()
+                -- Linux: open file in default application
+                vim.fn.jobstart({ "xdg-open", path }, { detach = true })
+              end,
             },
           })
         '';
       }
-      {
-        plugin = gitsigns-nvim; # git gutter and interaction
+      { # git gutter and interaction
+        plugin = gitsigns-nvim;
         type = "lua";
         config = "require('gitsigns').setup()";
       }
-      {
-        plugin = lualine-nvim; #powerline-alike
+      { #powerline-alike
+        plugin = lualine-nvim;
         type = "lua";
         config = "require('lualine').setup()";
       }
-      {
-        plugin = oil-nvim; # netrw replacement
+      { # netrw replacement
+        plugin = oil-nvim;
         type = "lua";
-        config = "require('oil').setup()";
+        config = #lua
+        ''
+          require('oil').setup({
+          });
+        '';
       }
     ];
   };

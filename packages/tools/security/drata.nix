@@ -36,7 +36,18 @@
 , systemd
 , wayland
 , xdg-utils
-, xorg
+, libX11
+, libXScrnSaver
+, libXcomposite
+, libXcursor
+, libXdamage
+, libXext
+, libXfixes
+, libXi
+, libXrandr
+, libXrender
+, libXtst
+, libxkbfile
 }:
 
 let
@@ -103,19 +114,19 @@ stdenv.mkDerivation rec {
     stdenv.cc.cc
     systemd
     wayland
-    xorg.libX11
-    xorg.libXScrnSaver
-    xorg.libXcomposite
-    xorg.libXcursor
-    xorg.libXdamage
-    xorg.libXext
-    xorg.libXfixes
-    xorg.libXi
-    xorg.libXrandr
-    xorg.libXrender
-    xorg.libXtst
-    xorg.libxkbfile
-    xorg.libxshmfence
+    libX11
+    libXScrnSaver
+    libXcomposite
+    libXcursor
+    libXdamage
+    libXext
+    libXfixes
+    libXi
+    libXrandr
+    libXrender
+    libXtst
+    libxkbfile
+    libxshmfence
   ] + ":${stdenv.cc.cc.lib}/lib64";
 
   buildInputs = [

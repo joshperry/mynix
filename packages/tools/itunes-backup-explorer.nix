@@ -1,11 +1,11 @@
-{ lib, makeDesktopItem, copyDesktopItems, fetchFromGitHub, jre, makeWrapper, maven, libGL, gtk3, glib, xorg }:
+{ lib, makeDesktopItem, copyDesktopItems, fetchFromGitHub, jre, makeWrapper, maven, libGL, gtk3, glib, libXtst, libXxf86vm }:
 let
   runtimeLibs = [
     libGL
     gtk3
     glib
-    xorg.libXtst
-    xorg.libXxf86vm
+    libXtst
+    libXxf86vm
   ];
 in maven.buildMavenPackage rec {
   pname = "itunes-backup-explorer";
