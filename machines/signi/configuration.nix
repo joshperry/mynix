@@ -497,9 +497,14 @@ in {
     # SSH support handled per-user in home-manager (josh: gpg-agent, ada: ssh-agent)
   };
 
-  programs.light = {
+  hardware.acpilight.enable = true;
+
+  services.actkbd = {
     enable = true;
-    brightnessKeys.enable = true;
+    bindings = [
+      { keys = [ 224 ]; events = [ "key" ]; command = "/run/current-system/sw/bin/xbacklight -dec 10"; }
+      { keys = [ 225 ]; events = [ "key" ]; command = "/run/current-system/sw/bin/xbacklight -inc 10"; }
+    ];
   };
 
   programs.thunar.plugins = with pkgs.xfce; [
@@ -933,7 +938,7 @@ in {
   services.resolved = {
     enable = true;
     #dnssec = "allow-downgrade";
-    extraConfig = "MulticastDNS=yes";
+    settings.Resolve.MulticastDNS = "yes";
   };
 
   # Avahi disabled — systemd-resolved handles mDNS resolution + hostname publishing
