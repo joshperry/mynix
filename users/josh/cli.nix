@@ -41,76 +41,39 @@
     extraLuaConfig = lib.fileContents ./config/vim/init.lua;
     vimAlias = true;
     vimdiffAlias = true;
-    coc ={ # universal lsp client
-      enable = true;
-      settings = {
-        "suggest.noselect" = true;
-        "suggest.enablePreview" = true;
-        "suggest.enablePreselect" = true;
-        "suggest.disableKind" = true;
-        languageserver = {
-          nix = { # nix language server
-            command = lib.getExe pkgs.nil;
-            filetypes = ["nix"];
-            rootPatterns = ["flake.nix"];
-          };
 
-          beancount = {
-            command = lib.getExe pkgs.beancount-language-server;
-            args = [ "--stdio" ];
-            filetypes = [ "beancount" ];
-            rootPatterns = [ ".git" ];
-            initializationOptions = {
-              journal_file = "main.beancount";
-              formatting = {
-                prefix_width = 30;
-                num_width = 10;
-                currency_column = 60;
-                account_amount_spacing = 2;
-                number_currency_spacing = 1;
-              };
-            };
-          };
-
-          svelte = {
-            command = lib.getExe pkgs.svelte-language-server;
-            args = [ "--stdio" ];
-            filetypes = ["svelte"];
-            rootPatterns = ["package.json"];
-          };
-        };
-      };
-    };
+    # Language servers on PATH so vim.lsp.enable can launch them
+    extraPackages = with pkgs; [
+      nil                          # nix
+      beancount-language-server
+      svelte-language-server
+      vscode-langservers-extracted # html, css, json, eslint
+      cmake-language-server
+      gopls
+      typescript-language-server
+      yaml-language-server
+      rust-analyzer
+      clang-tools                  # clangd
+    ];
 
     plugins = with pkgs.vimPlugins; [
-      { # Lets us bind ViM config specializations for direnv projects,
-        # including plugin installation like LSPs.
-        plugin = pkgs.mynix.dev.direnv-nvim;
-        type="lua";
-        config = # lua
+      nvim-web-devicons
+      gruvbox      # theme
+      { # completion engine — replaces CoC's popup menu, talks to native LSP
+        plugin = blink-cmp;
+        type = "lua";
+        config = #lua
         ''
-          vim.g.coc_start_at_startup = 0
-          require('direnv-nvim').setup({
-            async = true,
-            on_direnv_finished = function ()
-                -- Facilitate async project-specific vim tooling installed by nix-direnv
-                -- by bindings to things installed by it (like LSPs) in this function.
-                vim.cmd('CocStart')
-            end
+          require('blink.cmp').setup({
+            keymap = { preset = 'enter' },
+            completion = {
+              list = { selection = { preselect = false, auto_insert = true } },
+              documentation = { auto_show = true },
+            },
+            signature = { enabled = true },
           })
         '';
       }
-      nvim-web-devicons
-      gruvbox      # theme
-      coc-eslint   # CoC lsps
-      coc-cmake
-      coc-html
-      coc-go
-      coc-tsserver
-      coc-yaml
-      coc-rust-analyzer
-      coc-cmake
-      coc-clangd
       vim-tmux-navigator # allow ctrl-hjkl across vim and tmux internal panes
       mini-nvim          #TODO: Still unsure how to use mini.file from this, supercede oil?
       vim-fugitive       # A dash of tpope Git interaction goodness cref vintage:
