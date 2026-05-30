@@ -106,6 +106,8 @@ in {
         enable = true;
         settings = {
           attribution = { commit = ""; pr = ""; };
+          effortLevel = "xhigh";
+          model = "claude-opus-4-8";
           voiceEnabled = true;
           env = {
             CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
