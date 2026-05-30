@@ -42,6 +42,7 @@ in {
       persist = [
         "projects"
         ".claude"
+        ".claude.json"
       ];
 
       sudo.enable = true;
