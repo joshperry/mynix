@@ -102,9 +102,15 @@
         type = "lua";
         config = #lua
         ''
-          require('nvim-treesitter.configs').setup({
-            highlight = { enable = true }, incremental_selection = { enable = true },
-            indent = { enable = true },
+          require('nvim-treesitter').setup()
+          -- The main-branch rewrite dropped nvim-treesitter.configs; highlight and
+          -- indent now come from native treesitter, started per-buffer when a parser exists.
+          vim.api.nvim_create_autocmd('FileType', {
+            callback = function(args)
+              if pcall(vim.treesitter.start, args.buf) then
+                vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+              end
+            end,
           })
           -- Use treesitter for folding
           vim.wo.foldmethod = 'expr'
