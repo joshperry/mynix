@@ -164,6 +164,19 @@ in {
         programs.git.signing.key = "6CD1AEABA566EC82";
         # ssh-agent for SSH (GPG agent handles signing only, not SSH)
         services.ssh-agent.enable = true;
+        # Trusted SSH hosts are nix-defined and immutable: UserKnownHostsFile
+        # points at a read-only store file, so ada cannot trust-on-first-use an
+        # unknown or changed host key. New hosts are a reviewed config change,
+        # not a runtime decision; StrictHostKeyChecking=yes fails closed.
+        programs.ssh = {
+          enable = true;
+          matchBlocks."*" = {
+            userKnownHostsFile = builtins.toString (pkgs.writeText "ada-known_hosts" ''
+              github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+            '');
+            extraOptions.StrictHostKeyChecking = "yes";
+          };
+        };
         # command-not-found handler: suggest nix run instead of failing silently
         home.file.".local/share/bash/command-not-found.sh".text = ''
           command_not_found_handle() {

@@ -16,22 +16,6 @@
 
   boot.initrd.luks.devices."mainenc".device = "/dev/disk/by-uuid/e464c097-5f99-4eab-b453-f43186b0f38e";
 
-  boot.initrd.systemd.services.rollback-agents = {
-    description = "Rollback /agents to blank snapshot";
-    wantedBy = [ "initrd.target" ];
-    after = [ "cryptsetup.target" ];
-    before = [ "sysroot.mount" ];
-    unitConfig.DefaultDependencies = "no";
-    serviceConfig.Type = "oneshot";
-    script = ''
-      mkdir -p /mnt
-      mount -t btrfs -o subvol=/ /dev/disk/by-uuid/38b243a0-c875-4758-8998-cc6c6a4c451e /mnt
-      btrfs subvolume delete /mnt/@agents
-      btrfs subvolume snapshot /mnt/@agents-blank /mnt/@agents
-      umount /mnt
-    '';
-  };
-
   fileSystems."/" =
     { device = "none";
       fsType = "tmpfs";
