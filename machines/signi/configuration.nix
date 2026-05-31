@@ -397,7 +397,15 @@ in {
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
+  # /boot is a 487M ESP; keep a bounded number of generations so it can't fill
+  # up and block bootloader install during a switch.
+  boot.loader.systemd-boot.configurationLimit = 10;
   boot.loader.efi.canTouchEfiVariables = true;
+
+  # Required: the nuketown agent-home rollback runs as a boot.initrd.systemd
+  # unit, so it only executes with systemd stage 1. 26.05 made this the
+  # default; pin it so the wipe never silently no-ops if the default changes.
+  boot.initrd.systemd.enable = true;
   #boot.blacklistedKernelModules = [ "nouveau" "nvidia" ];
 
   security.polkit.enable = true;
