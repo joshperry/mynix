@@ -333,16 +333,15 @@
         "sops-nix": "sops-nix"
       },
       "locked": {
-        "lastModified": 1772418045,
-        "narHash": "sha256-KfNY96xmZcXMPrfeNPSnkObMsWZtDz+knUPBAVw8tDA=",
+        "lastModified": 1780247565,
+        "narHash": "sha256-katLjjvrpmP1fAsjEpDoe7wZZeHINxpqFD4VsPbxOoE=",
         "owner": "joshperry",
         "repo": "nuketown",
-        "rev": "231b5336eb856d6c36e724f15d9837938c7c3812",
+        "rev": "8ffed7626e4bc5224587ad8a8ad3e4d87665df32",
         "type": "github"
       },
       "original": {
         "owner": "joshperry",
-        "ref": "cloud-design",
         "repo": "nuketown",
         "type": "github"
       }

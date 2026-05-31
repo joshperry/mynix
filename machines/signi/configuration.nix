@@ -39,11 +39,15 @@ in {
         email = "ada@6bit.com";
       };
 
-      persist = [
-        "projects"
-        ".claude"
-        ".claude.json"
-      ];
+      persist = {
+        directories = [
+          "projects"
+          ".claude"
+        ];
+        files = [
+          ".claude.json"
+        ];
+      };
 
       sudo.enable = true;
       portal.enable = true;
