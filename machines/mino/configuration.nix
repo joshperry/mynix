@@ -189,6 +189,9 @@
         "Village Camp" = {
           pskRaw = "ext:village_camp_psk";
         };
+        "CCRVPGUEST" = {
+          pskRaw = "ext:ccrvpguest";
+        };
       };
     };
 
