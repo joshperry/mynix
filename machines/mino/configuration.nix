@@ -142,7 +142,7 @@
   nix.settings.trusted-users = [ "root" "ada" ];
 
   system.autoUpgrade = {
-    enable = true;
+    enable = false;
     dates = "04:00";
     flake = "github:joshperry/mynix";
     allowReboot = true;
