@@ -173,6 +173,8 @@ in {
           matchBlocks."*" = {
             userKnownHostsFile = builtins.toString (pkgs.writeText "ada-known_hosts" ''
               github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+              silo.loom.farm ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK429xZppZkGFdlhM3GnINUJD2K1/aiweypMQUp4Sw+s
+              10.0.2.1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIRoK8+kwamz4VpHNEca1lH4Hf9jsg5+/NlJ4I1mtOEq
             '');
             extraOptions.StrictHostKeyChecking = "yes";
           };
