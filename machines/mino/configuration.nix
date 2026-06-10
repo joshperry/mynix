@@ -17,7 +17,11 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 10;
-  boot.kernelParams = [ "console=ttyS0,19200n8" ];
+  # pcie_port_pm=off: kernel 6.18 (26.05) can't bring the second Realtek NIC
+  # (enp4s0, 04:00.0 behind root port 00:1d.3) back from D3cold, so it fails to
+  # probe ("Unable to change power state from D3cold to D0"). 6.12 was fine.
+  # Disabling PCIe port power management keeps the slot powered. Testing.
+  boot.kernelParams = [ "console=ttyS0,19200n8" "pcie_port_pm=off" ];
 
   # Impermanence mappings
   environment.persistence."/persist" = {
