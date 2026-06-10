@@ -21,7 +21,12 @@
   # (enp4s0, 04:00.0 behind root port 00:1d.3) back from D3cold, so it fails to
   # probe ("Unable to change power state from D3cold to D0"). 6.12 was fine.
   # Disabling PCIe port power management keeps the slot powered. Testing.
-  boot.kernelParams = [ "console=ttyS0,19200n8" "pcie_port_pm=off" ];
+  boot.kernelParams = [ "console=ttyS0,19200n8" "pcie_port_pm=off" "panic=10" ];
+
+  # Hardware watchdog fail-safe: if a bisect one-shot boot hangs the kernel
+  # (no console access here), the watchdog reboots back into the default
+  # generation. panic=10 above reboots 10s after a panic.
+  systemd.settings.Manager.RuntimeWatchdogSec = "30s";
 
   # Impermanence mappings
   environment.persistence."/persist" = {
@@ -122,6 +127,10 @@
 
   # Even root should use the daemon for builds to avoid /tmp cache
   environment.variables.NIX_REMOTE = "daemon";
+
+  # Allow ada to push pre-built closures from signi (kernel bisect: build
+  # the heavy kernels on signi, copy them here, boot via systemd-boot one-shot).
+  nix.settings.trusted-users = [ "root" "ada" ];
 
   system.autoUpgrade = {
     enable = true;
@@ -398,6 +407,12 @@
       { command = "/run/current-system/sw/bin/wpa_cli"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/ip"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/journalctl"; options = [ "NOPASSWD" ]; }
+      # Kernel-bisect fail-safe: set a one-shot boot entry then reboot. The
+      # persistent default stays the known-good generation, so a hung test
+      # boot self-recovers via watchdog/panic without console access.
+      { command = "/run/current-system/sw/bin/bootctl"; options = [ "NOPASSWD" ]; }
+      { command = "/run/current-system/sw/bin/systemctl reboot"; options = [ "NOPASSWD" ]; }
+      { command = "/run/current-system/sw/bin/reboot"; options = [ "NOPASSWD" ]; }
     ];
   }];
 
