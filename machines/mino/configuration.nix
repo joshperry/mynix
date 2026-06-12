@@ -289,6 +289,17 @@
         "loc"
         "guest"
       ];
+      # Authoritative local "lan" zone: answered here, never forwarded upstream.
+      # DHCP leases and dhcp-host names get <name>.lan via expand-hosts.
+      # no-hosts keeps mino's loopback /etc/hosts entries off the LAN; mino's own
+      # name is pinned to its loc-VLAN address explicitly.
+      domain = "lan";
+      local = "/lan/";
+      expand-hosts = true;
+      domain-needed = true;
+      bogus-priv = true;
+      no-hosts = true;
+      host-record = [ "mino.lan,10.0.2.1" ];
       dhcp-range = [
         "enp2s0,192.168.1.100,192.168.1.254,1h"
         "mgmt,10.0.1.30,10.0.1.254,36h"
