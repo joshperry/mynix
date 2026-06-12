@@ -10,13 +10,11 @@
   sops = {
     defaultSopsFile = ../../secrets/mino.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    # wpa_supplicant runs as its own user in a sandbox (not root), so the
-    # ext-PSK secret must be owned by that user or it can't read it.
-    # restartUnits: wpa_supplicant binds the secret into its mount namespace
-    # at start, so it must be restarted to pick up a new secret generation.
+    # Wifi PSKs, consumed as a NetworkManager ensureProfiles environmentFile
+    # (name=value lines, substituted into $var psk placeholders at activation).
+    # Read by the ensure-profiles activation as root, so default root:root 0400.
     secrets.wifi-psk = {
-      owner = "wpa_supplicant";
-      restartUnits = [ "wpa_supplicant.service" ];
+      restartUnits = [ "NetworkManager.service" ];
     };
   };
 
@@ -44,6 +42,10 @@
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/systemd/coredump"
+      # Runtime-joined park wifi (Cockpit/nmcli) + NM state (seen BSSIDs,
+      # connection timestamps) — so ad-hoc joins survive a cold boot.
+      "/etc/NetworkManager/system-connections"
+      "/var/lib/NetworkManager"
     ];
     files = [
       "/etc/machine-id"
@@ -197,32 +199,59 @@
       ];
     };
 
-    wireless = {
+    # wlo1 (campground/park wifi uplink) is managed by NetworkManager so parks
+    # can be scanned and joined at runtime (Cockpit web UI) without a rebuild —
+    # critical when offline at a new site. NM owns ONLY wlo1; every wired iface
+    # is unmanaged so the VLANs/SSH path stay on the static config + dhcpcd.
+    networkmanager = {
       enable = true;
-      secretsFile = config.sops.secrets.wifi-psk.path;
-      networks = {
-        "Shady Acres - Guest" = {
-        };
-        "Perry7" = {
-          pskRaw = "ext:wifi_psk";
-        };
-        "Village Camp" = {
-          pskRaw = "ext:village_camp_psk";
-        };
-        "CCRVPGUEST" = {
-          pskRaw = "ext:ccrvpguest";
-        };
-        # Phone "mars" 5GHz hotspot — cellular WAN uplink fallback.
-        "mars" = {
-          pskRaw = "ext:mars_psk";
-        };
+      # NM registers wlo1's park DNS via resolvconf, exactly as dhcpcd did, so
+      # dnsmasq keeps forwarding to the active WAN's resolvers. NOT "none".
+      dns = "default";
+      unmanaged = [
+        "interface-name:enp2s0"
+        "interface-name:enp4s0"
+        "interface-name:mgmt"
+        "interface-name:loc"
+        "interface-name:guest"
+      ];
+      # Known parks declared here as fallback; runtime-joined ones land in
+      # /etc/NetworkManager/system-connections (persisted). PSKs come from the
+      # sops env file via $var placeholders, never the world-readable store.
+      ensureProfiles = {
+        environmentFiles = [ config.sops.secrets.wifi-psk.path ];
+        profiles =
+          let
+            wpa = id: ssid: psk: {
+              connection = { inherit id; type = "wifi"; };
+              wifi = { inherit ssid; mode = "infrastructure"; };
+              wifi-security = { key-mgmt = "wpa-psk"; inherit psk; };
+              ipv4.method = "auto";
+              ipv6.method = "auto";
+            };
+          in
+          {
+            perry7 = wpa "Perry7" "Perry7" "$wifi_psk";
+            village-camp = wpa "Village Camp" "Village Camp" "$village_camp_psk";
+            ccrvpguest = wpa "CCRVPGUEST" "CCRVPGUEST" "$ccrvpguest";
+            # Phone "mars" 5GHz hotspot — cellular WAN uplink fallback.
+            mars = wpa "mars" "mars" "$mars_psk";
+            # Open guest SSID — no wifi-security block.
+            shady-acres = {
+              connection = { id = "Shady Acres - Guest"; type = "wifi"; };
+              wifi = { ssid = "Shady Acres - Guest"; mode = "infrastructure"; };
+              ipv4.method = "auto";
+              ipv6.method = "auto";
+            };
+          };
       };
     };
 
     dhcpcd = {
       enable = true;
       persistent = false;
-      allowInterfaces = [ "enp4s0" "wlo1" ];
+      # wlo1 is managed by NetworkManager now (handles its own DHCP + resolvconf).
+      allowInterfaces = [ "enp4s0" ];
       extraConfig = ''
         # generate a RFC 4361 complient DHCP ID
         duid
@@ -241,10 +270,6 @@
           iaid 1              # interface association ID
           ia_na 1             # Request an address
           ia_pd 2 mgmt/0 loc/1 guest/2       # request PDs for interfaces
-
-        # Campground/park wifi — preferred WAN when connected
-        interface wlo1
-          metric 100
       '';
     };
 
@@ -282,6 +307,10 @@
         53 #DNS
         67 #DHCP
       ];
+      # Cockpit web UI — only reachable from the loc VLAN. This firewall rule
+      # is the sole access control (the cockpit module force-resets any
+      # socket-level ListenStream bind). Never opened on mgmt/guest/wlo1/WAN.
+      interfaces.loc.allowedTCPPorts = [ 9090 ];
       # Allow forwarding from internal VLANs to wifi WAN
       # (networking.nat handles enp4s0 forwarding)
       extraForwardRules = ''
@@ -289,6 +318,17 @@
         iifname "wlo1" oifname { "mgmt", "loc", "guest" } ct state established,related accept
       '';
     };
+  };
+
+  # Cockpit: web UI for system metrics + scanning/joining park wifi at runtime
+  # (its Networking panel drives NetworkManager). Access is restricted to the
+  # loc VLAN by the firewall rule above (interfaces.loc.allowedTCPPorts); the
+  # module's openFirewall is off, so the port is never opened on mgmt/guest/WAN.
+  # Auth is PAM (josh/ada). Socket-level bind to 10.0.2.1 isn't done because the
+  # cockpit module force-resets ListenStream after any override.
+  services.cockpit = {
+    enable = true;
+    port = 9090;
   };
 
   services.dnsmasq = {
@@ -402,7 +442,8 @@
     group = "josh";
     initialHashedPassword = "$6$rounds=3000000$plps8mAYoxl.ngM7$UICj9iFn3SvWEBmD6Zsv0pWu8fru2jGNqvXazc7BjM9CJJxCna.du8yytejQeAL9yjQ.943AXyv8fjgSxOX.4.";
     isNormalUser = true;
-    extraGroups = [ "wheel" ];
+    # networkmanager: polkit perms for a remote Cockpit session to join/forget wifi.
+    extraGroups = [ "wheel" "networkmanager" ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICsPaFplk95wdbZnGF9q1LnQUKy36Lh+4dSHyFJwMeUK josh@6bit.com"
     ];
