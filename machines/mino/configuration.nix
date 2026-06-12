@@ -318,7 +318,10 @@
         "guest,10.0.3.10,10.0.3.254,5h"
       ];
       dhcp-host = [
-        "duck,10.0.1.3"
+        # mgmt-plane infrastructure (static reservations below the .30 pool start)
+        "3C:8C:F8:15:6B:F0,trendnet,10.0.1.2" # TEG-S80ES switch
+        "duck,10.0.1.3" # UniFi CloudKey Gen2
+        "74:AC:B9:D2:7A:83,u6lr,10.0.1.4" # UniFi U6-LR AP
         "bones,10.0.2.10"
       ];
     };
