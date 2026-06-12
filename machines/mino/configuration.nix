@@ -10,7 +10,14 @@
   sops = {
     defaultSopsFile = ../../secrets/mino.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
-    secrets.wifi-psk = {};
+    # wpa_supplicant runs as its own user in a sandbox (not root), so the
+    # ext-PSK secret must be owned by that user or it can't read it.
+    # restartUnits: wpa_supplicant binds the secret into its mount namespace
+    # at start, so it must be restarted to pick up a new secret generation.
+    secrets.wifi-psk = {
+      owner = "wpa_supplicant";
+      restartUnits = [ "wpa_supplicant.service" ];
+    };
   };
 
   # Use the systemd-boot EFI boot loader.
@@ -204,6 +211,10 @@
         };
         "CCRVPGUEST" = {
           pskRaw = "ext:ccrvpguest";
+        };
+        # Phone "mars" 5GHz hotspot — cellular WAN uplink fallback.
+        "mars" = {
+          pskRaw = "ext:mars_psk";
         };
       };
     };
