@@ -422,6 +422,38 @@ in {
 #  networking.networkmanager.wifi.powersave = true;
   networking.networkmanager.wifi.scanRandMacAddress = true;
   networking.networkmanager.wifi.macAddress = "random";
+
+  # Phone "mars" Bluetooth PAN tether, declared so its route priority is
+  # reproducible. route-metric 50 beats wifi's default 600, so when mars is
+  # connected it becomes the default route (matching the USB-tether behaviour),
+  # while the wifi link to mino stays up for LAN. autoconnect=false: only used
+  # deliberately (troubleshooting, or no-Starlink spots) — connecting it is the
+  # explicit act, like plugging in USB, and it never grabs cellular just because
+  # the phone is in BT range. (Static metrics can't do reachability-based
+  # failover; scripts/wan-failover.sh remains for the "mino's WAN is dead but
+  # wifi link is up" case.) UUID reused from the existing runtime profile.
+  networking.networkmanager.ensureProfiles.profiles."mars Network" = {
+    connection = {
+      id = "mars Network";
+      uuid = "b491a02d-175d-45b2-adc7-ef57e404a74e";
+      type = "bluetooth";
+      autoconnect = false;
+      autoconnect-priority = 0;
+    };
+    bluetooth = {
+      bdaddr = "04:00:6E:B4:95:71";
+      type = "panu";
+    };
+    ipv4 = {
+      method = "auto";
+      route-metric = 50;
+    };
+    ipv6 = {
+      method = "auto";
+      addr-gen-mode = "default";
+      route-metric = 50;
+    };
+  };
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
   networking.firewall.allowedUDPPorts = [
