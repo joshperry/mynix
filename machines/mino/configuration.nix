@@ -329,6 +329,10 @@
   services.cockpit = {
     enable = true;
     port = 9090;
+    # Cockpit rejects the session WebSocket if the browser Origin isn't in
+    # this allow-list (CSRF guard). List every loc-VLAN name/IP it's reached by;
+    # mkForce because the module hardcodes only localhost.
+    settings.WebService.Origins = lib.mkForce "https://mino.lan:9090 https://10.0.2.1:9090 https://localhost:9090";
   };
 
   services.dnsmasq = {
