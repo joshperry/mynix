@@ -349,6 +349,30 @@
     settings.WebService.Origins = lib.mkForce "https://mino.lan:9090 https://10.0.2.1:9090 https://localhost:9090";
   };
 
+  # Bridge PCP's python bindings into cockpit's metrics-history bridge.
+  # cockpit-bridge (pcp.py) does `import cpmapi`, but NixOS isolates each
+  # derivation's site-packages. The cockpit module links each plugin's
+  # passthru.cockpitPath /lib into /etc/cockpit/lib, which is on the bridge's
+  # PYTHONPATH — so we add PCP as a plugin carrying a slim env of just its
+  # python3.12 bindings (built with python312 in flake.nix to match cockpit's
+  # interpreter ABI). cpmapi.so finds libpcp via its store RPATH, so only the
+  # site-packages needs linking, not the shared libs. No cockpit rebuild.
+  services.cockpit.plugins =
+    let
+      pcpCockpitLib = pkgs.buildEnv {
+        name = "pcp-cockpit-pylib";
+        paths = [ config.services.pcp.package ];
+        pathsToLink = [ "/lib/python3.12/site-packages" ];
+      };
+    in
+    [
+      (config.services.pcp.package // {
+        passthru = (config.services.pcp.package.passthru or { }) // {
+          cockpitPath = [ pcpCockpitLib ];
+        };
+      })
+    ];
+
   services.dnsmasq = {
     enable = true;
     settings = {

@@ -497,10 +497,44 @@
           # callPackage'd against OUR nixpkgs (not the PR's prebuilt) so it
           # reuses our systemd/perl/python instead of dragging in a duplicate
           # base toolchain. services.pcp is configured in machines/mino/.
+          #
+          # python3 is pinned to python312 to match cockpit-bridge's
+          # interpreter: Cockpit's metrics-history bridge (pcp.py) does
+          # `import cpmapi`, so the libpcp python bindings must be the same ABI
+          # cockpit runs (cockpit pins python312; nixpkgs default is 3.13). The
+          # C daemons don't care about python version, so one package serves
+          # both the daemons and cockpit's bindings (wired in machines/mino/).
           "${inputs.nixpkgs-pcp}/nixos/modules/services/monitoring/pcp.nix"
           ({ pkgs, ... }: {
             services.pcp.package =
-              pkgs.callPackage "${inputs.nixpkgs-pcp}/pkgs/by-name/pc/pcp/package.nix" { };
+              (pkgs.callPackage "${inputs.nixpkgs-pcp}/pkgs/by-name/pc/pcp/package.nix" {
+                python3 = pkgs.python312;
+              }).overrideAttrs (old: {
+                # Cockpit's metrics bridge does `from pcp import pmapi`, whose
+                # _find_libpcp() loads libpcp.so via ctypes by bare soname —
+                # unresolvable on NixOS (no ldconfig cache) and not reachable
+                # via LD_LIBRARY_PATH through cockpit-session's setuid env
+                # sanitizing. Hardcode the absolute store path so the binding
+                # loads with no env dependency. --replace-fail trips the build
+                # if the PR restructures this line, flagging a needed revisit.
+                postInstall = (old.postInstall or "") + ''
+                  substituteInPlace $out/lib/python*/site-packages/pcp/pmapi.py \
+                    --replace-fail 'lib = find_library("pcp")' \
+                      'lib = "'"$out"'/lib/libpcp.so"'
+
+                  # The build prefix leaks into pcp.conf: PCP_LOG_DIR etc. point
+                  # at $out/var/... instead of the runtime /var. The systemd
+                  # units override these via Environment=, but the cockpit
+                  # bridge reads /etc/pcp.conf (a symlink to this file) with no
+                  # such env, so its source='pcp-archive' history lookup
+                  # (PCP_LOG_DIR/pmlogger/<host>) resolves into an empty store
+                  # path and the channel dies with not-found. Rewrite the dirs
+                  # to runtime paths so every consumer agrees, daemons included.
+                  substituteInPlace $out/share/pcp/etc/pcp.conf \
+                    --replace-fail "$out/var/log/pcp" "/var/log/pcp" \
+                    --replace-fail "$out/var/lib/pcp" "/var/lib/pcp"
+                '';
+              });
           })
         ];
       };
