@@ -326,6 +326,20 @@
   # module's openFirewall is off, so the port is never opened on mgmt/guest/WAN.
   # Auth is PAM (josh/ada). Socket-level bind to 10.0.2.1 isn't done because the
   # cockpit module force-resets ListenStream after any override.
+  # Performance Co-Pilot backs Cockpit's metrics *history* (the "PCP is
+  # missing" banner). pmcd collects live metrics; pmlogger writes archives.
+  # Package + module come from an unmerged nixpkgs PR pinned in flake.nix.
+  # pmcd is loopback-only — Cockpit reads it locally, nothing on the LAN.
+  # Archives land in /var/log/pcp (already persisted) so history survives
+  # impermanence reboots.
+  services.pcp = {
+    enable = true;
+    preset = "minimal"; # pmcd only...
+    pmlogger.enable = true; # ...plus archives, which is what Cockpit history needs
+    openFirewall = false;
+    allowedNetworks = [ "127.0.0.1/32" "::1/128" ];
+  };
+
   services.cockpit = {
     enable = true;
     port = 9090;

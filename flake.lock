@@ -270,6 +270,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-pcp": {
+      "locked": {
+        "lastModified": 1774739954,
+        "narHash": "sha256-AgyGeXYa1wertgyO9W9iynLYkJRVRmUl1916m4NHcZg=",
+        "owner": "randomizedcoder",
+        "repo": "nixpkgs",
+        "rev": "c6b29bed121ea607a0a0e90277720666c05c8726",
+        "type": "github"
+      },
+      "original": {
+        "owner": "randomizedcoder",
+        "repo": "nixpkgs",
+        "rev": "c6b29bed121ea607a0a0e90277720666c05c8726",
+        "type": "github"
+      }
+    },
     "nixpkgs-unstable": {
       "locked": {
         "lastModified": 1778869304,
@@ -354,6 +370,7 @@
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "nixpkgs": "nixpkgs_2",
+        "nixpkgs-pcp": "nixpkgs-pcp",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nuketown": "nuketown",
         "seed": "seed",

@@ -33,6 +33,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.sops-nix.follows = "sops-nix";
     };
+    # PCP (Performance Co-Pilot) for Cockpit metrics history — a full nixpkgs
+    # tree pinned to the open PR #495646 (adds the pcp package + services.pcp
+    # module). Pinned to the PR head commit, not the branch, for reproducibility.
+    # Drop this input and switch to pkgs.pcp once the PR merges upstream.
+    nixpkgs-pcp.url = "github:randomizedcoder/nixpkgs/c6b29bed121ea607a0a0e90277720666c05c8726";
   };
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nuketown, couchmail, sops-nix, flake-parts, ... }:
@@ -487,6 +492,16 @@
         sysmodules = [
           inputs.disko.nixosModules.disko
           inputs.impermanence.nixosModules.impermanence
+          # PCP module + package from the unmerged nixpkgs PR (see nixpkgs-pcp
+          # input). The module file is imported directly; the package.nix is
+          # callPackage'd against OUR nixpkgs (not the PR's prebuilt) so it
+          # reuses our systemd/perl/python instead of dragging in a duplicate
+          # base toolchain. services.pcp is configured in machines/mino/.
+          "${inputs.nixpkgs-pcp}/nixos/modules/services/monitoring/pcp.nix"
+          ({ pkgs, ... }: {
+            services.pcp.package =
+              pkgs.callPackage "${inputs.nixpkgs-pcp}/pkgs/by-name/pc/pcp/package.nix" { };
+          })
         ];
       };
 
