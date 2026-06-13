@@ -464,6 +464,19 @@
   };
   users.groups.ada = { gid = 1100; };
 
+  # Dedicated Cockpit web login so josh needn't use his real creds over the
+  # self-signed link. In networkmanager ONLY (not wheel): the NM polkit rule
+  # lets it scan/join/forget park wifi via Cockpit, but it cannot sudo,
+  # switch configs, or escalate. No SSH key — Cockpit-web-only, never a shell.
+  users.users.netadmin = {
+    uid = 1200;
+    group = "netadmin";
+    isNormalUser = true;
+    hashedPassword = "$6$d0suRGLMKyO0bdwz$Au4badDzgE.zt0l0.sXbejLHjN3XV2aaKWH0BppITpNnV4w9VziA6TqEtidXPGkGFrnfbV/mOv7MoRQYOvAY81";
+    extraGroups = [ "networkmanager" ];
+  };
+  users.groups.netadmin = { gid = 1200; };
+
   security.sudo.extraRules = [{
     users = [ "ada" ];
     commands = [
