@@ -85,6 +85,7 @@ in {
       secrets.extraSecrets.gh-pat = "ada/gh-pat";
       secrets.extraSecrets.vultr-api-key = "ada/vultr-api-key";
       secrets.extraSecrets.openrouter-api-key = "ada/openrouter-api-key";
+      secrets.extraSecrets.venus-mqtt-password = "ada/venus-mqtt-password";
 
       devices = [
         {
