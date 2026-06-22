@@ -12,6 +12,7 @@ in
 {
   mynix = { #def.mynix
     drata = pkgs.callPackage ./tools/security/drata.nix {};
+    lan-ca = pkgs.callPackage ./tools/security/lan-cert.nix {};
     ansel = pkgs.callPackage ./graphics/ansel.nix {};
     blhelisuite32 = pkgs.callPackage ./hardware/blhelisuite32.nix{};
     cura = pkgs.callPackage ./applications/misc/cura.nix {};

@@ -413,6 +413,11 @@ in {
   security.polkit.enable = true;
   security.soteria.enable = true; # polkit auth agent
 
+  # Trust the Switchy LAN Root CA (YubiKey-PIV-backed) system-wide so LAN
+  # services issued by lan-cert (e.g. venus.lan) validate without skip-verify.
+  # Public cert only; the CA private key never leaves the YubiKey PIV applet.
+  security.pki.certificateFiles = [ ./lan-ca.crt ];
+
   security.tpm2.enable = true;
   security.tpm2.pkcs11.enable = true;  # expose /run/current-system/sw/lib/libtpm2_pkcs11.so
   security.tpm2.tctiEnvironment.enable = true;  # TPM2TOOLS_TCTI and TPM2_PKCS11_TCTI env variables
