@@ -1,0 +1,73 @@
+From: Ada <ada@6bit.com>
+Date: 2026-06-23
+Subject: [PATCH] agent: chunk SETDATA in agent_card_pksign for large input
+
+gpg-agent's agent_card_pksign conveys the to-be-signed data to scdaemon
+on a single Assuan line and refuses anything that would exceed it:
+
+    if (indatalen*2 + 50 > DIM(line))
+      return unlock_scd (ctrl, gpg_error (GPG_ERR_GENERAL));
+
+With ASSUAN_LINELENGTH == 1002 the ceiling is ~476 bytes.  This breaks
+SSH authentication with an Ed25519 OpenPGP card key against a host that
+presents a CA-signed host certificate: OpenSSH host-bound authentication
+(publickey-hostbound-v00@openssh.com) embeds the server host key/cert
+into the signed data, and EdDSA signs the message verbatim (no host-side
+pre-hash), so the blob handed to the card can exceed 476 bytes.  The
+agent then fails with "smartcard signing failed: General error" before
+SETDATA/PKAUTH is ever sent -- the card is never contacted, so the
+extended-APDU work from T5682 cannot help.
+
+agent_card_pkdecrypt already handles arbitrary lengths by chunking with
+"SETDATA --append".  scdaemon's cmd_setdata accumulates appended data
+into ctrl->in_data (MAXLEN_SETDATA == 4096), and both cmd_pksign and
+cmd_pkauth read that same buffer, so no scdaemon change is required.
+Teach agent_card_pksign to chunk the same way.
+
+--- a/agent/call-scd.c
++++ b/agent/call-scd.c
+@@ -495,20 +495,34 @@
+   if (rc)
+     return rc;
+
+-  /* FIXME: In the mdalgo case (INDATA,INDATALEN) might be long and
+-   * thus we can't convey it on a single Assuan line.  */
+   if (!mdalgo)
+     return gpg_error (GPG_ERR_NOT_IMPLEMENTED);
+
+-  if (indatalen*2 + 50 > DIM(line))
+-    return unlock_scd (ctrl, gpg_error (GPG_ERR_GENERAL));
++  /* Send the data, chunking it across as many SETDATA lines as needed
++   * so that arbitrarily long input (e.g. an OpenSSH host-bound
++   * signature blob for an EdDSA card key) is not rejected for
++   * exceeding a single Assuan line.  Mirrors agent_card_pkdecrypt.  */
++  {
++    size_t len;
++    int i;
++    char *p;
+
+-  bin2hex (indata, indatalen, stpcpy (line, "SETDATA "));
+-
+-  rc = assuan_transact (daemon_ctx (ctrl), line,
+-                        NULL, NULL, NULL, NULL, pincache_put_cb, NULL);
+-  if (rc)
+-    return unlock_scd (ctrl, rc);
++    for (len = 0; len < indatalen;)
++      {
++        p = stpcpy (line, "SETDATA ");
++        if (len)
++          p = stpcpy (p, "--append ");
++        for (i=0; len < indatalen && (i*2 < DIM(line)-50); i++, len++)
++          {
++            sprintf (p, "%02X", indata[len]);
++            p += 2;
++          }
++        rc = assuan_transact (daemon_ctx (ctrl), line,
++                              NULL, NULL, NULL, NULL, pincache_put_cb, NULL);
++        if (rc)
++          return unlock_scd (ctrl, rc);
++      }
++  }
+
+   init_membuf (&data, 1024);
+   inqparm.ctx = daemon_ctx (ctrl);

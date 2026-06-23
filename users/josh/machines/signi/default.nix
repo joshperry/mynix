@@ -19,10 +19,34 @@
   # through pcscd in shared mode so both applets are usable concurrently.
   # signi-only: requires pcscd, which is enabled system-wide here but not on
   # josh's other hosts that share users/josh/cli.nix.
+  #
+  # disable-application piv: once the LAN CA was provisioned into PIV slot 9c,
+  # scdaemon began auto-selecting the now-populated PIV app and shadowing the
+  # OpenPGP app, which broke gpg/ssh signing ("added app 'piv'..." then
+  # "smartcard signing failed: General error"). Tell scdaemon to ignore PIV so
+  # it always uses OpenPGP. The CA is unaffected: lan-cert/step-kms-plugin reach
+  # PIV directly over PCSC/PKCS#11 (libykcs11), never through scdaemon.
   programs.gpg.scdaemonSettings = {
     disable-ccid = true;
     pcsc-shared = true;
+    disable-application = "piv";
   };
+
+  # Patched gnupg for THIS agent only (no pkgs.gnupg overlay, so gnupg's many
+  # dependents — kwallet/fwupd/flatpak/notmuch/... — are not force-rebuilt).
+  # gpg-agent's agent_card_pksign hands the data-to-sign to scdaemon on a single
+  # Assuan line and rejects input over ~476 bytes with GPG_ERR_GENERAL, unlike
+  # agent_card_pkdecrypt which chunks via "SETDATA --append". That blocks YubiKey
+  # SSH auth (Ed25519 OpenPGP key) to venus.lan: OpenSSH host-bound auth embeds
+  # venus's CA-signed host cert, inflating the to-be-signed blob to ~681 bytes,
+  # and pure EdDSA signs it verbatim — so the card is never even contacted
+  # ("smartcard signing failed: General error"). The patch makes pksign chunk
+  # SETDATA like pkdecrypt; scdaemon already accumulates --append (MAXLEN 4096)
+  # and the T5682 extended-APDU path carries it to the card. Pending upstream
+  # submission to gnupg-devel; drop once merged + released.
+  programs.gpg.package = pkgs.gnupg.overrideAttrs (old: {
+    patches = (old.patches or [ ]) ++ [ ./gnupg-card-pksign-chunk.patch ];
+  });
 
   # k3s rootless + nix-snapshotter (home-manager user services)
   virtualisation.containerd.rootless = {

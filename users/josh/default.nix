@@ -284,6 +284,18 @@
     enableSshSupport = true;
   };
 
+  # Trust the Switchy LAN Root CA (YubiKey-PIV slot 9c) as an SSH certificate
+  # authority for RV-LAN host certs (e.g. venus.lan's SSH host cert), so they
+  # verify without a TOFU prompt. The CA file is listed *alongside* the default
+  # mutable ~/.ssh/known_hosts, so trust-on-first-use still works elsewhere.
+  # venus.lan/.local only resolve on the RV LAN, so this is inert off-LAN.
+  programs.ssh = {
+    enable = true;
+    matchBlocks."*".userKnownHostsFile = "~/.ssh/known_hosts ${pkgs.writeText "josh-lan-ca-known_hosts" ''
+      @cert-authority venus.lan,venus.local ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHRWwpqbzOCH6pPGfEYh5d+cbFnUEIEw0xPfiTDS7QKek7YI5hqwN1L+cZkEntqsMukQiFyIDCc7nGNszPxiBlg=
+    ''}";
+  };
+
   # Desktop-specific bash additions
   programs.bash.shellAliases = {
     pbcopy = "xclip -sel clip"; # I used macs for a decade
