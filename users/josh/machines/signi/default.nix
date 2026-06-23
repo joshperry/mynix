@@ -42,8 +42,15 @@
   # and pure EdDSA signs it verbatim — so the card is never even contacted
   # ("smartcard signing failed: General error"). The patch makes pksign chunk
   # SETDATA like pkdecrypt; scdaemon already accumulates --append (MAXLEN 4096)
-  # and the T5682 extended-APDU path carries it to the card. Pending upstream
-  # submission to gnupg-devel; drop once merged + released.
+  # and the T5682 extended-APDU path carries it to the card.
+  #
+  # Already fixed upstream by gnupg commit fe147645d (NIIBE Yutaka, 2024-12-05,
+  # GnuPG-bug-id 7436) via the same prepare_setdata chunking — but only on the
+  # 2.5.x dev series. nixpkgs keeps 2.4.x as the default (the 2.4.9->2.5.19 bump
+  # PR #435641 was closed) and is adding 2.5 only as an opt-in experimental
+  # package (PR #515601, attr gnupg_25_experimental). Drop this patch once that
+  # lands, by pointing programs.gpg.package at pkgs.gnupg_25_experimental, or
+  # whenever the default gnupg crosses >= 2.5.2.
   programs.gpg.package = pkgs.gnupg.overrideAttrs (old: {
     patches = (old.patches or [ ]) ++ [ ./gnupg-card-pksign-chunk.patch ];
   });
