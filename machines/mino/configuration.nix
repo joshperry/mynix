@@ -405,6 +405,7 @@
         "duck,10.0.1.3" # UniFi CloudKey Gen2
         "74:AC:B9:D2:7A:83,u6lr,10.0.1.4" # UniFi U6-LR AP
         "bones,10.0.2.10"
+        "signi,10.0.2.11"
       ];
     };
   };
