@@ -181,11 +181,60 @@ in {
             extraOptions.StrictHostKeyChecking = "yes";
           };
         };
-        # command-not-found handler: suggest nix run instead of failing silently
+        # command-not-found handler: suggest nix run instead of failing silently.
+        # Also the BASH_ENV init file (see profileExtra), so it is sourced by
+        # non-interactive `bash -c` too — the find guard below relies on that.
         home.file.".local/share/bash/command-not-found.sh".text = ''
           command_not_found_handle() {
             echo "$1: command not found — try: nix run nixpkgs#$1 -- ''${@:2}" >&2
             return 127
+          }
+
+          # Guardrail: keep find from descending into the kago NAS automounts
+          # (/mnt/kago, /mnt/kagobu — autofs-triggered ~24TB over NFS). A stray
+          # `find /` would trip the automount and churn the whole array across
+          # the network. This shadows find with a thin wrapper that prunes those
+          # paths while preserving normal find semantics (global options kept
+          # ahead of tests; explicit -print added only when the expression has
+          # no action, so pruned mountpoints never show as false matches).
+          # Programs that execve("find") directly are unaffected.
+          find() {
+            local pre=() paths=() glob=()
+            while [ $# -gt 0 ]; do
+              case "$1" in
+                -H|-L|-P) pre+=("$1"); shift;;
+                -D) pre+=("$1" "$2"); shift 2;;
+                -O*) pre+=("$1"); shift;;
+                *) break;;
+              esac
+            done
+            while [ $# -gt 0 ]; do
+              case "$1" in -*|'('|'!'|')') break;; *) paths+=("$1"); shift;; esac
+            done
+            [ ''${#paths[@]} -eq 0 ] && paths=(.)
+            while [ $# -gt 0 ]; do
+              case "$1" in
+                -maxdepth|-mindepth|-regextype) glob+=("$1" "$2"); shift 2;;
+                -depth|-d|-mount|-xdev|-noleaf|-ignore_readdir_race|-noignore_readdir_race|-warn|-nowarn) glob+=("$1"); shift;;
+                *) break;;
+              esac
+            done
+            local prune=( '(' -path /mnt/kago -o -path /mnt/kagobu ')' -prune -o )
+            if [ $# -eq 0 ]; then
+              command find "''${pre[@]}" "''${paths[@]}" "''${glob[@]}" "''${prune[@]}" -print
+              return
+            fi
+            local a has_action=
+            for a in "$@"; do
+              case "$a" in
+                -print|-print0|-printf|-fprint|-fprint0|-fprintf|-ls|-fls|-exec|-execdir|-ok|-okdir|-delete|-quit) has_action=1; break;;
+              esac
+            done
+            if [ -n "$has_action" ]; then
+              command find "''${pre[@]}" "''${paths[@]}" "''${glob[@]}" "''${prune[@]}" \( "$@" \)
+            else
+              command find "''${pre[@]}" "''${paths[@]}" "''${glob[@]}" "''${prune[@]}" \( "$@" \) -print
+            fi
           }
         '';
         # Import keys and set env on login
