@@ -60,7 +60,7 @@
           mynix = (prev.mynix or {}) // {
             silo = prev.writeShellApplication {
               name = "silo";
-              runtimeInputs = with prev; [ git jq coreutils ];
+              runtimeInputs = with final; [ git jq coreutils ];
               text = builtins.readFile "${inputs.seed}/instances/silo/cli/silo";
             };
           };
