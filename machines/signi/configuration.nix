@@ -458,6 +458,14 @@ in {
   # Default since 26.05
   boot.initrd.systemd.enable = true;
 
+  # Load the iGPU driver in initrd (early KMS) so the LUKS/FDE prompt — and the
+  # subsequent sops-YubiKey PIN — render on the external USB-C DP-alt monitor when
+  # booting clamshell (lid closed). With only the efi simple-framebuffer, i915 loads
+  # too late and the external DP-alt link never trains before login, so the whole
+  # pre-X flow lands on the internal panel (must open the lid). Precedent: Framework
+  # 13 Intel Ultra, same symptom, fixed by i915-in-initrd. iGPU only — never nvidia.
+  boot.initrd.kernelModules = [ "i915" ];
+
   #boot.blacklistedKernelModules = [ "nouveau" "nvidia" ];
 
   security.polkit.enable = true;
