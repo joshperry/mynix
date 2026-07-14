@@ -456,7 +456,7 @@ in {
   boot.loader.efi.canTouchEfiVariables = true;
   # Needed by nuketown nuketown subvol rollback service
   # Default since 26.05
-  boot.initrd.systemd.enable = true; 
+  boot.initrd.systemd.enable = true;
 
   #boot.blacklistedKernelModules = [ "nouveau" "nvidia" ];
 
@@ -801,15 +801,17 @@ in {
     # `nixos-rebuild build` repeatedly — each build prints one hash
     # mismatch; paste the `got:` value into the matching field and
     # rebuild until it succeeds. Build order varies, so match by the
-    # derivation name in the error (settings → settingsSha256,
-    # NVIDIA-Linux-x86_64-*.run → sha256_64bit, source.drv (open kernel
-    # modules) → openSha256). A reboot is required to load the new
-    # kernel module.
+    # FAILED DEPENDENT derivation named in the error, not the source.drv
+    # name (both settings and open unpack a store path called "source"):
+    #   NVIDIA-Linux-x86_64-*.run       → sha256_64bit
+    #   source.drv feeding nvidia-settings → settingsSha256  (GTK app source)
+    #   source.drv feeding nvidia-open     → openSha256       (kernel modules)
+    # A reboot is required to load the new kernel module.
     package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-      version = "595.71.05";
-      openSha256 = "sha256-Lfz71QWKM6x/jD2B22SWpUi7/og30HRlXg1kL3EWzEw=";
-      settingsSha256 = "sha256-mXnf3jyvznfB3OfKd657rxv0rYHQb/dX/Riw/+N9EKU=";
-      sha256_64bit = "sha256-NiA7iWC35JyKQva6H1hjzeNKBek9KyS3mK8G3YRva4I=";
+      version = "595.84";
+      openSha256 = "sha256-pEmA2tUcOKwUPKy6N0QvS49Pdut4/7Phs/JhjdyBcNY=";
+      settingsSha256 = "sha256-QrnBM+sdWO4GanO62rxpHmRrjYkYpl5RD6fIiHq4C4A=";
+      sha256_64bit = "sha256-mcQE5SExvye8ptoCaNzOPr7cenOrF0BxqZXPGmxeugY=";
       sha256_aarch64 = "";
       persistencedSha256 = "";
     };
