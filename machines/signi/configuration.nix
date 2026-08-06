@@ -75,7 +75,7 @@ in {
 
       packages = with pkgs; [
         gh vultr-cli ssh-to-age sops mynix.ada-narrator sox
-        python3 openssl file dig iproute2 xxd binutils ardour
+        python3 openssl file dig iproute2 xxd binutils
         mynix.silo
       ];
 

@@ -5,6 +5,8 @@
   home.packages = with pkgs; [
     (pidgin.override { plugins = [ mynix.purple-gowhatsapp ]; })
 
+    ardour
+
     # LAN CA: issue/sign certs against the YubiKey-PIV CA. step-cli/-kms-plugin
     # for ad-hoc cert inspection; yubico-piv-tool to manage the PIV applet.
     mynix.lan-ca
