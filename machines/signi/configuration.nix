@@ -612,6 +612,12 @@ in {
    gid = 1000;
   };
 
+  # ALSA sequencer access for ada (Komplete Kontrol A61 control-surface work).
+  # /dev/snd/seq is a global node (root:audio 0660), so the nuketown per-device
+  # udev ACL cannot reach it; and the rawmidi node is held by PipeWire, so the
+  # sequencer is the only usable MIDI path. Group membership is the only lever.
+  users.users.ada.extraGroups = [ "audio" ];
+
   programs.steam.enable = true;
   hardware.steam-hardware.enable = true;
 
