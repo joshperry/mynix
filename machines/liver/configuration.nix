@@ -78,6 +78,8 @@
   users.users.ada = {
     uid = 1100;
     group = "ada";
+    # docker group for container investigation/management (agent access).
+    extraGroups = [ "docker" ];
     isNormalUser = true;
     hashedPassword = "!";
     openssh.authorizedKeys.keys = [
