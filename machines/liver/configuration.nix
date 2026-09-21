@@ -1,5 +1,11 @@
 { config, pkgs, lib, ... }:
 
+let
+  # Resilio Sync's data root, carried over from the old Gentoo box's
+  # docker-compose volume. Both the sync container and the /var/www/spub
+  # web share read from here, so keep them pointed at one definition.
+  resilioData = "/mnt/old/var/lib/docker/volumes/sync_sync_storage/_data";
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -132,7 +138,7 @@
     options = [ "bind" "ro" ];
   };
   fileSystems."/var/www/spub" = {
-    device = "/mnt/old/var/lib/docker/volumes/sync_sync_storage/_data/folders/public";
+    device = "${resilioData}/folders/public";
     depends = [ "/mnt/old" ];
     options = [ "bind" "ro" ];
   };
@@ -398,8 +404,28 @@
         "55555:55555/udp"
         "127.0.0.1:8888:8888"
       ];
-      volumes = [ "sync_storage:/mnt/sync" ];
+      # Bind-mount the resilio home migrated from the old Gentoo box rather
+      # than an empty docker named volume. That directory holds the peer
+      # identity, accepted license, the three share DBs and the 879M "public"
+      # folder; the named volume was a fresh install (136K, no folders), which
+      # is why the web UI started asking to accept the license again.
+      # Its sync.conf is byte-identical to the image default, so paths
+      # (/mnt/sync/config, /mnt/sync/folders) are unchanged.
+      # /var/www/spub serves .../folders/public, so this also makes the public
+      # share live again instead of frozen at the migration.
+      volumes = [ "${resilioData}:/mnt/sync" ];
     };
+  };
+
+  # Resilio's data lives on the old disk at /mnt/old. Docker silently creates
+  # an empty directory for a bind source that does not exist, so if the
+  # container started before (or without) that mount, resilio would come up
+  # against an empty folder and could propagate deletions to its peers.
+  # Bind the container's lifetime to the mount instead.
+  systemd.services.docker-sync = {
+    after = [ "mnt-old.mount" ];
+    requires = [ "mnt-old.mount" ];
+    unitConfig.ConditionPathIsDirectory = "${resilioData}/config";
   };
 
   # ── Nginx reverse proxy ───────────────────────────────────────
