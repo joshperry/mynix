@@ -343,6 +343,7 @@ in {
     "nvidia-settings"
     "discord"
     "HELI-X"
+    "HELI-X11"
     "joypixels"
     "libfprint-2-tod1-goodix-550a"
     "lmstudio"
