@@ -111,9 +111,7 @@ in {
         enable = true;
         settings = {
           attribution = { commit = ""; pr = ""; };
-          effortLevel = "xhigh";
-          model = "claude-opus-4-8";
-          voiceEnabled = true;
+          voiceEnabled = false;
           env = {
             CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
             PULSE_SERVER = "tcp:127.0.0.1:4713";
