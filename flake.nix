@@ -15,7 +15,9 @@
     impermanence = { url = "github:nix-community/impermanence"; };
     flake-parts.url = "github:hercules-ci/flake-parts";
     nuketown = {
-      url = "github:joshperry/nuketown";
+      # TEMP: testing multi-session portal from Ada's fork branch.
+      # Revert to github:joshperry/nuketown once merged.
+      url = "github:nuketownada/nuketown/portal-multi-session";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
       inputs.impermanence.follows = "impermanence";

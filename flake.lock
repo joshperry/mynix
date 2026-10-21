@@ -349,15 +349,16 @@
         "sops-nix": "sops-nix"
       },
       "locked": {
-        "lastModified": 1780247565,
-        "narHash": "sha256-katLjjvrpmP1fAsjEpDoe7wZZeHINxpqFD4VsPbxOoE=",
-        "owner": "joshperry",
+        "lastModified": 1792541361,
+        "narHash": "sha256-sUaffpvlmlP7abUp3G77f/n6xP1HWNMOqmadt1wRmv4=",
+        "owner": "nuketownada",
         "repo": "nuketown",
-        "rev": "8ffed7626e4bc5224587ad8a8ad3e4d87665df32",
+        "rev": "fd5561cec4574b11b681ba4d527a7525150461a8",
         "type": "github"
       },
       "original": {
-        "owner": "joshperry",
+        "owner": "nuketownada",
+        "ref": "portal-multi-session",
         "repo": "nuketown",
         "type": "github"
       }
