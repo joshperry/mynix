@@ -57,6 +57,23 @@
           import ./packages { pkgs = prev; }
         )
 
+        # Guerrilla-backport the aioimaplib test fix. nixpkgs 1762f3a
+        # (iroco-co/aioimaplib#138, "fix tests") landed on unstable but not
+        # release-26.05, so 26.05's aioimaplib fails its test suite under the
+        # current Python and breaks nuketown-daemon. Graft unstable's package
+        # EXPRESSION (same 2.0.1 source, just carrying the compat patch) into
+        # our 26.05 python sets — nothing in it is 3.14-specific but the patch
+        # filename. Drop this once 26.05 carries the fix.
+        (final: prev: {
+          pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+            (pyfinal: pyprev: {
+              aioimaplib = pyfinal.callPackage
+                "${inputs.nixpkgs-unstable}/pkgs/development/python-modules/aioimaplib"
+                { };
+            })
+          ];
+        })
+
         # Seed flake packages
         (final: prev: {
           mynix = (prev.mynix or {}) // {
