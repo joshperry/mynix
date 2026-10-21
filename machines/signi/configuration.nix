@@ -451,9 +451,11 @@ in {
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
-  # /boot is size limited; keep a bounded number of generations so it can't fill
-  # up and block bootloader install during a switch.
-  boot.loader.systemd-boot.configurationLimit = 10;
+  # /boot is a 487M ESP and each generation carries a kernel + initrd plus an
+  # nvidia-primary specialisation entry (~100M/gen). 10 overfills it and a
+  # kernel bump then fails bootloader install ("No space left on device"), so
+  # cap generations low enough that the ESP can't fill during a switch.
+  boot.loader.systemd-boot.configurationLimit = 5;
   boot.loader.efi.canTouchEfiVariables = true;
   # Needed by nuketown nuketown subvol rollback service
   # Default since 26.05
