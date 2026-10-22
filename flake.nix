@@ -109,7 +109,7 @@
               (final: prev: {
                 unstable = import nixpkgs-unstable { #def.unstable
                   inherit system;
-                  config.allowUnfreePredicate = config.nixpkgs.config.allowUnfreePredicate; 
+                  config.allowUnfreePredicate = config.nixpkgs.config.allowUnfreePredicate or (_: false);
                 };
               })
             ];
