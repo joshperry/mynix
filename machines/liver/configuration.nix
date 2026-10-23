@@ -52,6 +52,13 @@
   };
 
   networking.hostName = "liver";
+
+  # Temporary workarounds; printed on every build until removed.
+  warnings = [
+    "TEMP PIN: liver dovecot is pinned to 2.3; migrate services.dovecot2.settings (and couchmail's module) to 2.4 syntax"
+    "TEMP PIN: liver postgrey's perlPackages.BerkeleyDB is overridden to db 5.3; drop once nixpkgs stops pinning it to db4 on Linux"
+  ];
+
   time.timeZone = "MST7MDT";
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -265,7 +272,6 @@
   };
 
   # ── Dovecot ───────────────────────────────────────────────────
-  warnings = [ "TEMP PIN: liver dovecot is pinned to 2.3; migrate services.dovecot2.settings (and couchmail's module) to 2.4 syntax" ];
   services.dovecot2 = {
     enable = true;
     # Pinned to 2.3 until the config is migrated to 2.4 syntax
@@ -359,6 +365,24 @@
       mode = "0666";
     };
   };
+
+  # 26.05 pinned perlPackages.BerkeleyDB to db4 (nixpkgs ec077bf, for an
+  # aarch64-darwin test failure). /var/postgrey was written by db-5.3, which
+  # db4 can't open ("can't create DB environment"). Build it against db 5.3 again.
+  nixpkgs.overlays = [
+    (final: prev: {
+      postgrey = prev.postgrey.override {
+        perlPackages = prev.perlPackages // {
+          BerkeleyDB = prev.perlPackages.BerkeleyDB.overrideAttrs {
+            preConfigure = ''
+              echo "LIB = ${final.db.out}/lib" > config.in
+              echo "INCLUDE = ${final.db.dev}/include" >> config.in
+            '';
+          };
+        };
+      };
+    })
+  ];
 
   # Ensure postgrey socket dir exists inside the postfix queue
   systemd.tmpfiles.rules = [
