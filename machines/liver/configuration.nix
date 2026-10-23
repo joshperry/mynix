@@ -708,6 +708,14 @@
     enable = true;
     jails = {
       postfix.settings = { enabled = true; };
+      # The postfix jail's default mode ("more") ignores SASL auth failures,
+      # so password guessing on submission/smtps was never banned.
+      postfix-sasl.settings = {
+        enabled = true;
+        filter = "postfix[mode=auth]";
+        port = "smtp,465,submission";
+        backend = "systemd";
+      };
       dovecot.settings = { enabled = true; };
       # fail2ban 1.1.0's dovecot filter only knows 2.3's "Aborted login"
       # wording; 2.4 logs "Login aborted: ... (auth failed, ...)".
