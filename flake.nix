@@ -23,9 +23,7 @@
       inputs.impermanence.follows = "impermanence";
     };
     couchmail = {
-      # TEMP: Dovecot 2.4 support (oauth2 auth, sieve fix) (tempPins below).
-      # Revert to github:joshperry/couchmail once merged.
-      url = "github:joshperry/couchmail/ada/dovecot-2.4";
+      url = "github:joshperry/couchmail";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
@@ -50,7 +48,6 @@
     # Remove the entry when the input is reverted.
     tempPins = [
       "nuketown is pinned to nuketownada/nuketown#portal-multi-session; revert to github:joshperry/nuketown once merged"
-      "couchmail is pinned to joshperry/couchmail#ada/dovecot-2.4; revert to github:joshperry/couchmail once merged"
     ];
 
     packages = { ... }: {

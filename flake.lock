@@ -17,7 +17,6 @@
       },
       "original": {
         "owner": "joshperry",
-        "ref": "ada/dovecot-2.4",
         "repo": "couchmail",
         "type": "github"
       }
