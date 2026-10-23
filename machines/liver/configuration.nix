@@ -88,6 +88,7 @@
     group = "ada";
     isNormalUser = true;
     hashedPassword = "!";
+    extraGroups = [ "systemd-journal" ];  # read system logs when debugging
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4wKwiX1fnwB/U4Mc7JT4ddMExopexk0DUSd7Du12Sp ada@signi"
     ];
