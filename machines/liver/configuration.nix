@@ -500,10 +500,12 @@
   users.users.prosody.extraGroups = [ "nginx" ];
 
   # mod_auth_dovecot connects to dovecot's auth socket while loading and never
-  # retries if that fails, so dovecot must be up before prosody starts. (After
-  # that it reconnects on its own if dovecot restarts.)
+  # retries if that fails, so dovecot must be up before prosody starts. When
+  # dovecot restarts, the next login fails on the dead socket ("Could not write
+  # to socket: closed") before prosody reconnects, so restart prosody with it.
   systemd.services.prosody.wants = [ "dovecot.service" ];
   systemd.services.prosody.after = [ "dovecot.service" ];
+  systemd.services.prosody.partOf = [ "dovecot.service" ];
 
   # ── Prosody (XMPP) ───────────────────────────────────────────
   services.prosody = {
