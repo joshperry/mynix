@@ -324,8 +324,8 @@
           group = "postfix";
           mode = "0666";
         };
-        # Prosody XMPP auth
-        "unix_listener /run/dovecot2/auth-prosody" = {
+        # Prosody XMPP auth (relative to base_dir: /run/dovecot2/auth-prosody)
+        "unix_listener auth-prosody" = {
           user = "prosody";
           group = "prosody";
           mode = "0660";
