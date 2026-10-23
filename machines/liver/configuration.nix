@@ -13,6 +13,7 @@
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     secrets = {
       "couchmail/password" = { };
+      "couchmail/oauth-client-secret" = { };
       "couchdb/env" = { };
       "ghost/env" = { };
       "acme/gce_credentials" = { };
@@ -48,10 +49,16 @@
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-generations +2";
+    options = "--delete-older-than 30d";
   };
 
   networking.hostName = "liver";
+
+  # Temporary workarounds; printed on every build until removed.
+  warnings = [
+    "TEMP PIN: liver postgrey's perlPackages.BerkeleyDB is overridden to db 5.3; drop once nixpkgs stops pinning it to db4 on Linux"
+  ];
+
   time.timeZone = "MST7MDT";
   i18n.defaultLocale = "en_US.UTF-8";
 
@@ -59,7 +66,6 @@
     inetutils
     mtr
     sysstat
-    dovecot_pigeonhole
   ];
 
   # ── Users ─────────────────────────────────────────────────────
@@ -80,6 +86,7 @@
     group = "ada";
     isNormalUser = true;
     hashedPassword = "!";
+    extraGroups = [ "systemd-journal" ];  # read system logs when debugging
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH4wKwiX1fnwB/U4Mc7JT4ddMExopexk0DUSd7Du12Sp ada@signi"
     ];
@@ -112,26 +119,31 @@
   fileSystems."/var/spool/mail/vhosts" = {
     device = "/mnt/old/var/spool/mail/vhosts";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" ];
   };
   fileSystems."/var/lib/couchdb" = {
     device = "/mnt/old/var/lib/couchdb";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" ];
   };
   fileSystems."/var/lib/ghost" = {
     device = "/mnt/old/home/josh/dockstacks/curiouslynerdy/ghost/content";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" ];
   };
   fileSystems."/var/www/6bit.com" = {
     device = "/mnt/old/var/www/6bit.com";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" "ro" ];
   };
   fileSystems."/var/www/spub" = {
     device = "/mnt/old/var/lib/docker/volumes/sync_sync_storage/_data/folders/public";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" "ro" ];
   };
 
@@ -147,7 +159,7 @@
       credentialFiles = {
         "GCE_SERVICE_ACCOUNT_FILE" = config.sops.secrets."acme/gce_credentials".path;
       };
-      reloadServices = [ "postfix.service" "dovecot2.service" "prosody.service" ];
+      reloadServices = [ "postfix.service" "dovecot.service" "prosody.service" ];
       group = "nginx";
     };
 
@@ -261,54 +273,65 @@
   # ── Dovecot ───────────────────────────────────────────────────
   services.dovecot2 = {
     enable = true;
-    enableImap = true;
-    enableLmtp = true;
-    mailLocation = "maildir:/var/spool/mail/vhosts/%d/%n/.maildir";
-    sslServerCert = "/var/lib/acme/6bit.com/fullchain.pem";
-    sslServerKey = "/var/lib/acme/6bit.com/key.pem";
+    # Explicit: with stateVersion < 26.05 the module would default to 2.3
+    package = pkgs.dovecot_2_4;
     enablePAM = false;
 
-    mailPlugins.perProtocol.lmtp.enable = [ "sieve" ];
-    mailPlugins.globally.enable = [ "zlib" ];
+    # Auth (passdb oauth2) and sieve come from the couchmail module
+    settings = {
+      dovecot_config_version = "2.4.5";
+      # Keep on-disk formats readable by 2.3 until 2.4 has proven itself
+      dovecot_storage_version = "2.3.21.1";
 
-    extraConfig = ''
-      # Auth + sieve via couchmail module (passdb dict + sieve plugin)
-      userdb {
-        driver = static
-        args = uid=5000 gid=5000 home=/var/spool/mail/vhosts/%d/%n
-      }
+      protocols = {
+        imap = true;
+        lmtp = true;
+      };
+      mail_driver = "maildir";
+      mail_path = "/var/spool/mail/vhosts/%{user | domain}/%{user | username}/.maildir";
+      ssl_server_cert_file = "/var/lib/acme/6bit.com/fullchain.pem";
+      ssl_server_key_file = "/var/lib/acme/6bit.com/key.pem";
 
-      plugin {
-        zlib_save_level = 6
-        zlib_save = gz
-      }
+      "userdb static" = {
+        fields = {
+          uid = 5000;
+          gid = 5000;
+          home = "/var/spool/mail/vhosts/%{user | domain}/%{user | username}";
+        };
+        # couchmail's oauth2 passdb can't answer existence lookups; postfix only
+        # hands LMTP recipients that couchmail's virtual_mailbox_maps accepted.
+        userdb_static_allow_all_users = true;
+      };
+
+      mail_plugins.mail_compress = true;
+      mail_compress_write_method = "gz";
 
       # UID constraints (vmail user)
-      first_valid_uid = 5000
-      last_valid_uid = 5000
+      first_valid_uid = 5000;
+      last_valid_uid = 5000;
 
-      service lmtp {
-        unix_listener /var/lib/postfix/queue/private/dovecot-lmtp {
-          user = postfix
-          group = postfix
-          mode = 0666
-        }
-      }
+      "service lmtp" = {
+        "unix_listener /var/lib/postfix/queue/private/dovecot-lmtp" = {
+          user = "postfix";
+          group = "postfix";
+          mode = "0666";
+        };
+      };
 
-      service auth {
-        unix_listener /var/lib/postfix/queue/private/dovecot-auth {
-          user = postfix
-          group = postfix
-          mode = 0666
-        }
-        # Prosody XMPP auth
-        unix_listener /run/prosody/dovecot-auth {
-          user = prosody
-          group = prosody
-          mode = 0660
-        }
-      }
-    '';
+      "service auth" = {
+        "unix_listener /var/lib/postfix/queue/private/dovecot-auth" = {
+          user = "postfix";
+          group = "postfix";
+          mode = "0666";
+        };
+        # Prosody XMPP auth (relative to base_dir: /run/dovecot2/auth-prosody)
+        "unix_listener auth-prosody" = {
+          user = "prosody";
+          group = "prosody";
+          mode = "0660";
+        };
+      };
+    };
   };
 
   # ── OpenDKIM ──────────────────────────────────────────────────
@@ -348,6 +371,24 @@
     };
   };
 
+  # 26.05 pinned perlPackages.BerkeleyDB to db4 (nixpkgs ec077bf, for an
+  # aarch64-darwin test failure). /var/postgrey was written by db-5.3, which
+  # db4 can't open ("can't create DB environment"). Build it against db 5.3 again.
+  nixpkgs.overlays = [
+    (final: prev: {
+      postgrey = prev.postgrey.override {
+        perlPackages = prev.perlPackages // {
+          BerkeleyDB = prev.perlPackages.BerkeleyDB.overrideAttrs {
+            preConfigure = ''
+              echo "LIB = ${final.db.out}/lib" > config.in
+              echo "INCLUDE = ${final.db.dev}/include" >> config.in
+            '';
+          };
+        };
+      };
+    })
+  ];
+
   # Ensure postgrey socket dir exists inside the postfix queue
   systemd.tmpfiles.rules = [
     "d /var/lib/postfix/queue/postgrey 0755 postgrey postgrey -"
@@ -362,6 +403,7 @@
     domain = "6bit.com";
     couchdbCredentialsFile = config.sops.secrets."couchdb/env".path;
     bridgePasswordFile = config.sops.secrets."couchmail/password".path;
+    oauth2ClientSecretFile = config.sops.secrets."couchmail/oauth-client-secret".path;
     nginx = {
       enable = true;
       virtualHost = "6bit.com";
@@ -457,11 +499,11 @@
   users.users.nginx.extraGroups = [ "acme" ];
   users.users.prosody.extraGroups = [ "nginx" ];
 
-  # Dovecot creates its auth socket inside /run/prosody/ (prosody's RuntimeDirectory).
-  # If prosody restarts, systemd wipes that directory, so dovecot must also restart
-  # (after prosody) to recreate the socket.
-  systemd.services.dovecot.partOf = [ "prosody.service" ];
-  systemd.services.dovecot.after = [ "prosody.service" ];
+  # mod_auth_dovecot connects to dovecot's auth socket while loading and never
+  # retries if that fails, so dovecot must be up before prosody starts. (After
+  # that it reconnects on its own if dovecot restarts.)
+  systemd.services.prosody.wants = [ "dovecot.service" ];
+  systemd.services.prosody.after = [ "dovecot.service" ];
 
   # ── Prosody (XMPP) ───────────────────────────────────────────
   services.prosody = {
@@ -524,7 +566,7 @@
     # Authentication via Dovecot (overrides the enum-restricted option)
     extraConfig = ''
       authentication = "dovecot"
-      dovecot_auth_socket = "/run/prosody/dovecot-auth"
+      dovecot_auth_socket = "/run/dovecot2/auth-prosody"
       auth_append_host = true
       network_backend = "event"
 
@@ -666,7 +708,32 @@
     enable = true;
     jails = {
       postfix.settings = { enabled = true; };
+      # The postfix jail's default mode ("more") ignores SASL auth failures,
+      # so password guessing on submission/smtps was never banned.
+      postfix-sasl.settings = {
+        enabled = true;
+        filter = "postfix[mode=auth]";
+        port = "smtp,465,submission";
+        backend = "systemd";
+      };
       dovecot.settings = { enabled = true; };
+      # fail2ban 1.1.0's dovecot filter only knows 2.3's "Aborted login"
+      # wording; 2.4 logs "Login aborted: ... (auth failed, ...)".
+      dovecot-2_4 = {
+        settings = {
+          enabled = true;
+          port = "imap,imaps,submission,465";
+          backend = "systemd";
+        };
+        filter = {
+          INCLUDES.before = "common.conf";
+          Definition = {
+            _daemon = "dovecot";
+            failregex = ''^%(__prefix_line)s\S+-login: Login aborted: [^(]*\(auth failed, \d+ attempts(?: in \d+ secs)?\) \(auth_failed\): (?:user=<[^>]*>, )?(?:method=\S+, )?rip=<HOST>,'';
+            journalmatch = "_SYSTEMD_UNIT=dovecot.service";
+          };
+        };
+      };
       sshd.settings = { enabled = true; maxretry = 6; };
     };
   };

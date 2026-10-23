@@ -44,6 +44,12 @@
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nuketown, couchmail, sops-nix, flake-parts, ... }:
   let
+    # Temporary input pins, printed as a warning on every host build.
+    # Remove the entry when the input is reverted.
+    tempPins = [
+      "nuketown is pinned to nuketownada/nuketown#portal-multi-session; revert to github:joshperry/nuketown once merged"
+    ];
+
     packages = { ... }: {
       nixpkgs.overlays = [
         # Want python310
@@ -109,11 +115,12 @@
               (final: prev: {
                 unstable = import nixpkgs-unstable { #def.unstable
                   inherit system;
-                  config.allowUnfreePredicate = config.nixpkgs.config.allowUnfreePredicate; 
+                  config.allowUnfreePredicate = config.nixpkgs.config.allowUnfreePredicate or (_: false);
                 };
               })
             ];
           })
+          { warnings = map (p: "TEMP PIN: ${p}") tempPins; }
           home-manager.nixosModules.home-manager
           {
             home-manager.users = users;  #ref.hmUsers
