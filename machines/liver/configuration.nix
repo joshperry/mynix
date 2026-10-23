@@ -59,7 +59,8 @@
     inetutils
     mtr
     sysstat
-    dovecot_pigeonhole
+    # Must match the dovecot ABI; plain pkgs.dovecot_pigeonhole is 2.4
+    config.services.dovecot2.package.passthru.dovecot_pigeonhole
   ];
 
   # ── Users ─────────────────────────────────────────────────────
@@ -112,26 +113,31 @@
   fileSystems."/var/spool/mail/vhosts" = {
     device = "/mnt/old/var/spool/mail/vhosts";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" ];
   };
   fileSystems."/var/lib/couchdb" = {
     device = "/mnt/old/var/lib/couchdb";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" ];
   };
   fileSystems."/var/lib/ghost" = {
     device = "/mnt/old/home/josh/dockstacks/curiouslynerdy/ghost/content";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" ];
   };
   fileSystems."/var/www/6bit.com" = {
     device = "/mnt/old/var/www/6bit.com";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" "ro" ];
   };
   fileSystems."/var/www/spub" = {
     device = "/mnt/old/var/lib/docker/volumes/sync_sync_storage/_data/folders/public";
     depends = [ "/mnt/old" ];
+    fsType = "none";
     options = [ "bind" "ro" ];
   };
 
@@ -259,56 +265,62 @@
   };
 
   # ── Dovecot ───────────────────────────────────────────────────
+  warnings = [ "TEMP PIN: liver dovecot is pinned to 2.3; migrate services.dovecot2.settings (and couchmail's module) to 2.4 syntax" ];
   services.dovecot2 = {
     enable = true;
-    enableImap = true;
-    enableLmtp = true;
-    mailLocation = "maildir:/var/spool/mail/vhosts/%d/%n/.maildir";
-    sslServerCert = "/var/lib/acme/6bit.com/fullchain.pem";
-    sslServerKey = "/var/lib/acme/6bit.com/key.pem";
+    # Pinned to 2.3 until the config is migrated to 2.4 syntax
+    # (the module only defaults to 2.3 because stateVersion < 26.05).
+    package = pkgs.dovecot_2_3;
     enablePAM = false;
 
     mailPlugins.perProtocol.lmtp.enable = [ "sieve" ];
     mailPlugins.globally.enable = [ "zlib" ];
 
-    extraConfig = ''
-      # Auth + sieve via couchmail module (passdb dict + sieve plugin)
-      userdb {
-        driver = static
-        args = uid=5000 gid=5000 home=/var/spool/mail/vhosts/%d/%n
-      }
+    # Auth + sieve via couchmail module (passdb dict + sieve plugin)
+    settings = {
+      protocols = [ "imap" "lmtp" ];
+      mail_location = "maildir:/var/spool/mail/vhosts/%d/%n/.maildir";
+      ssl_cert = "</var/lib/acme/6bit.com/fullchain.pem";
+      ssl_key = "</var/lib/acme/6bit.com/key.pem";
 
-      plugin {
-        zlib_save_level = 6
-        zlib_save = gz
-      }
+      userdb = {
+        driver = "static";
+        args = "uid=5000 gid=5000 home=/var/spool/mail/vhosts/%d/%n";
+      };
+
+      plugin = {
+        zlib_save_level = 6;
+        zlib_save = "gz";
+      };
 
       # UID constraints (vmail user)
-      first_valid_uid = 5000
-      last_valid_uid = 5000
+      first_valid_uid = 5000;
+      last_valid_uid = 5000;
 
-      service lmtp {
-        unix_listener /var/lib/postfix/queue/private/dovecot-lmtp {
-          user = postfix
-          group = postfix
-          mode = 0666
-        }
-      }
+      "service lmtp" = {
+        "unix_listener /var/lib/postfix/queue/private/dovecot-lmtp" = {
+          user = "postfix";
+          group = "postfix";
+          mode = "0666";
+        };
+      };
 
-      service auth {
-        unix_listener /var/lib/postfix/queue/private/dovecot-auth {
-          user = postfix
-          group = postfix
-          mode = 0666
-        }
+      "service auth" = {
+        # The old module always ran auth as root; keep it for the couchmail dict socket
+        user = "root";
+        "unix_listener /var/lib/postfix/queue/private/dovecot-auth" = {
+          user = "postfix";
+          group = "postfix";
+          mode = "0666";
+        };
         # Prosody XMPP auth
-        unix_listener /run/prosody/dovecot-auth {
-          user = prosody
-          group = prosody
-          mode = 0660
-        }
-      }
-    '';
+        "unix_listener /run/prosody/dovecot-auth" = {
+          user = "prosody";
+          group = "prosody";
+          mode = "0660";
+        };
+      };
+    };
   };
 
   # ── OpenDKIM ──────────────────────────────────────────────────
