@@ -48,7 +48,7 @@
   nix.gc = {
     automatic = true;
     dates = "weekly";
-    options = "--delete-generations +2";
+    options = "--delete-older-than 30d";
   };
 
   networking.hostName = "liver";
