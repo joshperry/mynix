@@ -8,16 +8,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1792740586,
-        "narHash": "sha256-WKt3nmLMQ43DiTHnUCLIp8c+UkPX5ENPaMM2tAvdjpU=",
+        "lastModified": 1792787236,
+        "narHash": "sha256-x0+l/nhyn6Lu5kMQRTZ6UsOgXOLa/JJHKrUW+pXwNMM=",
         "owner": "joshperry",
         "repo": "couchmail",
-        "rev": "8cb7717ba2b0a50815b3f0551505efcf0c64dd1e",
+        "rev": "936d61bf229fd01853356f3e887ed9b196f63e54",
         "type": "github"
       },
       "original": {
         "owner": "joshperry",
-        "ref": "ada/dovecot-settings",
+        "ref": "ada/dovecot-2.4",
         "repo": "couchmail",
         "type": "github"
       }

@@ -13,6 +13,7 @@
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     secrets = {
       "couchmail/password" = { };
+      "couchmail/oauth-client-secret" = { };
       "couchdb/env" = { };
       "ghost/env" = { };
       "acme/gce_credentials" = { };
@@ -55,7 +56,6 @@
 
   # Temporary workarounds; printed on every build until removed.
   warnings = [
-    "TEMP PIN: liver dovecot is pinned to 2.3; migrate services.dovecot2.settings (and couchmail's module) to 2.4 syntax"
     "TEMP PIN: liver postgrey's perlPackages.BerkeleyDB is overridden to db 5.3; drop once nixpkgs stops pinning it to db4 on Linux"
   ];
 
@@ -66,8 +66,6 @@
     inetutils
     mtr
     sysstat
-    # Must match the dovecot ABI; plain pkgs.dovecot_pigeonhole is 2.4
-    config.services.dovecot2.package.passthru.dovecot_pigeonhole
   ];
 
   # ── Users ─────────────────────────────────────────────────────
@@ -275,30 +273,38 @@
   # ── Dovecot ───────────────────────────────────────────────────
   services.dovecot2 = {
     enable = true;
-    # Pinned to 2.3 until the config is migrated to 2.4 syntax
-    # (the module only defaults to 2.3 because stateVersion < 26.05).
-    package = pkgs.dovecot_2_3;
+    # Explicit: with stateVersion < 26.05 the module would default to 2.3
+    package = pkgs.dovecot_2_4;
     enablePAM = false;
 
-    mailPlugins.perProtocol.lmtp.enable = [ "sieve" ];
-    mailPlugins.globally.enable = [ "zlib" ];
-
-    # Auth + sieve via couchmail module (passdb dict + sieve plugin)
+    # Auth (passdb oauth2) and sieve come from the couchmail module
     settings = {
-      protocols = [ "imap" "lmtp" ];
-      mail_location = "maildir:/var/spool/mail/vhosts/%d/%n/.maildir";
-      ssl_cert = "</var/lib/acme/6bit.com/fullchain.pem";
-      ssl_key = "</var/lib/acme/6bit.com/key.pem";
+      dovecot_config_version = "2.4.5";
+      # Keep on-disk formats readable by 2.3 until 2.4 has proven itself
+      dovecot_storage_version = "2.3.21.1";
 
-      userdb = {
-        driver = "static";
-        args = "uid=5000 gid=5000 home=/var/spool/mail/vhosts/%d/%n";
+      protocols = {
+        imap = true;
+        lmtp = true;
+      };
+      mail_driver = "maildir";
+      mail_path = "/var/spool/mail/vhosts/%{user | domain}/%{user | username}/.maildir";
+      ssl_server_cert_file = "/var/lib/acme/6bit.com/fullchain.pem";
+      ssl_server_key_file = "/var/lib/acme/6bit.com/key.pem";
+
+      "userdb static" = {
+        fields = {
+          uid = 5000;
+          gid = 5000;
+          home = "/var/spool/mail/vhosts/%{user | domain}/%{user | username}";
+        };
+        # couchmail's oauth2 passdb can't answer existence lookups; postfix only
+        # hands LMTP recipients that couchmail's virtual_mailbox_maps accepted.
+        userdb_static_allow_all_users = true;
       };
 
-      plugin = {
-        zlib_save_level = 6;
-        zlib_save = "gz";
-      };
+      mail_plugins.mail_compress = true;
+      mail_compress_write_method = "gz";
 
       # UID constraints (vmail user)
       first_valid_uid = 5000;
@@ -313,8 +319,6 @@
       };
 
       "service auth" = {
-        # The old module always ran auth as root; keep it for the couchmail dict socket
-        user = "root";
         "unix_listener /var/lib/postfix/queue/private/dovecot-auth" = {
           user = "postfix";
           group = "postfix";
@@ -399,6 +403,7 @@
     domain = "6bit.com";
     couchdbCredentialsFile = config.sops.secrets."couchdb/env".path;
     bridgePasswordFile = config.sops.secrets."couchmail/password".path;
+    oauth2ClientSecretFile = config.sops.secrets."couchmail/oauth-client-secret".path;
     nginx = {
       enable = true;
       virtualHost = "6bit.com";
