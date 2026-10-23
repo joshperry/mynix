@@ -709,6 +709,23 @@
     jails = {
       postfix.settings = { enabled = true; };
       dovecot.settings = { enabled = true; };
+      # fail2ban 1.1.0's dovecot filter only knows 2.3's "Aborted login"
+      # wording; 2.4 logs "Login aborted: ... (auth failed, ...)".
+      dovecot-2_4 = {
+        settings = {
+          enabled = true;
+          port = "imap,imaps,submission,465";
+          backend = "systemd";
+        };
+        filter = {
+          INCLUDES.before = "common.conf";
+          Definition = {
+            _daemon = "dovecot";
+            failregex = ''^%(__prefix_line)s\S+-login: Login aborted: [^(]*\(auth failed, \d+ attempts(?: in \d+ secs)?\) \(auth_failed\): (?:user=<[^>]*>, )?(?:method=\S+, )?rip=<HOST>,'';
+            journalmatch = "_SYSTEMD_UNIT=dovecot.service";
+          };
+        };
+      };
       sshd.settings = { enabled = true; maxretry = 6; };
     };
   };
