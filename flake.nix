@@ -23,7 +23,9 @@
       inputs.impermanence.follows = "impermanence";
     };
     couchmail = {
-      url = "github:joshperry/couchmail";
+      # TEMP: dovecot2.settings fix for NixOS 26.05 (tempPins below).
+      # Revert to github:joshperry/couchmail once merged.
+      url = "github:joshperry/couchmail/ada/dovecot-settings";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
@@ -44,6 +46,13 @@
 
   outputs = inputs@{ self, nixpkgs, nixpkgs-unstable, home-manager, nuketown, couchmail, sops-nix, flake-parts, ... }:
   let
+    # Temporary input pins, printed as a warning on every host build.
+    # Remove the entry when the input is reverted.
+    tempPins = [
+      "nuketown is pinned to nuketownada/nuketown#portal-multi-session; revert to github:joshperry/nuketown once merged"
+      "couchmail is pinned to joshperry/couchmail#ada/dovecot-settings; revert to github:joshperry/couchmail once merged"
+    ];
+
     packages = { ... }: {
       nixpkgs.overlays = [
         # Want python310
@@ -114,6 +123,7 @@
               })
             ];
           })
+          { warnings = map (p: "TEMP PIN: ${p}") tempPins; }
           home-manager.nixosModules.home-manager
           {
             home-manager.users = users;  #ref.hmUsers
