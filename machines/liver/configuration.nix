@@ -160,7 +160,7 @@
       credentialFiles = {
         "GCE_SERVICE_ACCOUNT_FILE" = config.sops.secrets."acme/gce_credentials".path;
       };
-      reloadServices = [ "postfix.service" "dovecot2.service" "prosody.service" ];
+      reloadServices = [ "postfix.service" "dovecot.service" "prosody.service" ];
       group = "nginx";
     };
 
@@ -320,7 +320,7 @@
           mode = "0666";
         };
         # Prosody XMPP auth
-        "unix_listener /run/prosody/dovecot-auth" = {
+        "unix_listener /run/dovecot2/auth-prosody" = {
           user = "prosody";
           group = "prosody";
           mode = "0660";
@@ -493,11 +493,11 @@
   users.users.nginx.extraGroups = [ "acme" ];
   users.users.prosody.extraGroups = [ "nginx" ];
 
-  # Dovecot creates its auth socket inside /run/prosody/ (prosody's RuntimeDirectory).
-  # If prosody restarts, systemd wipes that directory, so dovecot must also restart
-  # (after prosody) to recreate the socket.
-  systemd.services.dovecot.partOf = [ "prosody.service" ];
-  systemd.services.dovecot.after = [ "prosody.service" ];
+  # mod_auth_dovecot connects to dovecot's auth socket while loading and never
+  # retries if that fails, so dovecot must be up before prosody starts. (After
+  # that it reconnects on its own if dovecot restarts.)
+  systemd.services.prosody.wants = [ "dovecot.service" ];
+  systemd.services.prosody.after = [ "dovecot.service" ];
 
   # ── Prosody (XMPP) ───────────────────────────────────────────
   services.prosody = {
@@ -560,7 +560,7 @@
     # Authentication via Dovecot (overrides the enum-restricted option)
     extraConfig = ''
       authentication = "dovecot"
-      dovecot_auth_socket = "/run/prosody/dovecot-auth"
+      dovecot_auth_socket = "/run/dovecot2/auth-prosody"
       auth_append_host = true
       network_backend = "event"
 
