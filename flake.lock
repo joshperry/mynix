@@ -8,11 +8,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792789113,
-        "narHash": "sha256-0S9R52w0h75RH3R2q43XIrZGleltIOh+mIn6lddpaQ8=",
+        "lastModified": 1792828065,
+        "narHash": "sha256-p+RWEffemUuaHDL1dwdWt6ZEASr7fQq6Hv9U73FA0vw=",
         "owner": "joshperry",
         "repo": "couchmail",
-        "rev": "fce6bfd36dcf02cdf78789ebdb22bd286c3557a0",
+        "rev": "644e633dc0023e9ad8c57c8b8ab70d8f0c7ae739",
         "type": "github"
       },
       "original": {

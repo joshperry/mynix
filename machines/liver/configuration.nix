@@ -410,6 +410,13 @@
     };
   };
 
+  # Futon session settings carried over from the old Gentoo local.ini:
+  # 3h sessions, cookies end with the browser session.
+  services.couchdb.extraConfig.chttpd_auth = {
+    timeout = "10800";
+    allow_persistent_cookies = "false";
+  };
+
   # ── OCI Containers ────────────────────────────────────────────
   virtualisation.oci-containers.backend = "docker";
   virtualisation.docker.enable = true;
