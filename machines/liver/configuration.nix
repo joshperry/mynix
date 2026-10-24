@@ -456,7 +456,7 @@
       useACMEHost = "6bit.com";
       root = "/var/www/6bit.com";
       locations."/couch/" = {
-        proxyPass = "http://localhost:5984/";
+        proxyPass = "http://127.0.0.1:5984/";
       };
       # Couchmail web UI + API locations provided by services.couchmail.nginx
       locations."/spub/" = {
