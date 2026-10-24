@@ -57,6 +57,7 @@
   # Temporary workarounds; printed on every build until removed.
   warnings = [
     "TEMP PIN: liver postgrey's perlPackages.BerkeleyDB is overridden to db 5.3; drop once nixpkgs stops pinning it to db4 on Linux"
+    "TEMP: liver couchmail.importFromCouchdb is on; turn it off (and drop the CouchDB bits) once the import has run"
   ];
 
   time.timeZone = "MST7MDT";
@@ -397,13 +398,19 @@
   # ── SpamAssassin ──────────────────────────────────────────────
   services.spamassassin.enable = true;
 
-  # ── Couchmail (CouchDB + mail bridge + web UI) ────────────────
+  # ── Couchmail (mail bridge + web UI, SQLite) ──────────────────
   services.couchmail = {
     enable = true;
     domain = "6bit.com";
-    couchdbCredentialsFile = config.sops.secrets."couchdb/env".path;
-    bridgePasswordFile = config.sops.secrets."couchmail/password".path;
     oauth2ClientSecretFile = config.sops.secrets."couchmail/oauth-client-secret".path;
+    # TEMP: one-time copy of the old CouchDB data into SQLite. Turn off once
+    # the couchmail journal shows "Import: imported ..."; CouchDB then stops
+    # and its data stays in /var/lib/couchdb as a fallback.
+    importFromCouchdb = {
+      enable = true;
+      credentialsFile = config.sops.secrets."couchdb/env".path;
+      bridgePasswordFile = config.sops.secrets."couchmail/password".path;
+    };
     nginx = {
       enable = true;
       virtualHost = "6bit.com";
