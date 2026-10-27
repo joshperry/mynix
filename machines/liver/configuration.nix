@@ -110,7 +110,11 @@
 
   services.openssh = {
     enable = true;
-    settings.PermitRootLogin = "no";
+    settings = {
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+      KbdInteractiveAuthentication = false;
+    };
   };
 
   # ── Bind mounts (old Gentoo disk at /mnt/old) ────────────────
