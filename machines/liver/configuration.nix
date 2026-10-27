@@ -733,6 +733,38 @@
     };
   };
 
+  # Once an address logs in over ssh, stop counting its failures: fail2ban
+  # can't reset a failure count, but failures from ignored addresses are never
+  # counted. Pubkey logins skip PAM auth, so this hooks the session stack.
+  # Each trusted address is a file in /run/fail2ban-trust whose mtime is its
+  # last login; every login drops addresses idle for 7 days and re-adds the
+  # rest, which also restores the list after fail2ban restarts.
+  security.pam.services.sshd.rules.session.fail2ban-trust = {
+    order = config.security.pam.services.sshd.rules.session.env.order + 50;
+    control = "optional";
+    modulePath = "${config.security.pam.package}/lib/security/pam_exec.so";
+    args = [
+      "quiet"
+      "${pkgs.writeShellScript "fail2ban-trust-ssh-login" ''
+        PATH=${lib.makeBinPath [ pkgs.coreutils pkgs.findutils config.services.fail2ban.package ]}
+        [ "$PAM_TYPE" = open_session ] || exit 0
+        case "$PAM_RHOST" in
+          ""|*[!0-9a-fA-F.:]*) exit 0 ;;
+        esac
+        dir=/run/fail2ban-trust
+        f2b() { timeout 5 fail2ban-client set sshd "$@" >/dev/null 2>&1 || true; }
+
+        mkdir -p "$dir"
+        touch "$dir/$PAM_RHOST"
+        find "$dir" -type f -mtime +7 -printf '%f\n' | while read -r ip; do
+          rm -f "$dir/$ip"
+          f2b delignoreip "$ip"
+        done
+        f2b addignoreip $(ls "$dir")
+      ''}"
+    ];
+  };
+
   # ── Unfree packages ──────────────────────────────────────────
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
     "resilio-sync"
