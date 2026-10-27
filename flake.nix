@@ -23,7 +23,7 @@
       inputs.impermanence.follows = "impermanence";
     };
     couchmail = {
-      url = "github:joshperry/couchmail/ada/sqlite";
+      url = "github:joshperry/couchmail";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
@@ -48,7 +48,6 @@
     # Remove the entry when the input is reverted.
     tempPins = [
       "nuketown is pinned to nuketownada/nuketown#portal-multi-session; revert to github:joshperry/nuketown once merged"
-      "couchmail is pinned to the ada/sqlite branch; revert to github:joshperry/couchmail once merged"
     ];
 
     packages = { ... }: {

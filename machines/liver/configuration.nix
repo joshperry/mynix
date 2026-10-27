@@ -12,9 +12,7 @@
     defaultSopsFile = ../../secrets/liver.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     secrets = {
-      "couchmail/password" = { };
       "couchmail/oauth-client-secret" = { };
-      "couchdb/env" = { };
       "ghost/env" = { };
       "acme/gce_credentials" = { };
       "xmpp/s3secret" = { };
@@ -57,7 +55,6 @@
   # Temporary workarounds; printed on every build until removed.
   warnings = [
     "TEMP PIN: liver postgrey's perlPackages.BerkeleyDB is overridden to db 5.3; drop once nixpkgs stops pinning it to db4 on Linux"
-    "TEMP: liver couchmail.importFromCouchdb is on; turn it off (and drop the CouchDB bits) once the import has run"
   ];
 
   time.timeZone = "MST7MDT";
@@ -403,25 +400,10 @@
     enable = true;
     domain = "6bit.com";
     oauth2ClientSecretFile = config.sops.secrets."couchmail/oauth-client-secret".path;
-    # TEMP: one-time copy of the old CouchDB data into SQLite. Turn off once
-    # the couchmail journal shows "Import: imported ..."; CouchDB then stops
-    # and its data stays in /var/lib/couchdb as a fallback.
-    importFromCouchdb = {
-      enable = true;
-      credentialsFile = config.sops.secrets."couchdb/env".path;
-      bridgePasswordFile = config.sops.secrets."couchmail/password".path;
-    };
     nginx = {
       enable = true;
       virtualHost = "6bit.com";
     };
-  };
-
-  # Futon session settings carried over from the old Gentoo local.ini:
-  # 3h sessions, cookies end with the browser session.
-  services.couchdb.extraConfig.chttpd_auth = {
-    timeout = "10800";
-    allow_persistent_cookies = "false";
   };
 
   # ── OCI Containers ────────────────────────────────────────────
@@ -469,9 +451,6 @@
       forceSSL = true;
       useACMEHost = "6bit.com";
       root = "/var/www/6bit.com";
-      locations."/couch/" = {
-        proxyPass = "http://127.0.0.1:5984/";
-      };
       # Couchmail web UI + API locations provided by services.couchmail.nginx
       locations."/spub/" = {
         alias = "/var/www/spub/";

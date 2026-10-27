@@ -17,7 +17,6 @@
       },
       "original": {
         "owner": "joshperry",
-        "ref": "ada/sqlite",
         "repo": "couchmail",
         "type": "github"
       }
