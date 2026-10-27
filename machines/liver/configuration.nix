@@ -12,9 +12,7 @@
     defaultSopsFile = ../../secrets/liver.yaml;
     age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     secrets = {
-      "couchmail/password" = { };
       "couchmail/oauth-client-secret" = { };
-      "couchdb/env" = { };
       "ghost/env" = { };
       "acme/gce_credentials" = { };
       "xmpp/s3secret" = { };
@@ -397,24 +395,15 @@
   # ── SpamAssassin ──────────────────────────────────────────────
   services.spamassassin.enable = true;
 
-  # ── Couchmail (CouchDB + mail bridge + web UI) ────────────────
+  # ── Couchmail (mail bridge + web UI, SQLite) ──────────────────
   services.couchmail = {
     enable = true;
     domain = "6bit.com";
-    couchdbCredentialsFile = config.sops.secrets."couchdb/env".path;
-    bridgePasswordFile = config.sops.secrets."couchmail/password".path;
     oauth2ClientSecretFile = config.sops.secrets."couchmail/oauth-client-secret".path;
     nginx = {
       enable = true;
       virtualHost = "6bit.com";
     };
-  };
-
-  # Futon session settings carried over from the old Gentoo local.ini:
-  # 3h sessions, cookies end with the browser session.
-  services.couchdb.extraConfig.chttpd_auth = {
-    timeout = "10800";
-    allow_persistent_cookies = "false";
   };
 
   # ── OCI Containers ────────────────────────────────────────────
@@ -462,9 +451,6 @@
       forceSSL = true;
       useACMEHost = "6bit.com";
       root = "/var/www/6bit.com";
-      locations."/couch/" = {
-        proxyPass = "http://127.0.0.1:5984/";
-      };
       # Couchmail web UI + API locations provided by services.couchmail.nginx
       locations."/spub/" = {
         alias = "/var/www/spub/";
