@@ -22,11 +22,16 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.loader.timeout = 10;
-  # pcie_port_pm=off: kernel 6.18 (26.05) can't bring the second Realtek NIC
-  # (enp4s0, 04:00.0 behind root port 00:1d.3) back from D3cold, so it fails to
-  # probe ("Unable to change power state from D3cold to D0"). 6.12 was fine.
-  # Disabling PCIe port power management keeps the slot powered. Testing.
+  # pcie_port_pm=off: on v6.16+ the WAN NIC (enp4s0, 04:00.0 behind root port
+  # 00:1d.3) fails to probe ("Unable to change power state from D3cold to D0").
+  # Firmware bug exposed by 4d4c10f763d7: suspending the empty Root Port 9
+  # (00:1d.0) gates a PCH clock the NIC also uses. Fixed upstream in 7.5 by
+  # adding this board to bridge_d3_blacklist
+  # (https://bugzilla.kernel.org/show_bug.cgi?id=222179); drop the param then.
   boot.kernelParams = [ "console=ttyS0,19200n8" "pcie_port_pm=off" "panic=10" ];
+  warnings = lib.optional
+    (lib.versionAtLeast config.boot.kernelPackages.kernel.version "7.5")
+    "mino: kernel >= 7.5 has the M90n-1 bridge_d3_blacklist fix; remove pcie_port_pm=off from boot.kernelParams (bugzilla 222179).";
 
   # Hardware watchdog fail-safe: if a bisect one-shot boot hangs the kernel
   # (no console access here), the watchdog reboots back into the default
