@@ -252,6 +252,9 @@
       window.commands = [
         { command = "floating enable"; criteria = { class = "zoom"; }; }
         { command = "floating disable"; criteria = { class = "zoom"; title = "Zoom Meeting"; }; }
+        # Toast-style PIN prompt: keeps it clear of the centred nuketown
+        # approval dialog, which otherwise hides it while it grabs the keyboard.
+        { command = "floating enable, move position 78 ppt 82 ppt"; criteria = { class = "(?i)pinentry"; }; }
       ];
 
       startup = [
