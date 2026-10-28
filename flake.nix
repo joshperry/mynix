@@ -15,9 +15,7 @@
     impermanence = { url = "github:nix-community/impermanence"; };
     flake-parts.url = "github:hercules-ci/flake-parts";
     nuketown = {
-      # TEMP: testing multi-session portal from Ada's fork branch.
-      # Revert to github:joshperry/nuketown once merged.
-      url = "github:nuketownada/nuketown/portal-multi-session";
+      url = "github:joshperry/nuketown";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.home-manager.follows = "home-manager";
       inputs.impermanence.follows = "impermanence";
@@ -47,7 +45,6 @@
     # Temporary input pins, printed as a warning on every host build.
     # Remove the entry when the input is reverted.
     tempPins = [
-      "nuketown is pinned to nuketownada/nuketown#portal-multi-session; revert to github:joshperry/nuketown once merged"
     ];
 
     packages = { ... }: {
