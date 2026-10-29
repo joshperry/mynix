@@ -117,6 +117,7 @@ front-panel LEDs (`led_drv_TMJ33.ko`, GPIO at `0xa00`) are not ported.
 | btrfs snapshots (cron → `snapshot_schedule_task.php`) | `services.btrbk` (`backup.nix`) | Only `bu` dailies (7 kept) actually existed |
 | Backblaze rclone sync `bu/offsite` → bucket `kago-bu` (held one test file) | `services.restic` → `b2:kago-bu:restic` (`backup.nix`) | Daily from a read-only snapshot at a fixed path; 7d/5w/12m. B2 creds in `secrets/kago.yaml` are **placeholders** until filled in |
 | sshd 9222/9223 | sshd 22 | add `kago.local` (port 22) to ada's pinned known_hosts at cutover; same host key |
+| `buzzer all` at boot end / shutdown (PC speaker by hand: PIT ch2 `0x43`/`0x42`, gate `0x61`; one 350ms beep, divisor 600 ≈ 1989Hz) | `beep.nix` (pcspkr + beep(1)) | ready beep after multi-user.target; shutdown beep after services stop |
 | TOS web UI | `services.cockpit` on `:9090` | status, logs, services; no metrics history (PCP) on 2G RAM |
 | NFS `/mnt/md0/media` → `10.0.2.10`, rsync daemon `[bu]` (`/mnt/bu`, nonexistent), smbftpd, Docker (no containers), minidlna, upnpd, k3s | dropped | |
 
@@ -223,7 +224,4 @@ signatures without the flag), then `sudo nix-env -p /nix/var/nix/profiles/system
 
 Still to do: drop ada's TEMP full sudo; clean up TOS leftovers on the data
 volume (`@system`, `@zlog`, `application`, `appdata_bak`, old `@snapshot/bu`);
-first restic run; LED port (optional); ready/shutdown beep (TOS beeped when
-boot reached ready, from `buzzer all` near the end of `rcS`, and right before
-power-off; mechanism still to find: the `buzzer` binary vs the `pcspkr`
-platform device vs the IT8613E beep output that `it87` reports).
+LED port (optional).

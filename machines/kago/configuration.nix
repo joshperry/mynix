@@ -6,6 +6,7 @@
     ./hardware-configuration.nix
     ./fan.nix
     ./backup.nix
+    ./beep.nix
     ../../profiles/server.nix
   ];
 
