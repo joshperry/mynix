@@ -8,6 +8,7 @@
     ./backup.nix
     ./beep.nix
     ./health.nix
+    ./notify.nix
     ../../profiles/server.nix
   ];
 

@@ -151,7 +151,17 @@ A smartd warning or a failed check writes a flag to `/run/kago-alarm/`, and
 the alarm timer beeps three high beeps every 5 minutes while any flag exists
 (or an array is degraded). Clear with `sudo rm /run/kago-alarm/<flag>`; a
 reboot clears them too, and smartd re-flags a problem that persists.
-Not yet: any notification off the box (mail/XMPP identity for kago).
+Each alarm is also sent once over XMPP to josh@6bit.com (`notify.nix`).
+
+## Notifications (`notify.nix`)
+
+`kago-notify <subject> [body|-]` sends an XMPP message from kago@6bit.com
+(password: `xmpp/m2m_password` in `secrets/kago.yaml`) to josh@6bit.com via
+liver's Prosody, using go-sendxmpp. Prosody only offers SASL PLAIN (it
+authenticates against Dovecot), after STARTTLS, hence `--allow-plain`.
+Sent: one "up" message per boot; each new alarm flag and degraded md array
+(plus "recovered"), from the 5-minute alarm timer, which retries a failed
+send next round; restic failures (`kago-notify-failure@`, no beeping).
 
 ## Services (TOS → NixOS)
 

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, kago-notify, ... }:
 # Ready/shutdown beeps, as TOS did. TOS's /usr/bin/buzzer drove the PC
 # speaker by hand (PIT channel 2 via ports 0x43/0x42, gate bits on 0x61);
 # `buzzer all` with its defaults is one 350ms beep at divisor 600 (~1989Hz).
@@ -26,21 +26,38 @@ in
   # Alarm: nag every 5 minutes while any md array is missing a member
   # ([UU_], TOS buzzer_config raid_drive_miss), including during a rebuild, or
   # while anything has left a flag in /run/kago-alarm (health.nix). Clear a
-  # flag with `sudo rm /run/kago-alarm/<name>` once dealt with.
+  # flag with `sudo rm /run/kago-alarm/<name>` once dealt with. Each alarm is
+  # also sent once over XMPP (notify.nix); a failed send retries next round.
   systemd.services.kago-raid-alarm = {
     description = "Beep while an md array is degraded or an alarm is raised";
-    path = [ pkgs.gnugrep ];
+    path = [ pkgs.gnugrep kago-notify ];
     serviceConfig.Type = "oneshot";
     script = ''
+      sent=/run/kago-alarm/.sent
+      mkdir -p $sent
       alarm=
       if grep -qE '\[U*_[U_]*\]' /proc/mdstat; then
         echo "md array degraded:"; grep -B1 -E '\[U*_[U_]*\]' /proc/mdstat
         alarm=1
+        if [ ! -e $sent/md-degraded ]; then
+          cat /proc/mdstat | kago-notify "md array degraded" - && touch $sent/md-degraded || true
+        fi
+      elif [ -e $sent/md-degraded ]; then
+        cat /proc/mdstat | kago-notify "md arrays recovered" - && rm $sent/md-degraded || true
       fi
       for f in /run/kago-alarm/*; do
         [ -e "$f" ] || continue
-        echo "alarm raised: $f"; cat "$f"
+        name=''${f##*/}
+        echo "alarm raised: $name"; cat "$f"
         alarm=1
+        if [ ! -e "$sent/$name" ]; then
+          kago-notify "alarm: $name" - < "$f" && touch "$sent/$name" || true
+        fi
+      done
+      # Forget sends for cleared flags, so a new alarm by the same name sends.
+      for s in $sent/*; do
+        name=''${s##*/}
+        case $name in md-degraded|'*') ;; *) [ -e "/run/kago-alarm/$name" ] || rm "$s" ;; esac
       done
       if [ -n "$alarm" ]; then ${alarmBeep}; fi
     '';
