@@ -3,9 +3,8 @@
 TerraMaster F5-221 NAS, being migrated from TOS 4.2.44 to NixOS **in place**:
 the TOS data volume (md RAID5 → LVM → btrfs) is kept as-is.
 
-Status (2026-10-28): **running NixOS**, installed in place over TOS; data
-volume kept. See "Install log" below. ada has TEMP full sudo in
-`configuration.nix` until things settle.
+Status (2026-10-29): **running NixOS**, installed in place over TOS; data
+volume kept. See "Install log" below.
 
 ## Hardware
 
@@ -249,8 +248,14 @@ smb.conf, transmission settings), `idscan/` (pre-remap uid/gid/ACL histograms),
 
 Deploying: build on signi, `nix copy --no-check-sigs --to ssh-ng://ada@kago.local`
 (ada is a trusted user, but the ssh-ng `nix-daemon --stdio` proxy still checks
-signatures without the flag), then `sudo nix-env -p /nix/var/nix/profiles/system
---set <path>` and `sudo <path>/bin/switch-to-configuration switch`.
+signatures without the flag), then `sudo /run/current-system/sw/bin/nix-env -p
+/nix/var/nix/profiles/system --set <path>` and `sudo <path>/bin/switch-to-configuration
+switch` (exactly these paths: ada's sudo is scoped to them and `journalctl`).
 
-Still to do: drop ada's TEMP full sudo; clean up TOS leftovers on the data
-volume: `@snapshot/{bu,media,public}` (TOS snapshots, kept until btrbk has its own history) and `@kago-migration` (rollback). Deleted 2026-10-29: `appdata_bak`, `@system`, `@zlog`, `application`, `@snapshot/appdata`.
+Left on the data volume on purpose: TOS's `@snapshot/{bu,media,public}`
+(delete once btrbk has a week of its own) and `@kago-migration` (rollback;
+delete once TOS is never coming back). Deleted 2026-10-29: `appdata_bak`,
+`@system`, `@zlog`, `application`, `@snapshot/appdata`.
+
+B2 bucket `kago-bu` lifecycle: keep prior versions 30 days (restic prunes
+by deleting packs; keep-all would retain them forever).

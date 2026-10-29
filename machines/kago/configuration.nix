@@ -124,9 +124,6 @@
   security.sudo.extraRules = [{
     users = [ "ada" ];
     commands = [
-      # TEMP (2026-10-28): full passwordless sudo while the migration settles,
-      # granted by josh. Remove this line once kago is stable on NixOS.
-      { command = "ALL"; options = [ "NOPASSWD" ]; }
       { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/journalctl"; options = [ "NOPASSWD" ]; }

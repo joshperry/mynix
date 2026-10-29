@@ -30,6 +30,21 @@ in
     };
   };
 
+  # media/public: hourly, 24 hourlies + 7 dailies (TOS kept just 5 hourlies).
+  # Cheap on mostly-static data; covers deletes the Samba recycle bin misses.
+  services.btrbk.instances.hourly = {
+    onCalendar = "hourly";
+    settings = {
+      snapshot_preserve_min = "2h";
+      snapshot_preserve = "24h 7d";
+      volume."/mnt/md0" = {
+        snapshot_dir = "@snapshot/btrbk";
+        subvolume.media = { };
+        subvolume.public = { };
+      };
+    };
+  };
+
   # restic reads a read-only snapshot taken for the run, so the backup is
   # consistent without stopping anything. The snapshot always lives at the same
   # path, and btrfs snapshots keep inode numbers, so restic's change detection
