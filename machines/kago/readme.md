@@ -223,4 +223,7 @@ signatures without the flag), then `sudo nix-env -p /nix/var/nix/profiles/system
 
 Still to do: drop ada's TEMP full sudo; clean up TOS leftovers on the data
 volume (`@system`, `@zlog`, `application`, `appdata_bak`, old `@snapshot/bu`);
-first restic run; LED port (optional).
+first restic run; LED port (optional); ready/shutdown beep (TOS beeped when
+boot reached ready, from `buzzer all` near the end of `rcS`, and right before
+power-off; mechanism still to find: the `buzzer` binary vs the `pcspkr`
+platform device vs the IT8613E beep output that `it87` reports).
