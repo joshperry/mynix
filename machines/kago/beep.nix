@@ -5,6 +5,8 @@
 # Same sound through the stock pcspkr driver and beep(1).
 let
   tosBeep = "${pkgs.beep}/bin/beep -f 1989 -l 350";
+  # Alarm: three short high beeps.
+  alarmBeep = "${pkgs.beep}/bin/beep -f 2983 -l 150 -r 3 -d 100";
 in
 {
   boot.kernelModules = [ "pcspkr" ];
@@ -18,6 +20,27 @@ in
     serviceConfig = {
       Type = "oneshot";
       ExecStart = tosBeep;
+    };
+  };
+
+  # RAID alarm (TOS buzzer_config raid_drive_miss): nag every 5 minutes while
+  # any md array is missing a member ([UU_]), including during a rebuild.
+  systemd.services.kago-raid-alarm = {
+    description = "Beep while an md array is degraded";
+    path = [ pkgs.gnugrep ];
+    serviceConfig.Type = "oneshot";
+    script = ''
+      if grep -qE '\[U*_[U_]*\]' /proc/mdstat; then
+        echo "md array degraded:"; grep -B1 -E '\[U*_[U_]*\]' /proc/mdstat
+        ${alarmBeep}
+      fi
+    '';
+  };
+  systemd.timers.kago-raid-alarm = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnBootSec = "2min";
+      OnUnitActiveSec = "5min";
     };
   };
 

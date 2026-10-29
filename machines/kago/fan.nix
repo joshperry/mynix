@@ -47,6 +47,8 @@
         if [ $t -ge 70 ]; then
           hot=$((hot + 1))
           echo "drives at ''${t}C ($hot)"
+          # overheat alarm (TOS buzzer_config hard_over): five urgent beeps
+          ${pkgs.beep}/bin/beep -f 2983 -l 100 -r 5 -d 80 || true
           [ $hot -ge 2 ] && systemctl poweroff
         else
           hot=0

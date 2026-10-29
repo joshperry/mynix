@@ -104,8 +104,38 @@ passes it.
 
 NixOS: `it87` from `linuxPackages.it87` (frankcrawford, supports IT8613E;
 mainline doesn't) loads without `ignore_resource_conflict`, `drivetemp` gives
-the disk temps, and `fan.nix` runs the same curve with a 600 rpm floor. The
-front-panel LEDs (`led_drv_TMJ33.ko`, GPIO at `0xa00`) are not ported.
+the disk temps, and `fan.nix` runs the same curve with a 600 rpm floor.
+
+## LEDs (investigated, nothing to port)
+
+The bay LEDs are dim green with a drive present and brighter on activity, empty
+bays off — all driven by hardware (SATA presence/activity), no software needed.
+Reviews and TerraMaster's FAQ describe the bays as red at power-on, green when
+ready, and red for a failed drive; this unit has not been seen red, and it is
+not known whether its LEDs are bi-colour (check next time the case is open).
+
+TOS's two LED paths are generic J3355-family code and do nothing visible here:
+
+- `led_drv_TMJ33.ko` (`/dev/leddrvN`, commands `led1on`…`led10off`): bit 0
+  (GPIOTXState) of SoC North-community pads 23–32 (P2SB port 0xC5, PADCFG
+  0x5B8–0x600; P2SB BAR read from PCI 0:0d.0). Linux: `gpiochip0` lines 23–32,
+  all outputs. Flipped each both ways: no change.
+- `syscontrol` (`driv_set_led`, used on this board since `leddevice == 1`):
+  IT8613E simple-I/O data ports, LED1/3/5/7/9 active-low on `a05`.3, `a02`.1,
+  `a02`.2, `a02`.3, `a03`.1; LED2/4/6/8/10 active-high on `a01`.3, `a01`.1,
+  `a03`.3, `a03`.4, `a03`.5 (simple I/O base 0x0a00, so `a01` = set 2). The
+  pins are GPIO + simple I/O + output-enabled (LDN 7 0xC1–0xC3 / 0xC9–0xCB).
+  Each bit flipped alone, and odd/even combined across all bays: no change.
+  LED11/12 (eth0/eth1 carrier) are no-ops on this board. TOS's `sys_ledN`
+  threads blinked LED1–5 in software from diskstats.
+
+Nothing else in TOS touches LEDs: the kernel has only stock AHCI
+enclosure-management (`em_message`, unused; the ASM1061s advertise `led`), and
+the INIT initramfs's `aplcontrol` is an older `syscontrol` build.
+
+Failure signalling is audible instead (`beep.nix`, TOS buzzer_config parity):
+RAID degraded → three high beeps every 5 minutes; drives ≥70°C → five beeps
+per fan-loop reading before the poweroff.
 
 ## Services (TOS → NixOS)
 
@@ -223,5 +253,4 @@ signatures without the flag), then `sudo nix-env -p /nix/var/nix/profiles/system
 --set <path>` and `sudo <path>/bin/switch-to-configuration switch`.
 
 Still to do: drop ada's TEMP full sudo; clean up TOS leftovers on the data
-volume (`@system`, `@zlog`, `application`, `appdata_bak`, old `@snapshot/bu`);
-LED port (optional).
+volume (`@system`, `@zlog`, `application`, `appdata_bak`, old `@snapshot/bu`).
