@@ -7,6 +7,7 @@
     ./fan.nix
     ./backup.nix
     ./beep.nix
+    ./health.nix
     ../../profiles/server.nix
   ];
 
@@ -137,8 +138,6 @@
     mdadm
     smartmontools
   ];
-
-  services.smartd.enable = true;
 
   # Web status page in place of the TOS UI (log in as josh).
   services.cockpit = {

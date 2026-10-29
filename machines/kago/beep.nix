@@ -23,18 +23,37 @@ in
     };
   };
 
-  # RAID alarm (TOS buzzer_config raid_drive_miss): nag every 5 minutes while
-  # any md array is missing a member ([UU_]), including during a rebuild.
+  # Alarm: nag every 5 minutes while any md array is missing a member
+  # ([UU_], TOS buzzer_config raid_drive_miss), including during a rebuild, or
+  # while anything has left a flag in /run/kago-alarm (health.nix). Clear a
+  # flag with `sudo rm /run/kago-alarm/<name>` once dealt with.
   systemd.services.kago-raid-alarm = {
-    description = "Beep while an md array is degraded";
+    description = "Beep while an md array is degraded or an alarm is raised";
     path = [ pkgs.gnugrep ];
     serviceConfig.Type = "oneshot";
     script = ''
+      alarm=
       if grep -qE '\[U*_[U_]*\]' /proc/mdstat; then
         echo "md array degraded:"; grep -B1 -E '\[U*_[U_]*\]' /proc/mdstat
-        ${alarmBeep}
+        alarm=1
       fi
+      for f in /run/kago-alarm/*; do
+        [ -e "$f" ] || continue
+        echo "alarm raised: $f"; cat "$f"
+        alarm=1
+      done
+      if [ -n "$alarm" ]; then ${alarmBeep}; fi
     '';
+  };
+  # OnFailure= target for health checks: raise the alarm for unit %i.
+  systemd.services."kago-alarm@" = {
+    description = "Raise the alarm for %i";
+    serviceConfig.Type = "oneshot";
+    script = ''
+      mkdir -p /run/kago-alarm
+      echo "$1 failed, see: journalctl -u $1" > "/run/kago-alarm/$1"
+    '';
+    scriptArgs = "%i";
   };
   systemd.timers.kago-raid-alarm = {
     wantedBy = [ "timers.target" ];

@@ -136,6 +136,23 @@ Failure signalling is audible instead (`beep.nix`, TOS buzzer_config parity):
 RAID degraded → three high beeps every 5 minutes; drives ≥70°C → five beeps
 per fan-loop reading before the poweroff.
 
+## Disk health (`health.nix`)
+
+TOS ran none of this; on NixOS (2026-10-29):
+
+- smartd on the three disks (by serial): `-a`, short self-test daily 02:00,
+  long self-test (~20h) on the 10th/12th/14th, one disk each.
+- `kago-md-check`: md `check` of the data array, first Sunday 01:00; fails on
+  a non-zero `mismatch_cnt`. (nixpkgs' mdadm has the mdcheck timers but not
+  the `mdcheck` script they run.)
+- btrfs scrub of `/mnt/md0`, the 20th 02:00.
+
+A smartd warning or a failed check writes a flag to `/run/kago-alarm/`, and
+the alarm timer beeps three high beeps every 5 minutes while any flag exists
+(or an array is degraded). Clear with `sudo rm /run/kago-alarm/<flag>`; a
+reboot clears them too, and smartd re-flags a problem that persists.
+Not yet: any notification off the box (mail/XMPP identity for kago).
+
 ## Services (TOS → NixOS)
 
 | TOS | NixOS | Notes |
