@@ -88,7 +88,7 @@ Package overlays are applied in this order (flake.nix:30-46):
 - **xeeps**: Graphical workstation with solo.nix config
 - **liver**: Server (minimal user config from users/josh/server.nix). Has a mynix clone at `josh@6bit.com:~/dev/mynix` for remote builds. Ada's SSH key is in josh's account there.
 - **mino**: Server with disko and impermanence
-- **kago**: TerraMaster F5-221 NAS being migrated from TOS in place (keeps the md/LVM/btrfs data volume; boots via TOS's internal USB flash GRUB). Not installed yet — see `machines/kago/readme.md`
+- **kago**: TerraMaster F5-221 NAS, migrated in place from TOS (kept its md/LVM/btrfs data volume; TOS's GRUB on the disks/flash hands over to NixOS's on md9). Deploy and history: `machines/kago/readme.md`
 - **sandboxos**: Test/sandbox environment
 
 ## Key Conventions

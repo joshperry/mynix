@@ -3,8 +3,9 @@
 TerraMaster F5-221 NAS, being migrated from TOS 4.2.44 to NixOS **in place**:
 the TOS data volume (md RAID5 → LVM → btrfs) is kept as-is.
 
-Status (2026-10-28): audit done, NixOS-from-RAM test passed (step 1), config
-written and building. **Not installed yet** — kago is still on TOS.
+Status (2026-10-28): **running NixOS**, installed in place over TOS; data
+volume kept. See "Install log" below. ada has TEMP full sudo in
+`configuration.nix` until things settle.
 
 ## Hardware
 
@@ -47,7 +48,11 @@ for tooling; delete at install). NixOS adds `@nixos/root` and `@nixos/nix`.
 
 ## Boot
 
-BIOS → internal USB flash → its GRUB 2 (i386-pc), whose `grub.cfg` does:
+The BIOS (custom TerraMaster AMI, boot priority list locked/greyed out) boots
+the **disks**: TOS's GRUB 2 (i386-pc) in each disk's MBR, config on `sdX1`
+(`boot/grub/grub.cfg`). The internal USB flash carries the same GRUB and config
+(`boot/grub2/grub.cfg`) and is #4 in the order; Boot Override (Save & Exit)
+can pick it for one boot. Both TOS configs do:
 
 ```
 insmod mdraid1x
@@ -58,14 +63,24 @@ else                                                # fresh NAS: installer
 fi
 ```
 
-No initrd and a fixed command line, so it can't boot NixOS directly. The
-flash's `grub.cfg` gets edited to hand over to the NixOS-generated config on
-`md9` (`boot.loader.grub.devices = [ "nodev" ]`): nothing is ever installed to
-the disks' MBRs, the BIOS is untouched, and restoring the flash image brings
-back TOS's boot/recovery path. TOS hides the flash after boot
-(`/etc/init.d/mountusb stop` deletes the SCSI device); under NixOS it shows up
-as `sdd`. The `sdX1` copies have the same `grub.cfg` but an older kernel; the
-`(hd0,gpt1)` + `type=usb` branch implies the flash is first in the BIOS order.
+No initrd and a fixed command line, so it can't boot NixOS directly. NixOS
+manages only its own config on `md9` (`boot.loader.grub.devices = [ "nodev" ]`)
+and `boot.loader.grub.extraInstallCommands` writes `usbflash-grub.cfg` over all
+four TOS configs (disks matched by serial, flash by label), keeping each TOS
+original as `grub.cfg.tos`. That config `configfile`s
+`(md/UTOSCORE-X86-S64)/grub/grub.cfg`, with the TOS INIT system as a manual
+second entry. Nothing is installed to any MBR and the BIOS is untouched.
+
+When `md9` holds no TOS kernel the stock configs boot the INIT system
+(`type=usb`): a web "Initialization" wizard on :80 that **wipes the disks** if
+clicked through, with a fresh ssh host key on 9222. That's what happened on the
+first reboot (only the flash had been edited, on the wrong assumption it was
+the boot device). TOS hides the flash after boot (`/etc/init.d/mountusb stop`
+deletes the SCSI device); under NixOS it is `sdd`.
+
+The flash and disk GRUBs are TOS-era (pre-2.12): `/boot` must be ext4 without
+`metadata_csum`, `metadata_csum_seed` or `orphan_file` (TOS's own md9 feature
+set), and `splashImage = null`.
 
 ## Fan
 
@@ -161,31 +176,51 @@ it); never chain `cat > file && … &` over ssh (the background job gets stdin
 from `/dev/null` and empties the file); `fuser -km /home` also kills
 interactive sessions.
 
-## Install (steps 2–4, not done)
+## Install log (2026-10-28)
 
-From the kexec environment, data volume read-write:
+Rollback material lives in btrfs subvolume `@kago-migration` on the data
+volume (root-only): `usbflash.img` (whole flash, pre-edit), `md9-tos-root.img`
+(TOS root, byte-verified), `tos-etc/` (ssh host keys, smbpasswd, passwd/group,
+smb.conf, transmission settings), `idscan/` (pre-remap uid/gid/ACL histograms),
+`remap.log`. Restoring TOS = write `md9-tos-root.img` back to md9 and the
+`grub.cfg.tos` files back over `grub.cfg` (or the flash image).
 
-1. **Backups first:** offsite `bu` current; `dd` the boot flash (`sdd`) to
-   `/mnt/md0/@kago-migration/usbflash.img`; copy TOS's `/etc/ssh/ssh_host_*`,
-   `/etc/samba/smbp` (smbpasswd), `/etc/passwd`/`group` and
-   `/usr/local/transmission/settings.json` next to it (do this from TOS, before
-   handover).
-2. Shrink the RAID1s: `mdadm --grow /dev/md9 --raid-devices=3`, same for
-   `md8`.
-3. `mkfs.ext4 -L KAGOBOOT /dev/md9`; `mkswap /dev/md8`.
-4. `btrfs subvolume create /mnt/md0/@nixos{,/root,/nix}`; delete `@nix`.
-5. Remap ownership (above).
-6. On signi: build `.#nixosConfigurations.kago`, `nix copy` to the target
-   store; `nixos-install --system <path> --no-bootloader --root /mnt`, then
-   generate `/boot/grub/grub.cfg` (`switch-to-configuration boot` in the
-   chroot).
-7. Restore the TOS host keys into `/mnt/etc/ssh`; import Samba passwords:
-   `pdbedit -i smbpasswd:smbp -e tdbsam:/var/lib/samba/private/passdb.tdb`.
-8. Edit the flash's `boot/grub2/grub.cfg`: keep the `insmod mdraid1x` and
-   the INIT fallback, replace the RAID branch with
-   `configfile (md/UTOSCORE-X86-S64)/grub/grub.cfg`. Check first that the
-   flash GRUB's modules can read what the NixOS `grub.cfg` uses (search by
-   fs uuid, ext2).
-9. Reboot. Rollback: write `usbflash.img` back; TOS's root on `md9` is gone
-   by then, so TOS would come up as a fresh install from the flash (data
-   volume untouched).
+1. From TOS: saved `tos-etc/`; scanned ids (~1.12M files across media, bu,
+   public, appdata, User).
+2. Handover to the kexec environment (`kexec/`). Assembled arrays by UUID
+   (they come up as md125-127 there, no `/dev/md/<name>` links without udev
+   rules); imaged flash and md9, `cmp`-verified.
+3. `mdadm --grow --raid-devices=3` on md9 and md8 (72 slots → 3).
+4. `mkfs.ext4 -L KAGOBOOT -O ^metadata_csum,^metadata_csum_seed,^orphan_file`
+   on md9; `mkswap` on md8.
+5. Deleted `@nix` (TOS-side tooling store); created `@nixos/{root,nix}`.
+6. Ownership: `remap-ids.awk` (getfacl → awk → `setfacl -P --restore`, plus
+   `chown -h` for symlinks). Dry run on a reflink copy first; afterwards zero
+   files or ACL entries with TOS ids.
+7. Closure: kago fetched the 916 cache.nixos.org paths itself (`nix copy
+   --from https://cache.nixos.org --to /mnt`); the 149 local-only paths
+   (config, it87, unfree plex, ...) were piped from signi with
+   `nix-store --export | nix-store --store /mnt --import`. A single
+   export/import of the whole 5.5G closure OOM-kills in the 1.8G RAM
+   environment; enable swap on md8 first.
+8. TOS ssh host keys into `/mnt/etc/ssh` (sops derives kago's age key from
+   the ed25519 one), then `nixos-install --system ... --no-root-passwd`.
+9. Edited the flash `grub.cfg` and rebooted — into the TOS INIT wizard, since
+   the BIOS boots the disks (see Boot). Recovered with a monitor: Boot
+   Override → USB flash; kago reached over a direct cable to signi
+   (NetworkManager `ipv4.method shared` connection `kago-direct`, 10.42.0.0/24,
+   ssh with `-o HostKeyAlias=kago.local`).
+10. From NixOS: the grub hook rewrote all four TOS configs; plex `dataDir`
+    moved to `/mnt/md0/User/plex/...` (the unit's `ProtectHome` hides /home);
+    md9 had assembled with only `sda2` (`sdb2`/`sdc2` went stale during the
+    INIT boot) — zeroed and re-added; Samba passwords imported from TOS's
+    smbpasswd with uids remapped (`pdbedit -i smbpasswd:... -e tdbsam`).
+
+Deploying: build on signi, `nix copy --no-check-sigs --to ssh-ng://ada@kago.local`
+(ada is a trusted user, but the ssh-ng `nix-daemon --stdio` proxy still checks
+signatures without the flag), then `sudo nix-env -p /nix/var/nix/profiles/system
+--set <path>` and `sudo <path>/bin/switch-to-configuration switch`.
+
+Still to do: drop ada's TEMP full sudo; clean up TOS leftovers on the data
+volume (`@system`, `@zlog`, `application`, `appdata_bak`, old `@snapshot/bu`);
+first restic run; LED port (optional).

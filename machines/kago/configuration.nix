@@ -9,14 +9,45 @@
     ../../profiles/server.nix
   ];
 
-  # Boot: BIOS -> internal USB flash (TOS's GRUB, grub.cfg edited to
-  # `configfile` ours) -> /boot on md9. NixOS only maintains grub.cfg and the
-  # kernels on /boot; it never installs GRUB to a disk.
+  # Boot: BIOS (boot order locked, boots the disks) -> TOS's GRUB in the disks'
+  # MBR, config on sdX1 -> /boot on md9. The internal USB flash has the same
+  # TOS GRUB. NixOS only maintains grub.cfg and the kernels on /boot and never
+  # installs GRUB itself; the TOS GRUBs get a config that hands over to ours.
   boot.loader.grub = {
     enable = true;
     devices = [ "nodev" ];
     copyKernels = true;
     configurationLimit = 10;  # /boot (md9) is 1.9G
+    # TOS-era GRUBs load our grub.cfg; keep it to plain text.
+    splashImage = null;
+    # Keep the TOS GRUBs' configs pointed at ours (original kept as grub.cfg.tos).
+    extraInstallCommands = let
+      handover = ./usbflash-grub.cfg;
+      tosBoot = [
+        "/dev/disk/by-id/ata-ST14000NM0018-2H4101_ZHZ680TR-part1"
+        "/dev/disk/by-id/ata-ST14000NM0018-2H4101_ZHZ63P8S-part1"
+        "/dev/disk/by-id/ata-ST14000NM0018-2H4101_ZHZ5JXXZ-part1"
+        "/dev/disk/by-label/UTOSBOOT-X86-S64"  # internal USB flash
+      ];
+    in ''
+      for dev in ${lib.concatStringsSep " " tosBoot}; do
+        [ -b "$dev" ] || { echo "kago: $dev missing, skipping"; continue; }
+        m=$(${pkgs.coreutils}/bin/mktemp -d)
+        ${pkgs.util-linux}/bin/mount "$dev" "$m"
+        for cfg in "$m/boot/grub/grub.cfg" "$m/boot/grub2/grub.cfg"; do
+          [ -e "$cfg" ] || continue
+          if ! ${pkgs.diffutils}/bin/cmp -s ${handover} "$cfg"; then
+            # back up only TOS's own config, not an earlier hand-over version
+            ${pkgs.gnugrep}/bin/grep -q '^# kago:' "$cfg" || [ -e "$cfg.tos" ] \
+              || ${pkgs.coreutils}/bin/cp -a "$cfg" "$cfg.tos"
+            ${pkgs.coreutils}/bin/install -m 644 ${handover} "$cfg"
+            echo "kago: wrote hand-over grub.cfg to $dev"
+          fi
+        done
+        ${pkgs.util-linux}/bin/umount "$m"
+        ${pkgs.coreutils}/bin/rmdir "$m"
+      done
+    '';
   };
 
   networking.hostName = "kago";
@@ -92,6 +123,9 @@
   security.sudo.extraRules = [{
     users = [ "ada" ];
     commands = [
+      # TEMP (2026-10-28): full passwordless sudo while the migration settles,
+      # granted by josh. Remove this line once kago is stable on NixOS.
+      { command = "ALL"; options = [ "NOPASSWD" ]; }
       { command = "/nix/store/*/bin/switch-to-configuration"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/nix-env"; options = [ "NOPASSWD" ]; }
       { command = "/run/current-system/sw/bin/journalctl"; options = [ "NOPASSWD" ]; }
@@ -162,11 +196,13 @@
     openFirewall = true;
   };
 
-  # Existing library, metadata and preferences from TOS.
+  # Existing library, metadata and preferences from TOS (/home/plex there).
+  # Reached via the top-level mount: the plex unit has ProtectHome, which hides
+  # /home (the User subvolume) from it.
   services.plex = {
     enable = true;
     openFirewall = true;
-    dataDir = "/home/plex/Library/Application Support";
+    dataDir = "/mnt/md0/User/plex/Library/Application Support";
   };
   users.users.plex.extraGroups = [ "nas" ];
 
