@@ -487,6 +487,14 @@
         };
       };
 
+      kago = nixosSystem {
+        name = "kago";
+        system = "x86_64-linux";
+        users = {
+          josh = import ./users/josh/server.nix;
+        };
+      };
+
       liver = nixosSystem {
         name = "liver";
         system = "x86_64-linux";

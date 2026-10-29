@@ -4,6 +4,7 @@ keys:
   - &ada_age age1ujjm7feyd3p2e0qtfa6zr2rzf593yd2z0xjn0ytvd8jcje68nansxy4zuu
   - &liver_age age1u85f62gvuk0fevmlxvsz74q8zlfdtasqrktfguxcn7q8fak5a3lq09ha7r
   - &mino_age age1c4lf0ka5h87g98z047ljfzp2tuf6gx0csg8aw89xwsderem52fasnuc4td
+  - &kago_age age1sjvt3p9mjngnc6yxzx0e05nnlffp8dhu6ydar7j3w6w728hv7grse2p5w6
   - &seed_dfw_1_age age10yx5tftxu9phrzhvvwjgyztvmuvqly5zmg0h2696g7dkr4a6ec7sa69ldu
   - &seed_dfw_2_age age155d63shppu7t9t2j04675l4xlcst8r6uh7mytx7s69dv58wykfrsclzeud
   - &seed_dfw_3_age age1j503tg9f0gnc76u2g2j9luhc0cs5j8kj9xy0we64q5atxhwgqcaqjqv0k6
@@ -29,6 +30,14 @@ creation_rules:
           - *admin_josh
         age:
           - *mino_age
+          - *ada_age
+
+  - path_regex: secrets/kago\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *kago_age
           - *ada_age
 
   - path_regex: secrets/seed-dfw-1\.yaml$
