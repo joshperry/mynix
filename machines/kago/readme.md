@@ -144,7 +144,7 @@ per fan-loop reading before the poweroff.
 | Samba `public` `appdata` `media` `bu` (recycle on media/bu) | `services.samba` | `appdata_bak` and `[homes]` dropped |
 | Plex (native, `/home/plex/Library/Application Support`) | `services.plex` with that `dataDir` | Media paths in the DB stay valid since `/mnt/md0` is kept |
 | Transmission (watch `/mnt/md0/public/rssseeds`) | `services.transmission` | TOS `rsswatcher` not ported |
-| btrfs snapshots (cron → `snapshot_schedule_task.php`) | `services.btrbk` (`backup.nix`) | Only `bu` dailies (7 kept) actually existed |
+| btrfs snapshots (cron → `snapshot_schedule_task.php`) | `services.btrbk` (`backup.nix`) | TOS kept `bu` dailies (7) and `media`/`public` hourlies (5 each); `appdata` every 5 min (deleted). btrbk does `bu` daily so far |
 | Backblaze rclone sync `bu/offsite` → bucket `kago-bu` (held one test file) | `services.restic` → `b2:kago-bu:restic` (`backup.nix`) | Daily from a read-only snapshot at a fixed path; 7d/5w/12m. B2 creds in `secrets/kago.yaml` are **placeholders** until filled in |
 | sshd 9222/9223 | sshd 22 | add `kago.local` (port 22) to ada's pinned known_hosts at cutover; same host key |
 | `buzzer all` at boot end / shutdown (PC speaker by hand: PIT ch2 `0x43`/`0x42`, gate `0x61`; one 350ms beep, divisor 600 ≈ 1989Hz) | `beep.nix` (pcspkr + beep(1)) | ready beep after multi-user.target; shutdown beep after services stop |
@@ -253,4 +253,4 @@ signatures without the flag), then `sudo nix-env -p /nix/var/nix/profiles/system
 --set <path>` and `sudo <path>/bin/switch-to-configuration switch`.
 
 Still to do: drop ada's TEMP full sudo; clean up TOS leftovers on the data
-volume (`@system`, `@zlog`, `application`, `appdata_bak`, old `@snapshot/bu`).
+volume: `@snapshot/{bu,media,public}` (TOS snapshots, kept until btrbk has its own history) and `@kago-migration` (rollback). Deleted 2026-10-29: `appdata_bak`, `@system`, `@zlog`, `application`, `@snapshot/appdata`.

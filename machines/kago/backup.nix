@@ -14,7 +14,10 @@ in
     secrets.restic-b2-env = { };
   };
 
-  # TOS kept 7 dailies of bu (its media/public hourly schedules produced none).
+  # btrbk does not create its snapshot_dir.
+  systemd.tmpfiles.rules = [ "d /mnt/md0/@snapshot/btrbk 0755 root root -" ];
+
+  # TOS kept 7 dailies of bu.
   services.btrbk.instances.bu = {
     onCalendar = "daily";
     settings = {
