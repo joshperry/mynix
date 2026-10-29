@@ -175,6 +175,7 @@ in {
               silo.loom.farm ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIK429xZppZkGFdlhM3GnINUJD2K1/aiweypMQUp4Sw+s
               mino.lan,10.0.2.1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIRoK8+kwamz4VpHNEca1lH4Hf9jsg5+/NlJ4I1mtOEq
               6bit.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyRuKkv7YgbRHUs9X5OFYxIbxklXYuOqUT4/bBP0Wm4
+              [kago.local]:9222 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAf1cvzv6UreS8T4iDhfIHFxpCliPqy44laz+TpZS2lm
               @cert-authority venus.lan,venus.local ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHRWwpqbzOCH6pPGfEYh5d+cbFnUEIEw0xPfiTDS7QKek7YI5hqwN1L+cZkEntqsMukQiFyIDCc7nGNszPxiBlg=
             '');
             extraOptions.StrictHostKeyChecking = "yes";
