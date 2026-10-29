@@ -598,7 +598,7 @@
       http_external_url = "https://xmpp.6bit.com/"
     '';
 
-    virtualHosts."6bit.com" = {
+    virtualHosts."xmpp.6bit.com" = {
       enabled = true;
       domain = "6bit.com";
       ssl = {
