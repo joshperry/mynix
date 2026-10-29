@@ -576,6 +576,21 @@ in {
     serviceConfig = {
       # Create /var/cache/nix automatically on Nix Daemon start
       CacheDirectory = "nix";
+      # Backstop: a runaway build or VM test is throttled, then killed, before
+      # it can push the desktop into the kernel OOM killer.
+      MemoryHigh = "28G";
+      MemoryMax = "36G";
+    };
+  };
+
+  # Backstop for the agents (all of ada's processes: claude-code sessions,
+  # subagents, their nix evaluations). Over MemoryMax the OOM killer picks
+  # inside ada's slice, not josh's session.
+  systemd.slices."user-${toString config.nuketown.agents.ada.uid}" = {
+    overrideStrategy = "asDropin";
+    sliceConfig = {
+      MemoryHigh = "32G";
+      MemoryMax = "40G";
     };
   };
   
