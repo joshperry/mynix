@@ -176,10 +176,17 @@ in {
               mino.lan,10.0.2.1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIRoK8+kwamz4VpHNEca1lH4Hf9jsg5+/NlJ4I1mtOEq
               6bit.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOyRuKkv7YgbRHUs9X5OFYxIbxklXYuOqUT4/bBP0Wm4
               kago.local,[kago.local]:9222 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAf1cvzv6UreS8T4iDhfIHFxpCliPqy44laz+TpZS2lm
+              # seed ATL1 nodes — verified: ssh-to-age of each matches its recipient in seed/infra/.sops.yaml
+              seed-atl1-1,96.30.205.16 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOzJ+UhlD7jy1CClHQGJq1SL749py9PAkarrlC5iSUDl
+              seed-atl1-2,144.202.24.202 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINP5XgWqIf/gHu321MPL/uPYskVany0K3tvazGjsJH4V
+              seed-atl1-3,155.138.232.75 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIJMIm0e1MBAogdHi3/GfWtPW6R7NOwpTIE2HVx8yEla
               @cert-authority venus.lan,venus.local ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBHRWwpqbzOCH6pPGfEYh5d+cbFnUEIEw0xPfiTDS7QKek7YI5hqwN1L+cZkEntqsMukQiFyIDCc7nGNszPxiBlg=
             '');
             extraOptions.StrictHostKeyChecking = "yes";
           };
+          matchBlocks."seed-atl1-1" = { hostname = "96.30.205.16"; user = "ada"; };
+          matchBlocks."seed-atl1-2" = { hostname = "144.202.24.202"; user = "ada"; };
+          matchBlocks."seed-atl1-3" = { hostname = "155.138.232.75"; user = "ada"; };
         };
         # command-not-found handler: suggest nix run instead of failing silently.
         # Also the BASH_ENV init file (see profileExtra), so it is sourced by
