@@ -587,7 +587,17 @@ in {
       # it can push the desktop into the kernel OOM killer.
       MemoryHigh = "28G";
       MemoryMax = "36G";
+      # Builds yield the CPU to the desktop when it's contended (default 100).
+      CPUWeight = 50;
     };
+  };
+
+  # The defaults (max-jobs = auto, cores = 0) let one build run 22 derivations
+  # at once, each told to use all 22 cores; several agent builds at once then
+  # saturate the machine. 4 jobs x 6 cores roughly fills it, no more.
+  nix.settings = {
+    max-jobs = 4;
+    cores = 6;
   };
 
   # Backstop for the agents (all of ada's processes: claude-code sessions,
@@ -598,6 +608,7 @@ in {
     sliceConfig = {
       MemoryHigh = "32G";
       MemoryMax = "40G";
+      CPUWeight = 50;
     };
   };
   
