@@ -311,6 +311,27 @@ in {
         };
       };
     };
+
+    # One `claude setup-token` sign-in for the machine's agents (subscription,
+    # not API billing). ada keeps her own /login for now.
+    claudeCode.oauthTokenSecret = "nuketown/claude-oauth-token";
+    agents.ada.claudeCode.oauthTokenFile = null;
+
+    # The approval reviewer: a plain-English, adversarial analysis on every
+    # card. No sudo; each review is a fresh `claude -p` with no tools.
+    agents.reviewer = {
+      enable = true;
+      uid = 1101;
+      role = "reviewer";
+      description = ''
+        Reviews sudo requests on signi: reads the request and any snapshotted
+        scripts and writes a plain-English, adversarial analysis for josh.
+      '';
+      git = { name = "Reviewer"; email = "reviewer@6bit.com"; };
+      claudeCode.enable = true;
+      extraHomeConfig.home.stateVersion = "25.11";
+    };
+    approval.reviewer.enable = true;
   };
 
   environment.systemPackages = with pkgs; [
