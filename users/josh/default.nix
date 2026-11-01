@@ -112,6 +112,9 @@
         # Lock screen
         "${mod}+F12" = "exec --no-startup-id xset s activate";
 
+        # Clipboard history (clipmenud, started below)
+        "${mod}+v" = "exec --no-startup-id env CM_LAUNCHER=rofi ${lib.getExe' pkgs.clipmenu "clipmenu"} -p clipboard";
+
         # Vim-style focus
         "${mod}+h" = "focus left";
         "${mod}+j" = "focus down";
@@ -261,6 +264,12 @@
         { command = "${lib.getExe pkgs.dunst}"; notification = false; }
         { command = "${pkgs.networkmanagerapplet}/bin/nm-applet"; notification = false; }
         { command = "${lib.getExe pkgs.pasystray}"; notification = false; }
+        # Owns the clipboard, so a copy survives the window it came from
+        # closing (X11 keeps a selection only while its owner runs).
+        { command = "${pkgs.writeShellScript "clipmenud" ''
+            export CM_OWN_CLIPBOARD=1 CM_SELECTIONS=clipboard
+            exec ${lib.getExe' pkgs.clipmenu "clipmenud"}
+          ''}"; notification = false; }
         { command = "${lib.getExe pkgs.mynix.xss-lock-hinted} --transfer-sleep-lock -- session-lock"; always = true; notification = false; }
       ];
 
