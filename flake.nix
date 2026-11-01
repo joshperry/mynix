@@ -123,6 +123,9 @@
             ];
           })
           { warnings = map (p: "TEMP PIN: ${p}") tempPins; }
+          # the commit each build came from ("<rev>-dirty" for a dirty tree);
+          # nuketown's switch card compares it with the repo's HEAD
+          { system.configurationRevision = self.rev or self.dirtyRev or null; }
           home-manager.nixosModules.home-manager
           {
             home-manager.users = users;  #ref.hmUsers
