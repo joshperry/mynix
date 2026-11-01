@@ -32,6 +32,17 @@ creation_rules:
           - *mino_age
           - *ada_age
 
+  # pubsub-push Android app signing key (backup; builds use the copy in
+  # ~/projects/pubsub-push/android/signing/). Its own file so ada's key
+  # reaches only this, not the rest of signi.yaml.
+  - path_regex: secrets/pubsub-push\.yaml$
+    key_groups:
+      - pgp:
+          - *admin_josh
+        age:
+          - *signi_age
+          - *ada_age
+
   - path_regex: secrets/kago\.yaml$
     key_groups:
       - pgp:
