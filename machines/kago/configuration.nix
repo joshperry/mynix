@@ -215,7 +215,8 @@
       watch-dir-enabled = true;
       rpc-bind-address = "0.0.0.0";
       rpc-port = 9091;
-      rpc-whitelist-enabled = false;
+      rpc-host-whitelist-enabled = true;
+      rpc-host-whitelist = "kago.local";
       rpc-authentication-required = false;
       peer-port = 64622;
       ratio-limit = 2;
