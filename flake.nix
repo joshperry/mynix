@@ -360,7 +360,7 @@
             ssh "$target" ${lib.getExe pkgs.nvd} diff /run/current-system "$system"
 
             if [[ -z "$yes" ]]; then
-              read -rp "''${action^} $host? [y/N] " choice
+              read -rp "''${action^} $host? [y/N] " choice || choice=
               [[ "''${choice,,}" == y* ]] || { unlink "$link"; exit 1; }
             fi
 
