@@ -339,7 +339,7 @@ in {
     arduino
     audacity
     edgetx
-    firefox
+    librewolf
     irssi
     kdePackages.kdenlive
     unstable.lmstudio
