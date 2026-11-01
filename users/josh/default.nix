@@ -1,4 +1,4 @@
-{ pkgs, lib, ... }: {
+{ config, pkgs, lib, ... }: {
   imports = [
     ./cli.nix
   ];
@@ -23,7 +23,9 @@
     soundfont-fluid
     unstable.blender
     unstable.darktable
-    discord
+  ] ++ lib.optionals (!(config.programs.pubsub-push.discord.enable or false)) [
+    discord  # programs.pubsub-push.discord installs its own (signi)
+  ] ++ [
     gimp-with-plugins
     libcanberra-gtk3
     nerdctl

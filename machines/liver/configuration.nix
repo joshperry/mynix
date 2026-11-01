@@ -504,6 +504,20 @@
   systemd.services.prosody.after = [ "dovecot.service" ];
   systemd.services.prosody.partOf = [ "dovecot.service" ];
 
+  # ── Push topics (pubsub-push) ────────────────────────────────
+  # UnifiedPush (patched mod_unified_push) plus pubsub topics on
+  # notify.6bit.com, delivered to phones store-and-forward. Publishers
+  # publish; members' devices may register for the topic.
+  services.pubsub-push.prosody = {
+    enable = true;
+    service = "notify.6bit.com";
+    topics = {
+      test = { publishers = [ "josh@6bit.com" "ada@6bit.com" ]; members = [ "josh@6bit.com" "ada@6bit.com" ]; };
+      kago = { publishers = [ "kago@6bit.com" ]; members = [ "josh@6bit.com" ]; };
+      signi-discord = { publishers = [ "signi@6bit.com" ]; members = [ "josh@6bit.com" ]; };
+    };
+  };
+
   # ── Prosody (XMPP) ───────────────────────────────────────────
   services.prosody = {
     enable = true;
@@ -554,12 +568,6 @@
       ];
     };
 
-    # From the pubsub-push flake input (plugin path set in flake.nix):
-    # unified_push: self-hosted UnifiedPush provider, patched (offline pushes
-    #   were reported delivered and lost) and exposed to other modules;
-    # pubsub_unified_push: delivers pubsub topics on notify.6bit.com to
-    #   UnifiedPush apps, store-and-forward. See pubsub-push docs/design.md.
-    extraModules = [ "unified_push" "pubsub_unified_push" ];
 
     httpInterfaces = [ "127.0.0.1" ];
     httpPorts = [ 5280 ];
@@ -605,18 +613,6 @@
       -- nginx forwards Host: xmpp.6bit.com, which is no Prosody host; without
       -- this every HTTP route (UnifiedPush /push/ included) is "Unknown host" 404.
       http_default_host = "6bit.com"
-
-      -- Push topics (mod_pubsub_unified_push): nodes on notify.6bit.com.
-      -- Publishers publish; members may register apps for the topic.
-      pubsub_unified_push_service = "notify.6bit.com"
-      pubsub_unified_push_nodes = {
-        test = { publishers = { "josh@6bit.com", "ada@6bit.com" }, members = { "josh@6bit.com", "ada@6bit.com" } };
-        kago = { publishers = { "kago@6bit.com" }, members = { "josh@6bit.com" } };
-        ["signi-discord"] = { publishers = { "signi@6bit.com" }, members = { "josh@6bit.com" } };
-      }
-
-      -- Last in extraConfig: everything after a Component line is its config.
-      Component "notify.6bit.com" "pubsub"
     '';
 
     virtualHosts."xmpp.6bit.com" = {

@@ -1,4 +1,4 @@
-{ config, pkgs, pubsub-publish, ... }:
+{ config, pkgs, ... }:
 # Off-box notification as kago@6bit.com via liver's Prosody:
 #
 #   kago-notify [-p low|default|high] [-u url] <subject> [body]   (body "-": stdin)
@@ -11,7 +11,7 @@
 let
   kago-notify = pkgs.writeShellApplication {
     name = "kago-notify";
-    runtimeInputs = [ pubsub-publish pkgs.go-sendxmpp pkgs.coreutils ];
+    runtimeInputs = [ pkgs.pubsub-publish pkgs.go-sendxmpp pkgs.coreutils ];
     text = ''
       priority=default url=
       while getopts p:u: opt; do

@@ -369,11 +369,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793503965,
-        "narHash": "sha256-pdA7UkjzT5araVJQuZfFF7zPy7sz6PXfxVPRVd4M0oY=",
+        "lastModified": 1793505687,
+        "narHash": "sha256-K76HA74iZ//EYxJh2bFCPFFTfx0FyJHmlFp3SY0ULPM=",
         "owner": "nuketownada",
         "repo": "pubsub-push",
-        "rev": "5d26126ddafe53ab06d2f0cb539f9bab5668dcbf",
+        "rev": "45b5c520d21d46e3880aa85cf005e8f301450634",
         "type": "github"
       },
       "original": {

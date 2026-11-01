@@ -499,8 +499,8 @@
           josh = import ./users/josh/server.nix;
         };
         sysmodules = [
-          # kago-notify publishes to the `kago` push topic (machines/kago/notify.nix)
-          { _module.args.pubsub-publish = inputs.pubsub-push.packages.x86_64-linux.pubsub-publish; }
+          # pkgs.pubsub-publish, for kago-notify (machines/kago/notify.nix)
+          { nixpkgs.overlays = [ inputs.pubsub-push.overlays.default ]; }
         ];
       };
 
@@ -512,7 +512,7 @@
         };
         sysmodules = [
           couchmail.nixosModules.default
-          { services.prosody.extraPluginPaths = [ "${inputs.pubsub-push}/prosody" ]; }
+          inputs.pubsub-push.nixosModules.prosody
         ];
       };
 
@@ -586,6 +586,8 @@
         users = {
           josh = { imports = [
             ./users/josh/machines/signi
+            # Discord → phone while locked (machines/signi/pubsub-push.nix)
+            inputs.pubsub-push.homeManagerModules.discord
             nuketown.homeManagerModules.approvalDaemon
             { nuketown.approvalDaemon.enable = true; }
             inputs.seed.homeModules.default
@@ -622,17 +624,6 @@
           nuketown.nixosModules.default
           inputs.seed.nixosModules.default
           inputs.seed.nixosModules.persistence
-          # Discord → phone (machines/signi/pubsub-push.nix): Discord with
-          # Vencord + the PubsubPush plugin, and the publisher it runs.
-          {
-            nixpkgs.overlays = [ (final: prev: {
-              discord = prev.discord.override {
-                withVencord = true;
-                vencord = inputs.pubsub-push.packages.x86_64-linux.vencord;
-              };
-            }) ];
-            _module.args.pubsub-publish = inputs.pubsub-push.packages.x86_64-linux.pubsub-publish;
-          }
         ];
       };
 
