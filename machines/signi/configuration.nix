@@ -5,6 +5,7 @@ in {
   imports = [
     ./hardware-configuration.nix
     ../../profiles/graphical.nix
+    ./pubsub-push.nix
   ];
 
   # ── Secrets (sops-nix) ────────────────────────────────────────

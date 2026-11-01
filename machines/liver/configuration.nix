@@ -612,6 +612,7 @@
       pubsub_unified_push_nodes = {
         test = { publishers = { "josh@6bit.com", "ada@6bit.com" }, members = { "josh@6bit.com", "ada@6bit.com" } };
         kago = { publishers = { "kago@6bit.com" }, members = { "josh@6bit.com" } };
+        ["signi-discord"] = { publishers = { "signi@6bit.com" }, members = { "josh@6bit.com" } };
       }
 
       -- Last in extraConfig: everything after a Component line is its config.

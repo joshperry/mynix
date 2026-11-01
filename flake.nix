@@ -622,6 +622,17 @@
           nuketown.nixosModules.default
           inputs.seed.nixosModules.default
           inputs.seed.nixosModules.persistence
+          # Discord → phone (machines/signi/pubsub-push.nix): Discord with
+          # Vencord + the PubsubPush plugin, and the publisher it runs.
+          {
+            nixpkgs.overlays = [ (final: prev: {
+              discord = prev.discord.override {
+                withVencord = true;
+                vencord = inputs.pubsub-push.packages.x86_64-linux.vencord;
+              };
+            }) ];
+            _module.args.pubsub-publish = inputs.pubsub-push.packages.x86_64-linux.pubsub-publish;
+          }
         ];
       };
 
