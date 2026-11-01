@@ -24,6 +24,11 @@
       url = "github:joshperry/couchmail";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Prosody modules: patched mod_unified_push + pubsub→UnifiedPush bridge
+    pubsub-push = {
+      url = "github:nuketownada/pubsub-push";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     sops-nix = {
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -503,6 +508,7 @@
         };
         sysmodules = [
           couchmail.nixosModules.default
+          { services.prosody.extraPluginPaths = [ "${inputs.pubsub-push}/prosody" ]; }
         ];
       };
 

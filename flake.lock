@@ -362,6 +362,26 @@
         "type": "github"
       }
     },
+    "pubsub-push": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793490659,
+        "narHash": "sha256-0IsTAC9nUBW3dUPff84P8sHOI/y9VGdX422sAfvBu60=",
+        "owner": "nuketownada",
+        "repo": "pubsub-push",
+        "rev": "9f225971af9df64b40881f1cd79745ff2406a331",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nuketownada",
+        "repo": "pubsub-push",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "couchmail": "couchmail",
@@ -373,6 +393,7 @@
         "nixpkgs-pcp": "nixpkgs-pcp",
         "nixpkgs-unstable": "nixpkgs-unstable",
         "nuketown": "nuketown",
+        "pubsub-push": "pubsub-push",
         "seed": "seed",
         "sops-nix": "sops-nix_2"
       }
