@@ -498,6 +498,10 @@
         users = {
           josh = import ./users/josh/server.nix;
         };
+        sysmodules = [
+          # kago-notify publishes to the `kago` push topic (machines/kago/notify.nix)
+          { _module.args.pubsub-publish = inputs.pubsub-push.packages.x86_64-linux.pubsub-publish; }
+        ];
       };
 
       liver = nixosSystem {

@@ -1,21 +1,44 @@
-{ config, pkgs, ... }:
-# Off-box notification: XMPP messages from kago@6bit.com to josh@6bit.com via
-# liver's Prosody. `kago-notify <subject> [body]`, or the body on stdin with
-# `-`. Exits non-zero if the message wasn't sent.
+{ config, pkgs, pubsub-publish, ... }:
+# Off-box notification as kago@6bit.com via liver's Prosody:
+#
+#   kago-notify [-p low|default|high] [-u url] <subject> [body]   (body "-": stdin)
+#
+# Publishes to the `kago` topic on notify.6bit.com (pubsub-push: delivered to
+# josh's phone through Conversations, store-and-forward; high pops up, url
+# opens on tap). If the publish fails, falls back to a direct XMPP message
+# to josh, so a broken topic path still gets noticed. Exits non-zero only if
+# both fail.
 let
   kago-notify = pkgs.writeShellApplication {
     name = "kago-notify";
-    runtimeInputs = [ pkgs.go-sendxmpp pkgs.coreutils ];
+    runtimeInputs = [ pubsub-publish pkgs.go-sendxmpp pkgs.coreutils ];
     text = ''
+      priority=default url=
+      while getopts p:u: opt; do
+        case $opt in
+          p) priority=$OPTARG ;;
+          u) url=$OPTARG ;;
+          *) echo "usage: kago-notify [-p low|default|high] [-u url] subject [body|-]" >&2; exit 2 ;;
+        esac
+      done
+      shift $((OPTIND - 1))
       subject=$1
       body=''${2:-}
       if [ "$body" = - ]; then body=$(cat); fi
+
+      if pubsub-publish --jid kago@6bit.com \
+          --password-file ${config.sops.secrets."xmpp/m2m_password".path} \
+          --service notify.6bit.com --topic kago --priority "$priority" \
+          ''${url:+--url "$url"} "$subject" "$body"; then
+        exit 0
+      fi
+
       # go-sendxmpp keeps a client id under $HOME; units run without one.
       export HOME=/var/lib/kago-notify XDG_CACHE_HOME=/var/lib/kago-notify/.cache
       mkdir -p "$XDG_CACHE_HOME"
       # Prosody authenticates against Dovecot, so it only offers PLAIN (after
       # STARTTLS). FAST tokens off: nothing to keep between runs.
-      printf 'kago: %s\n%s\n' "$subject" "$body" \
+      printf 'kago: %s (topic publish failed)\n%s\n' "$subject" "$body" \
         | go-sendxmpp -f ${config.sops.templates.kago-sendxmpprc.path} \
             --allow-plain --fast-off --suppress-root-warning --timeout 30 \
             josh@6bit.com
@@ -44,7 +67,7 @@ in
       RestartSec = "1min";
     };
     script = ''
-      ${kago-notify}/bin/kago-notify "up" "booted $(${pkgs.procps}/bin/uptime -s), $(grep -c '\[UUU\]' /proc/mdstat)/3 md arrays clean"
+      ${kago-notify}/bin/kago-notify -p low "up" "booted $(${pkgs.procps}/bin/uptime -s), $(grep -c '\[UUU\]' /proc/mdstat)/3 md arrays clean"
     '';
   };
 
@@ -53,7 +76,7 @@ in
     description = "Tell josh %i failed";
     serviceConfig.Type = "oneshot";
     script = ''
-      journalctl -u "$1" -n 15 --no-pager -o cat | ${kago-notify}/bin/kago-notify "$1 failed" -
+      journalctl -u "$1" -n 15 --no-pager -o cat | ${kago-notify}/bin/kago-notify -u https://kago.local:9090/ "$1 failed" -
     '';
     scriptArgs = "%i";
   };

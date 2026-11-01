@@ -40,7 +40,7 @@ in
         echo "md array degraded:"; grep -B1 -E '\[U*_[U_]*\]' /proc/mdstat
         alarm=1
         if [ ! -e $sent/md-degraded ]; then
-          cat /proc/mdstat | kago-notify "md array degraded" - && touch $sent/md-degraded || true
+          cat /proc/mdstat | kago-notify -p high -u https://kago.local:9090/ "md array degraded" - && touch $sent/md-degraded || true
         fi
       elif [ -e $sent/md-degraded ]; then
         cat /proc/mdstat | kago-notify "md arrays recovered" - && rm $sent/md-degraded || true
@@ -51,7 +51,7 @@ in
         echo "alarm raised: $name"; cat "$f"
         alarm=1
         if [ ! -e "$sent/$name" ]; then
-          kago-notify "alarm: $name" - < "$f" && touch "$sent/$name" || true
+          kago-notify -p high -u https://kago.local:9090/ "alarm: $name" - < "$f" && touch "$sent/$name" || true
         fi
       done
       # Forget sends for cleared flags, so a new alarm by the same name sends.
