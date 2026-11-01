@@ -602,6 +602,9 @@
 
       -- HTTP settings for UnifiedPush endpoint
       http_external_url = "https://xmpp.6bit.com/"
+      -- nginx forwards Host: xmpp.6bit.com, which is no Prosody host; without
+      -- this every HTTP route (UnifiedPush /push/ included) is "Unknown host" 404.
+      http_default_host = "6bit.com"
 
       -- Push topics (mod_pubsub_unified_push): nodes on notify.6bit.com.
       -- Publishers publish; members may register apps for the topic.
