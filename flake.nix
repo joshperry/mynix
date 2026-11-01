@@ -277,6 +277,12 @@
         installerSystem // { inherit isoScript; };
     in
     targetSystem // { inherit installer; };
+
+    # Where deploysys reaches each remotely deployed host
+    deployAddresses = {
+      kago = "kago.local";
+      mino = "mino.lan";
+    };
   in
   flake-parts.lib.mkFlake { inherit inputs; } {
     systems = [ "x86_64-linux" "aarch64-linux" ];
@@ -305,6 +311,63 @@
               sudo result/bin/switch-to-configuration switch
               unlink result
             fi
+          '')
+          #def.deploysys
+          # Build a host here, copy it over ssh and switch it there; for hosts
+          # too small to build themselves (kago) or that we'd rather not (mino).
+          # The remote user must be a nix trusted-user (nix copy pushes
+          # unsigned paths) and able to sudo nix-env + switch-to-configuration
+          # at the exact paths below (ada's sudo is scoped to them).
+          (writers.writeBashBin "deploysys" ''
+            set -euo pipefail
+
+            usage() {
+              echo "Usage: deploysys [-y] [-a boot|switch|test] <host> [[user@]address]"
+              echo ""
+              echo "Builds .#<host> locally, copies it to the host, diffs and switches."
+              echo "Address defaults to: ${lib.concatStringsSep ", " (lib.mapAttrsToList (h: a: "${h} -> ${a}") deployAddresses)}"
+              exit 1
+            }
+
+            yes=; action=switch
+            while getopts "ya:" opt; do
+              case "$opt" in
+                y) yes=1 ;;
+                a) action="$OPTARG" ;;
+                *) usage ;;
+              esac
+            done
+            shift $((OPTIND - 1))
+            [[ $# -ge 1 ]] || usage
+            case "$action" in boot|switch|test) ;; *) usage ;; esac
+
+            host="$1"
+            case "$host" in
+            ${lib.concatStrings (lib.mapAttrsToList (h: a: "  ${h}) address=${a} ;;\n") deployAddresses)}  *) address="$host" ;;
+            esac
+            target="''${2:-$USER@$address}"
+
+            [[ -d "machines/$host" ]] || { echo "Error: machines/$host does not exist"; exit 1; }
+
+            link="result-$host"
+            nix build ".#nixosConfigurations.$host.config.system.build.toplevel" \
+              --out-link "$link" --show-trace
+            system=$(readlink -f "$link")
+            echo "Built $system"
+
+            # nvd goes along so the diff runs against what the host actually runs
+            nix copy --no-check-sigs --to "ssh-ng://$target" "$system" ${pkgs.nvd}
+            ssh "$target" ${lib.getExe pkgs.nvd} diff /run/current-system "$system"
+
+            if [[ -z "$yes" ]]; then
+              read -rp "''${action^} $host? [y/N] " choice
+              [[ "''${choice,,}" == y* ]] || { unlink "$link"; exit 1; }
+            fi
+
+            # One session, so a password-prompting sudo asks once
+            tty=(); [[ -t 0 ]] && tty=(-t)
+            ssh "''${tty[@]}" "$target" "sudo /run/current-system/sw/bin/nix-env -p /nix/var/nix/profiles/system --set $system && sudo $system/bin/switch-to-configuration $action"
+            unlink "$link"
           '')
           #def.updatesys
           (writers.writeBashBin "updatesys" ''
@@ -448,6 +511,7 @@
           echo
           echo "================= mYniX ================="
           echo '- `buildsys`: Build, review, and apply current host'
+          echo '- `deploysys [-y] [-a boot|switch|test] <host> [[user@]address]`: Build a host here, copy, review, and apply it there'
           echo '- `updatesys`: Update the flake.lock'
           echo '- `flash-installer <machine> <usbdev>`: Create minimal installer ISO with prebuilt system and write it to USB'
           echo ""

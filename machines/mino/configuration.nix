@@ -142,9 +142,9 @@
   # Even root should use the daemon for builds to avoid /tmp cache
   environment.variables.NIX_REMOTE = "daemon";
 
-  # Allow ada to push pre-built closures from signi (kernel bisect: build
+  # Allow pushing pre-built closures from signi (deploysys; kernel bisect: build
   # the heavy kernels on signi, copy them here, boot via systemd-boot one-shot).
-  nix.settings.trusted-users = [ "root" "ada" ];
+  nix.settings.trusted-users = [ "root" "josh" "ada" ];
 
   system.autoUpgrade = {
     enable = false;

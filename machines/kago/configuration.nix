@@ -120,9 +120,10 @@
   };
   users.groups.ada = { gid = 1100; };
 
-  # 2G RAM: systems are built on signi and copied over, so ada must be able
-  # to import unsigned paths. Scoped sudo is enough to deploy.
-  nix.settings.trusted-users = [ "ada" ];
+  # 2G RAM: systems are built on signi and copied over (deploysys), so the
+  # deploying user must be able to import unsigned paths. Scoped sudo is
+  # enough for ada to deploy.
+  nix.settings.trusted-users = [ "josh" "ada" ];
   security.sudo.extraRules = [{
     users = [ "ada" ];
     commands = [
