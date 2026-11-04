@@ -214,7 +214,10 @@
       incomplete-dir-enabled = false;
       watch-dir = "/mnt/md0/public/rssseeds";
       watch-dir-enabled = true;
-      rpc-bind-address = "0.0.0.0";
+      # "::" listens on IPv6 and IPv4; "0.0.0.0" is v4-only, and
+      # kago.local resolves to v6 addresses that browsers don't fall
+      # back from.
+      rpc-bind-address = "::";
       rpc-port = 9091;
       rpc-whitelist-enabled = false;
       rpc-host-whitelist-enabled = true;
