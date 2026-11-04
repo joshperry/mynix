@@ -229,6 +229,10 @@
     };
   };
   users.users.transmission.extraGroups = [ "nas" ];
+  # The unit is chrooted with ProtectSystem=strict and only binds
+  # download-dir read-write; torrents saved straight into the media tree
+  # fail with EROFS without this.
+  systemd.services.transmission.serviceConfig.BindPaths = [ "/mnt/md0/media" ];
 
   system.stateVersion = "26.05";
 }
