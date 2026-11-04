@@ -879,10 +879,10 @@ in {
     #   source.drv feeding nvidia-open     → openSha256       (kernel modules)
     # A reboot is required to load the new kernel module.
     package = config.boot.kernelPackages.nvidiaPackages.mkDriver {
-      version = "595.84";
-      openSha256 = "sha256-pEmA2tUcOKwUPKy6N0QvS49Pdut4/7Phs/JhjdyBcNY=";
-      settingsSha256 = "sha256-QrnBM+sdWO4GanO62rxpHmRrjYkYpl5RD6fIiHq4C4A=";
-      sha256_64bit = "sha256-mcQE5SExvye8ptoCaNzOPr7cenOrF0BxqZXPGmxeugY=";
+      version = "595.112.07";
+      openSha256 = "sha256-nQnXGCcvo4i7eGaVft3Xc9dRUPPH0v9Zi87cfI4i/Ys=";
+      settingsSha256 = "sha256-2bWSou/9J3EojhSRXBol/+yGGu2XZ6EuCptb5qXHM14=";
+      sha256_64bit = "sha256-Gjjs1Tii2mIypzMBhAY69Z6fyUbJCMylVb0HkJhIufA=";
       sha256_aarch64 = "";
       persistencedSha256 = "";
     };
