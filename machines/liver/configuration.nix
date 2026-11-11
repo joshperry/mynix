@@ -180,7 +180,7 @@
   # behind mino's Starlink CGNAT). Cloud DNS delegates acme.6bit.com here
   # (NS 6bit.com.); each host gets an account that can only set the TXT under
   # its own random subdomain, CNAMEd from _acme-challenge.<host>.6bit.com.
-  # Accounts are made on liver: curl -X POST http://127.0.0.1:8053/register
+  # Accounts are declared below rather than registered.
   services.acme-dns = {
     enable = true;
     settings = {
@@ -197,9 +197,63 @@
       api = {
         ip = "127.0.0.1";
         port = 8053;
+        disable_registration = true;
       };
     };
   };
+
+  # Reconcile acme-dns accounts with this list before it starts: undeclared
+  # accounts (and their TXT rows) are deleted, declared ones upserted. The
+  # subdomain is the attribute name, so a host CNAMEs
+  # _acme-challenge.<host>.6bit.com to <subdomain>.acme.6bit.com. The key (40
+  # chars of [A-Za-z0-9_-]) lives only in that host's sops file; liver keeps
+  # its bcrypt hash: mkpasswd -m bcrypt -R 10. Schema matches acme-dns 2.0's
+  # pkg/database/db.go, so this also works on a fresh database.
+  systemd.services.acme-dns.serviceConfig.ExecStartPre = let
+    accounts = {
+      kago = {
+        username = "36a3fcf4-4967-4a17-95f8-6b9fbe02cd02";
+        passwordHash = "$2b$10$D7bJTUVE0whzMzQgauNup.idps0154H9m1D75U3Z6/f4Xogpe76Yi";
+      };
+    };
+    rows = lib.concatStringsSep ",\n    " (lib.mapAttrsToList (sub: a:
+      "('${a.username}', '${a.passwordHash}', '${sub}')") accounts);
+    sql = pkgs.writeText "acme-dns-accounts.sql" ''
+      BEGIN;
+      CREATE TABLE IF NOT EXISTS acmedns(Name TEXT, Value TEXT);
+      CREATE TABLE IF NOT EXISTS records(
+        Username TEXT UNIQUE NOT NULL PRIMARY KEY,
+        Password TEXT UNIQUE NOT NULL,
+        Subdomain TEXT UNIQUE NOT NULL,
+        AllowFrom TEXT);
+      CREATE TABLE IF NOT EXISTS txt(
+        Subdomain TEXT NOT NULL,
+        Value TEXT NOT NULL DEFAULT ''',
+        LastUpdate INT);
+      INSERT INTO acmedns(Name, Value) SELECT 'db_version', '1'
+        WHERE NOT EXISTS (SELECT 1 FROM acmedns WHERE Name = 'db_version');
+
+      CREATE TEMP TABLE want(Username TEXT, Password TEXT, Subdomain TEXT);
+      ${lib.optionalString (accounts != { }) ''
+        INSERT INTO want VALUES
+            ${rows};
+      ''}
+      -- Delete before upserting so a subdomain can move between usernames.
+      DELETE FROM records WHERE Username NOT IN (SELECT Username FROM want)
+        OR Subdomain NOT IN (SELECT Subdomain FROM want);
+      DELETE FROM txt WHERE Subdomain NOT IN (SELECT Subdomain FROM want);
+      INSERT INTO records SELECT Username, Password, Subdomain, '[]' FROM want WHERE true
+        ON CONFLICT(Username) DO UPDATE SET
+          Password = excluded.Password,
+          Subdomain = excluded.Subdomain,
+          AllowFrom = excluded.AllowFrom;
+      -- Each update overwrites the older of a subdomain's two TXT rows.
+      INSERT INTO txt(Subdomain, LastUpdate)
+        SELECT w.Subdomain, 0 FROM want w, (SELECT 1 UNION ALL SELECT 2)
+        WHERE NOT EXISTS (SELECT 1 FROM txt t WHERE t.Subdomain = w.Subdomain);
+      COMMIT;
+    '';
+  in "${pkgs.sqlite}/bin/sqlite3 ${config.services.acme-dns.settings.database.connection} '.read ${sql}'";
 
   # ── Postfix ───────────────────────────────────────────────────
   services.postfix = {
