@@ -65,7 +65,10 @@ in
     backupCleanupCommand = ''
       ${pkgs.btrfs-progs}/bin/btrfs subvolume delete ${snap}
     '';
+    # One retention timeline for kago: by default forget groups by host+paths,
+    # so adding a path would strand the old snapshots in their own group.
     pruneOpts = [
+      "--group-by host"
       "--keep-daily 7"
       "--keep-weekly 5"
       "--keep-monthly 12"
