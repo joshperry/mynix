@@ -9,6 +9,7 @@
     ./beep.nix
     ./health.nix
     ./notify.nix
+    ./webdav.nix
     ../../profiles/server.nix
   ];
 

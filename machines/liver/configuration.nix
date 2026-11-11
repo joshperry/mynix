@@ -213,7 +213,7 @@
     accounts = {
       kago = {
         username = "36a3fcf4-4967-4a17-95f8-6b9fbe02cd02";
-        passwordHash = "$2b$10$D7bJTUVE0whzMzQgauNup.idps0154H9m1D75U3Z6/f4Xogpe76Yi";
+        passwordHash = "$2b$10$.nQW1HrHnNefvXXk09Ydu.SUJjwQgtpHQqffDTNS7y0e46ibewIZ2";
       };
     };
     rows = lib.concatStringsSep ",\n    " (lib.mapAttrsToList (sub: a:
