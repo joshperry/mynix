@@ -54,7 +54,9 @@ in
     initialize = true;
     passwordFile = config.sops.secrets.restic-password.path;
     environmentFile = config.sops.secrets.restic-b2-env.path;
-    paths = [ "${snap}/offsite" ];
+    # phone: Seedvault backups over WebDAV (webdav.nix), already encrypted on
+    # the device.
+    paths = [ "${snap}/offsite" "${snap}/phone" ];
     backupPrepareCommand = ''
       ${pkgs.coreutils}/bin/mkdir -p "$(${pkgs.coreutils}/bin/dirname ${snap})"
       if [ -e ${snap} ]; then ${pkgs.btrfs-progs}/bin/btrfs subvolume delete ${snap}; fi
