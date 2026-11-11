@@ -175,6 +175,32 @@
     };
   };
 
+  # ── acme-dns ──────────────────────────────────────────────────
+  # DNS-01 challenges for hosts that can't hold the gcloud credentials (kago,
+  # behind mino's Starlink CGNAT). Cloud DNS delegates acme.6bit.com here
+  # (NS 6bit.com.); each host gets an account that can only set the TXT under
+  # its own random subdomain, CNAMEd from _acme-challenge.<host>.6bit.com.
+  # Accounts are made on liver: curl -X POST http://127.0.0.1:8053/register
+  services.acme-dns = {
+    enable = true;
+    settings = {
+      general = {
+        domain = "acme.6bit.com";
+        nsname = "6bit.com";
+        nsadmin = "josh.6bit.com";
+        records = [
+          "acme.6bit.com. A 66.228.49.9"
+          "acme.6bit.com. AAAA 2600:3c00::f03c:91ff:fe69:350"
+          "acme.6bit.com. NS 6bit.com."
+        ];
+      };
+      api = {
+        ip = "127.0.0.1";
+        port = 8053;
+      };
+    };
+  };
+
   # ── Postfix ───────────────────────────────────────────────────
   services.postfix = {
     enable = true;
@@ -490,6 +516,15 @@
         proxyPass = "http://localhost:8888";
       };
     };
+
+    # acme-dns API (resolved by acme-dns itself). Only /update is public;
+    # registration is done on liver against the loopback port.
+    virtualHosts."acme.6bit.com" = {
+      forceSSL = true;
+      useACMEHost = "6bit.com";
+      locations."= /update".proxyPass = "http://127.0.0.1:8053";
+      locations."/".return = "404";
+    };
   };
 
   # Grant nginx access to ACME certs
@@ -704,6 +739,7 @@
     allowedTCPPorts = [
       22    # SSH
       25    # SMTP
+      53    # acme-dns
       80    # HTTP
       143   # IMAP
       443   # HTTPS
@@ -715,6 +751,7 @@
       55555 # Resilio Sync
     ];
     allowedUDPPorts = [
+      53    # acme-dns
       55555 # Resilio Sync
     ];
   };
