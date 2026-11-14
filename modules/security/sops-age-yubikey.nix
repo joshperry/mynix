@@ -53,12 +53,12 @@ in {
       requires = [ "pcscd.socket" ];
 
       unitConfig.DefaultDependencies = false;
+      # Boot only: a restart on switch would ask for the PIN on tty1 mid-session.
+      restartIfChanged = false;
 
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        RuntimeDirectory = "sops-age";
-        RuntimeDirectoryMode = "0700";
 
         # Bind to dedicated TTY for pinentry-curses
         StandardInput = "tty";
@@ -85,6 +85,12 @@ in {
           rm -rf "$GNUPGHOME"
         }
         trap cleanup EXIT
+
+        # Not a RuntimeDirectory: that would reset an existing directory
+        # (nuketown's tmpfiles rule makes it writable by the approval broker)
+        # to root 0700 for as long as this unit stays active.
+        keydir=$(dirname "${cfg.keyFile}")
+        [ -d "$keydir" ] || mkdir -p -m 0700 "$keydir"
 
         # Configure pinentry for this session
         mkdir -p "$GNUPGHOME"
@@ -141,6 +147,19 @@ in {
 
         echo "ERROR: Failed to decrypt age key after ${toString cfg.pinRetries} attempts" >&2
         exit 1
+      '';
+    };
+
+    # The decrypted key is only needed while sops-install-secrets runs (at
+    # boot, and on a switch that decrypts it again); don't leave it in /run.
+    systemd.services.sops-age-yubikey-wipe = {
+      description = "Remove the decrypted sops age key";
+      wantedBy = [ "sops-install-secrets.service" ];
+      after = [ "sops-install-secrets.service" ];
+      unitConfig.DefaultDependencies = false;
+      serviceConfig.Type = "oneshot";
+      script = ''
+        rm -f "${cfg.keyFile}"
       '';
     };
   };

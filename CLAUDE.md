@@ -172,6 +172,17 @@ Fix: nix interpolation `${pkgs.pinentry-curses}/bin/pinentry-curses`.
 immediately, covering it before user could interact. Fix: added `display-manager.service`
 to the unit's `before` list so X waits for decryption to complete.
 
-**Status**: Both fixes switched, needs reboot to verify. On reboot tty1 should show
-pinentry prompt with no X covering it. Touch YubiKey when prompted.
-If it fails, check `sudo journalctl -b -u sops-age-yubikey.service`.
+**Status**: Both fixes verified — the boot unlock has succeeded on every boot since
+2026-10-21 (journal).
+
+**Bug 3 (fixed 2026-11-14, needs reboot to verify)**: `RuntimeDirectory = "sops-age"`
+(0700) reset nuketown's `d /run/sops-age 0773 root nuketown-secrets` for as long as the
+unit stayed active, so the broker (runs as josh) couldn't write the key and the first
+decrypting `nuketown-switch` of every boot was denied ("could not write
+/run/sops-age/keys.txt"). Hidden until nuketown a8e07ab (2026-10-28) made a failed
+write deny: before, the switch went ahead on the boot key left in /run, and its
+tmpfiles-resetup fixed the dir. Fix: no RuntimeDirectory (the script creates the dir
+only if missing), `restartIfChanged = false`, and `sops-age-yubikey-wipe.service`
+removes the key after each sops-install-secrets run. On the next reboot, check that
+`/run/sops-age` is `root:nuketown-secrets 773`, that there's no `keys.txt`, and that
+the first `nuketown-switch` goes through.
