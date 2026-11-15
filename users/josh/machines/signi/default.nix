@@ -1,4 +1,31 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, osConfig, ... }:
+let
+  # SteamVR's vrclient.so is a prebuilt binary that can't find its libs outside
+  # the steam FHS env; point its rpath at the env's /usr/lib64 (what fixxr.sh
+  # did by hand). Steam replaces the file on every SteamVR update, so a path
+  # unit re-runs this whenever SteamVR's app manifest (appid 250820) changes.
+  steamvrFixRpath = pkgs.writeShellScript "steamvr-fix-rpath" ''
+    set -eu
+    steamapps="$HOME/.local/share/Steam/steamapps"
+    vrclient="$steamapps/common/SteamVR/bin/linux64/vrclient.so"
+    rpath="${osConfig.programs.steam.package.fhsenv}/usr/lib64"
+
+    # The manifest is rewritten repeatedly while an update downloads; only
+    # patch once it reports fully installed (StateFlags 4).
+    if ! ${pkgs.gnugrep}/bin/grep -Eq '"StateFlags"[[:space:]]+"4"' "$steamapps/appmanifest_250820.acf"; then
+      echo "SteamVR not fully installed yet; skipping"
+      exit 0
+    fi
+    [ -e "$vrclient" ] || { echo "no $vrclient"; exit 0; }
+
+    if [ "$(${pkgs.patchelf}/bin/patchelf --print-rpath "$vrclient")" = "$rpath" ]; then
+      echo "vrclient.so rpath already set"
+    else
+      ${pkgs.patchelf}/bin/patchelf --set-rpath "$rpath" "$vrclient"
+      echo "vrclient.so rpath set to $rpath"
+    fi
+  '';
+in
 {
   imports = [ ../.. ];
 
@@ -79,4 +106,19 @@
   # Workaround: upstream k3s-rootless sets EnvironmentFile=null which
   # home-manager's systemd type rejects. Remove it when not set.
   systemd.user.services.k3s.Service.EnvironmentFile = lib.mkForce [];
+
+  # Also runs at login, which picks up a steam package change from a switch.
+  systemd.user.services.steamvr-fix-rpath = {
+    Unit.Description = "Point SteamVR's vrclient.so rpath at the steam FHS env";
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${steamvrFixRpath}";
+    };
+    Install.WantedBy = [ "default.target" ];
+  };
+  systemd.user.paths.steamvr-fix-rpath = {
+    Unit.Description = "Watch SteamVR's app manifest for updates";
+    Path.PathChanged = "%h/.local/share/Steam/steamapps/appmanifest_250820.acf";
+    Install.WantedBy = [ "default.target" ];
+  };
 }
