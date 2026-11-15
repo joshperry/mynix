@@ -25,7 +25,14 @@ let
     if [ "$(${pkgs.patchelf}/bin/patchelf --print-rpath "$vrclient")" = "$rpath" ]; then
       echo "vrclient.so rpath already set"
     else
-      ${pkgs.patchelf}/bin/patchelf --set-rpath "$rpath" "$vrclient"
+      # patchelf truncates and rewrites the file in place, which would crash a
+      # running SteamVR (it runs while flag 64 is set); patch a copy and
+      # rename it over, so running processes keep the old inode.
+      tmp="$vrclient.steamvr-fix-rpath.tmp"
+      trap '${pkgs.coreutils}/bin/rm -f "$tmp"' EXIT
+      ${pkgs.coreutils}/bin/cp --preserve=mode "$vrclient" "$tmp"
+      ${pkgs.patchelf}/bin/patchelf --set-rpath "$rpath" "$tmp"
+      ${pkgs.coreutils}/bin/mv -f "$tmp" "$vrclient"
       echo "vrclient.so rpath set to $rpath"
     fi
   '';
