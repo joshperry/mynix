@@ -11,9 +11,13 @@ let
     rpath="${osConfig.programs.steam.package.fhsenv}/usr/lib64"
 
     # The manifest is rewritten repeatedly while an update downloads; only
-    # patch once it reports fully installed (StateFlags 4).
-    if ! ${pkgs.gnugrep}/bin/grep -Eq '"StateFlags"[[:space:]]+"4"' "$steamapps/appmanifest_250820.acf"; then
-      echo "SteamVR not fully installed yet; skipping"
+    # patch when StateFlags (a bitmask) is fully installed (4), ignoring
+    # update-waiting (2) and running (64): an update sits at 6 for days with
+    # its files staged in steamapps/temp, and common/ is complete meanwhile.
+    flags=$(${pkgs.gnused}/bin/sed -n 's/.*"StateFlags"[[:space:]]*"\([0-9]*\)".*/\1/p' \
+      "$steamapps/appmanifest_250820.acf" 2>/dev/null || true)
+    if [ $(( ''${flags:-0} & ~(2|64) )) -ne 4 ]; then
+      echo "SteamVR StateFlags ''${flags:-missing}, not installed or mid-update; skipping"
       exit 0
     fi
     [ -e "$vrclient" ] || { echo "no $vrclient"; exit 0; }
