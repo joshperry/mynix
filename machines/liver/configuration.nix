@@ -55,8 +55,8 @@
   # Temporary workarounds; printed on every build until removed.
   warnings = [
     "TEMP PIN: liver postgrey's perlPackages.BerkeleyDB is overridden to db 5.3; drop once nixpkgs stops pinning it to db4 on Linux"
-    "TEMP PIN: liver nginx is nginxMainline overridden to 1.31.9 (CVE-2026-123633, CVE-2026-123007); drop once the locked nixpkgs ships >= 1.31.9"
-  ];
+  ] ++ lib.optional (lib.versionAtLeast pkgs.nginxMainline.version "1.31.9")
+    "liver: locked nixpkgs now has nginxMainline ${pkgs.nginxMainline.version}; drop the 1.31.9 src override in services.nginx.package (just use pkgs.nginxMainline)";
 
   time.timeZone = "MST7MDT";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -526,15 +526,21 @@
   # ── Nginx reverse proxy ───────────────────────────────────────
   services.nginx = {
     enable = true;
-    # HTTP/2 RCEs CVE-2026-123633 / CVE-2026-123007 are fixed in 1.31.9; the
-    # 26.05 channel only has 1.31.8 so far. See warnings above.
-    package = pkgs.nginxMainline.overrideAttrs (old: rec {
-      version = "1.31.9";
-      src = pkgs.fetchurl {
-        url = "https://nginx.org/download/nginx-${version}.tar.gz";
-        hash = "sha256-oRxe7uLiV/RHjw5kn4SwBAeH0nfS0+UjOVKqa23LgK0=";
-      };
-    });
+    # TEMP: HTTP/2 RCEs CVE-2026-123633 / CVE-2026-123007 are fixed in 1.31.9
+    # (nixpkgs#589970), which hadn't reached the nixos-26.05 channel yet. Only
+    # applied while the locked nginxMainline is older, so a newer one is never
+    # held back; the warnings above say when to delete this.
+    package =
+      if lib.versionOlder pkgs.nginxMainline.version "1.31.9" then
+        pkgs.nginxMainline.overrideAttrs (old: rec {
+          version = "1.31.9";
+          src = pkgs.fetchurl {
+            url = "https://nginx.org/download/nginx-${version}.tar.gz";
+            hash = "sha256-oRxe7uLiV/RHjw5kn4SwBAeH0nfS0+UjOVKqa23LgK0=";
+          };
+        })
+      else
+        pkgs.nginxMainline;
     recommendedTlsSettings = true;
     recommendedOptimisation = true;
     recommendedGzipSettings = true;
